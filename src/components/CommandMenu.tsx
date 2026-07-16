@@ -9,7 +9,6 @@ import {
   Briefcase, 
   Code2, 
   Terminal, 
-  MessageSquare, 
   FileText, 
   Sparkles,
   Command as CommandIcon

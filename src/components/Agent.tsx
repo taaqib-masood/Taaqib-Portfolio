@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Send, Loader2, Terminal, Wrench } from "lucide-react";
+import { Send, Loader2, Wrench } from "lucide-react";
 
 const SUGGESTED_PROMPTS = [
   "What did you build at LTTS?",
@@ -22,7 +22,7 @@ const TOOL_LABELS: Record<string, string> = {
   get_live_demo: "get_live_demo",
 };
 
-type AnyPart = any;
+type AnyPart = { type: string; text?: string; toolInvocation?: { toolName: string } };
 
 function getTextFromParts(parts: AnyPart[] | undefined, content: string | undefined): string {
   if (!parts || parts.length === 0) return content ?? "";
@@ -210,7 +210,7 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
               {messages.map((msg) => {
                 if (msg.role !== "user" && msg.role !== "assistant") return null;
 
-                const msgAny = msg as any;
+                const msgAny = msg as { parts?: AnyPart[], content?: string, id: string, role: string };
                 const textContent = getTextFromParts(msgAny.parts, msgAny.content);
                 if (!textContent && msg.role === "assistant") return null;
 
