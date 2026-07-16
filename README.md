@@ -530,7 +530,6 @@ OPENAI_API_KEY=your_openai_api_key_here
 
 | Method | Details |
 |---|---|
-| **WhatsApp** | [+971 50 133 0057](https://wa.me/971501330057?text=Hi%20Taaqib%2C%20I%20reviewed%20your%20portfolio.) |
 | **Email** | [taaqib.masood@icloud.com](mailto:taaqib.masood@icloud.com) |
 | **LinkedIn** | [linkedin.com/in/taaqib-masood](https://linkedin.com/in/taaqib-masood) |
 | **GitHub** | [github.com/taaqib-masood](https://github.com/taaqib-masood) |
