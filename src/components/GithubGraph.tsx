@@ -99,52 +99,46 @@ export function GithubGraph() {
   }, []);
 
   return (
-    <section className="py-24 px-6 max-w-7xl mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.5 , ease: [0.16, 1, 0.3, 1] }}
-        className="mb-12 text-center"
-      >
-        <h2 className="font-heading text-4xl font-bold mb-4 flex items-center justify-center gap-3">
-          <GithubIcon className="h-8 w-8 text-slate-300" />
-          Live GitHub Activity
-        </h2>
-        <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-          Consistent contributions and open-source projects.
-        </p>
-      </motion.div>
+    <section className="max-w-[1440px] mx-auto border-b border-border">
+      
+      {/* Header */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 border-b border-border">
+        <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-border flex flex-col justify-center">
+          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] flex items-center gap-4">
+            <GithubIcon className="h-8 md:h-12 w-8 md:w-12 text-foreground" />
+            GitHub
+          </h2>
+        </div>
+        <div className="lg:col-span-8 p-6 md:p-8 bg-surface-container-low flex flex-col justify-center">
+          <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-outline">
+            Consistent contributions and open-source projects tracking logic layer developments.
+          </p>
+        </div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.5, delay: 0.1 , ease: [0.16, 1, 0.3, 1] }}
-        className="rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-xl p-8 mb-8 overflow-x-auto flex justify-center"
-      >
-        <div className="min-w-fit">
+      <div className="border-b border-border p-6 md:p-8 overflow-x-auto flex justify-center bg-surface">
+        <div className="min-w-fit pointer-events-none">
           <GitHubCalendar
             username="taaqib-masood"
-            colorScheme="dark"
+            colorScheme="light"
             theme={{
-              dark: ["#1e1e24", "#372c5e", "#563899", "#784ad1", "#a16fff"],
+              light: ["#f1f5f9", "#cbd5e1", "#94a3b8", "#475569", "#0f172a"],
             }}
-            blockSize={12}
-            blockMargin={4}
+            blockSize={14}
+            blockMargin={6}
             fontSize={12}
           />
         </div>
-      </motion.div>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {loading
           ? Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="h-[140px] rounded-2xl border border-slate-800 bg-slate-900/40 animate-pulse flex items-center justify-center"
+                className="h-[180px] border-b lg:border-b-0 md:[&:not(:nth-child(2n))]:border-r lg:[&:not(:nth-child(3n))]:border-r border-border bg-surface flex items-center justify-center"
               >
-                <Loader2 className="h-6 w-6 text-slate-700 animate-spin" />
+                <Loader2 className="h-6 w-6 text-outline animate-spin" />
               </div>
             ))
           : repos.map((repo, idx) => (
@@ -153,32 +147,40 @@ export function GithubGraph() {
                 href={repo.html_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.4, delay: 0.1 + idx * 0.05 , ease: [0.16, 1, 0.3, 1] }}
-                className="group flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/40 p-6 hover:border-violet-500/50 hover:bg-slate-800/60 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.3, delay: idx * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                className={`group flex flex-col justify-between border-b border-border p-6 md:p-8 bg-surface hover:bg-foreground hover:text-surface transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset ${
+                  idx % 3 !== 2 ? "lg:border-r" : ""
+                } ${
+                  idx % 2 !== 1 ? "md:border-r lg:border-r-0" : ""
+                } ${
+                  idx >= repos.length - (repos.length % 3 || 3) ? "lg:border-b-0" : ""
+                } ${
+                  idx >= repos.length - (repos.length % 2 || 2) ? "md:border-b-0 lg:border-b" : ""
+                }`}
               >
                 <div>
-                  <h3 className="font-semibold text-slate-200 group-hover:text-violet-400 transition-colors mb-2 line-clamp-1">
+                  <h3 className="text-[14px] font-bold uppercase tracking-widest mb-4 line-clamp-1 group-hover:text-surface transition-colors">
                     {repo.name}
                   </h3>
-                  <p className="text-sm text-slate-400 line-clamp-2 mb-4">
+                  <p className="text-[14px] leading-[1.6] text-outline group-hover:text-surface/70 line-clamp-2 mb-6">
                     {repo.description || "No description available."}
                   </p>
                 </div>
-                <div className="flex items-center gap-4 text-xs text-slate-500 font-medium">
+                <div className="flex items-center gap-6 text-[10px] font-bold uppercase tracking-widest text-outline group-hover:text-surface/80">
                   {repo.language && (
-                    <span className="flex items-center gap-1.5">
-                      <span className="h-2.5 w-2.5 rounded-full bg-violet-500" />
+                    <span className="flex items-center gap-2">
+                      <span className="h-2 w-2 bg-foreground group-hover:bg-surface" />
                       {repo.language}
                     </span>
                   )}
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-2">
                     <Star className="h-3.5 w-3.5" />
                     {repo.stargazers_count}
                   </span>
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-2">
                     <GitFork className="h-3.5 w-3.5" />
                     {repo.forks_count}
                   </span>

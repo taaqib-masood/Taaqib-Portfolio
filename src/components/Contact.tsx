@@ -7,10 +7,6 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Mail, Phone, MapPin, ExternalLink, Loader2 } from "lucide-react";
 
 const GithubIcon = ({ className }: { className?: string }) => (
@@ -66,127 +62,125 @@ export function Contact() {
   }
 
   return (
-    <section id="contact" className="py-24 px-6 max-w-7xl mx-auto relative z-10">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.5 , ease: [0.16, 1, 0.3, 1] }}
-        className="mb-16 text-center"
-      >
-        <h2 className="font-heading text-4xl font-bold mb-4">Get in touch</h2>
-        <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-          Open to AI Engineering and AI-integrated full-stack roles — based in Dubai, available immediately.
-        </p>
-      </motion.div>
+    <section id="contact" className="max-w-[1440px] mx-auto border-b border-border relative z-10">
+      
+      {/* Header */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 border-b border-border">
+        <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-border flex flex-col justify-center">
+          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1]">Contact</h2>
+        </div>
+        <div className="lg:col-span-8 p-6 md:p-8 bg-surface-container-low flex flex-col justify-center">
+          <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-outline">
+            Open to AI Engineering and AI-integrated full-stack roles — based in Dubai, available immediately.
+          </p>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-12">
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.5, delay: 0.2 , ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col gap-8"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="lg:col-span-6 flex flex-col border-b lg:border-b-0 lg:border-r border-border bg-surface"
         >
-          <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-8 backdrop-blur-xl">
-            <h3 className="font-heading text-2xl font-bold text-white mb-6">Contact Information</h3>
+          <div className="p-6 md:p-8 flex-1">
+            <h3 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-8 border-b border-border pb-4">Contact Information</h3>
             <ul className="space-y-6">
-              <li className="flex items-center gap-4 text-slate-300">
-                <div className="bg-violet-500/10 p-3 rounded-full border border-violet-500/20">
-                  <Mail className="h-5 w-5 text-violet-400" />
+              <li className="flex items-start gap-4">
+                <div className="mt-1">
+                  <Mail className="h-4 w-4 text-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Email</p>
-                  <a href={`mailto:${contact.email}`} className="font-medium hover:text-violet-400 transition-colors">{contact.email}</a>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-outline mb-1">Email</p>
+                  <a href={`mailto:${contact.email}`} className="text-[16px] font-medium hover:text-outline transition-colors">{contact.email}</a>
                 </div>
               </li>
-              <li className="flex items-center gap-4 text-slate-300">
-                <div className="bg-violet-500/10 p-3 rounded-full border border-violet-500/20">
-                  <Phone className="h-5 w-5 text-violet-400" />
+              <li className="flex items-start gap-4">
+                <div className="mt-1">
+                  <Phone className="h-4 w-4 text-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Phone</p>
-                  <a href={`tel:${contact.phone}`} className="font-medium hover:text-violet-400 transition-colors">{contact.phone}</a>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-outline mb-1">Phone</p>
+                  <a href={`tel:${contact.phone}`} className="text-[16px] font-medium hover:text-outline transition-colors">{contact.phone}</a>
                 </div>
               </li>
-              <li className="flex items-center gap-4 text-slate-300">
-                <div className="bg-violet-500/10 p-3 rounded-full border border-violet-500/20">
-                  <MapPin className="h-5 w-5 text-violet-400" />
+              <li className="flex items-start gap-4">
+                <div className="mt-1">
+                  <MapPin className="h-4 w-4 text-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Location</p>
-                  <p className="font-medium">{contact.residency}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-outline mb-1">Location</p>
+                  <p className="text-[16px] font-medium">{contact.residency}</p>
                 </div>
               </li>
             </ul>
-
-            <div className="mt-8 pt-8 border-t border-slate-800 flex gap-4">
-              <a 
-                href={contact.linkedin} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="bg-slate-800/80 p-3 rounded-full hover:bg-violet-600 hover:text-white transition-all text-slate-400"
-                aria-label="LinkedIn"
-              >
-                <LinkedinIcon className="h-5 w-5" />
-              </a>
-              <a 
-                href={contact.github} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="bg-slate-800/80 p-3 rounded-full hover:bg-violet-600 hover:text-white transition-all text-slate-400"
-                aria-label="GitHub"
-              >
-                <GithubIcon className="h-5 w-5" />
-              </a>
-              <a 
-                href={contact.liveDemo} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="bg-slate-800/80 p-3 rounded-full hover:bg-violet-600 hover:text-white transition-all text-slate-400 flex items-center gap-2 px-4"
-                aria-label="Live Demo"
-              >
-                <ExternalLink className="h-5 w-5" />
-                <span className="text-sm font-medium">Live Demo</span>
-              </a>
-            </div>
+          </div>
+          
+          <div className="border-t border-border grid grid-cols-3">
+            <a 
+              href={contact.linkedin} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="p-6 flex items-center justify-center border-r border-border hover:bg-foreground hover:text-surface transition-colors"
+              aria-label="LinkedIn"
+            >
+              <LinkedinIcon className="h-6 w-6" />
+            </a>
+            <a 
+              href={contact.github} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="p-6 flex items-center justify-center border-r border-border hover:bg-foreground hover:text-surface transition-colors"
+              aria-label="GitHub"
+            >
+              <GithubIcon className="h-6 w-6" />
+            </a>
+            <a 
+              href={contact.liveDemo} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="p-6 flex items-center justify-center hover:bg-foreground hover:text-surface transition-colors gap-3"
+              aria-label="Live Demo"
+            >
+              <ExternalLink className="h-6 w-6" />
+            </a>
           </div>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.5, delay: 0.3 , ease: [0.16, 1, 0.3, 1] }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="lg:col-span-6"
         >
-          <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-8 backdrop-blur-xl h-full">
-            <h3 className="font-heading text-2xl font-bold text-white mb-6">Send a message</h3>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="bg-surface h-full flex flex-col p-6 md:p-8">
+            <h3 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-8 border-b border-border pb-4">Send a message</h3>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex-1 flex flex-col">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-slate-300">Name</Label>
-                <Input id="name" placeholder="John Doe" className="bg-slate-950/50 border-slate-800 focus-visible:ring-violet-500" {...register("name")} />
-                {errors.name && <p className="text-sm text-red-400 mt-1">{errors.name.message}</p>}
+                <label htmlFor="name" className="text-[10px] font-bold uppercase tracking-widest text-outline">Name</label>
+                <input id="name" placeholder="John Doe" className="w-full border border-border bg-surface px-4 py-3 text-[16px] focus:outline-none focus:border-primary transition-colors" {...register("name")} />
+                {errors.name && <p className="text-[10px] font-bold uppercase tracking-widest text-destructive mt-1">{errors.name.message}</p>}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-slate-300">Email</Label>
-                <Input id="email" type="email" placeholder="john@example.com" className="bg-slate-950/50 border-slate-800 focus-visible:ring-violet-500" {...register("email")} />
-                {errors.email && <p className="text-sm text-red-400 mt-1">{errors.email.message}</p>}
+                <label htmlFor="email" className="text-[10px] font-bold uppercase tracking-widest text-outline">Email</label>
+                <input id="email" type="email" placeholder="john@example.com" className="w-full border border-border bg-surface px-4 py-3 text-[16px] focus:outline-none focus:border-primary transition-colors" {...register("email")} />
+                {errors.email && <p className="text-[10px] font-bold uppercase tracking-widest text-destructive mt-1">{errors.email.message}</p>}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="message" className="text-slate-300">Message</Label>
-                <Textarea id="message" placeholder="How can I help you?" className="min-h-[120px] bg-slate-950/50 border-slate-800 focus-visible:ring-violet-500" {...register("message")} />
-                {errors.message && <p className="text-sm text-red-400 mt-1">{errors.message.message}</p>}
+              <div className="space-y-2 flex-1 flex flex-col">
+                <label htmlFor="message" className="text-[10px] font-bold uppercase tracking-widest text-outline">Message</label>
+                <textarea id="message" placeholder="How can I help you?" className="w-full flex-1 min-h-[160px] border border-border bg-surface px-4 py-3 text-[16px] focus:outline-none focus:border-primary transition-colors resize-none" {...register("message")} />
+                {errors.message && <p className="text-[10px] font-bold uppercase tracking-widest text-destructive mt-1">{errors.message.message}</p>}
               </div>
-              <Button type="submit" className="w-full bg-violet-600 hover:bg-violet-700 text-white py-6 text-base" disabled={isSubmitting}>
+              <button type="submit" className="w-full bg-primary hover:bg-foreground text-on-primary hover:text-surface transition-colors py-4 text-[14px] font-bold uppercase tracking-widest flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    <Loader2 className="mr-3 h-5 w-5 animate-spin" />
                     Sending...
                   </>
                 ) : (
                   "Send Message"
                 )}
-              </Button>
+              </button>
             </form>
           </div>
         </motion.div>

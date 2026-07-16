@@ -33,45 +33,43 @@ export function McpTeaser() {
   };
 
   return (
-    <section className="py-24 px-6 max-w-7xl mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.5 , ease: [0.16, 1, 0.3, 1] }}
-        className="mb-12 text-center"
-      >
-        <h2 className="font-heading text-4xl font-bold mb-4">Model Context Protocol (MCP) in Action</h2>
-        <p className="text-slate-400 text-lg max-w-3xl mx-auto">
-          At LTTS, I built an automated code review pipeline that injects live Jira and Confluence context directly into the PR. Here&apos;s a simulated interactive demo.
-        </p>
-      </motion.div>
+    <section className="max-w-[1440px] mx-auto border-b border-border">
+      {/* Header */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 border-b border-border">
+        <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-border flex flex-col justify-center">
+          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1]">MCP Pipeline</h2>
+        </div>
+        <div className="lg:col-span-8 p-6 md:p-8 bg-surface-container-low flex flex-col justify-center">
+          <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-outline">
+            At LTTS, I built an automated code review pipeline that injects live Jira and Confluence context directly into the PR. Here is a simulated interactive demo.
+          </p>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2">
         {/* Left: PR Diff */}
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.5, delay: 0.1 , ease: [0.16, 1, 0.3, 1] }}
-          className="rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-xl overflow-hidden flex flex-col"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="border-b lg:border-b-0 lg:border-r border-border bg-surface flex flex-col"
         >
-          <div className="bg-slate-950/50 border-b border-slate-800 px-4 py-3 flex items-center gap-2">
-            <GitPullRequest className="h-4 w-4 text-violet-400" />
-            <span className="text-sm font-medium text-slate-300">user-controller.js (PR #102)</span>
+          <div className="bg-surface-container-low border-b border-border px-6 py-4 flex items-center gap-3">
+            <GitPullRequest className="h-4 w-4 text-foreground" />
+            <span className="text-[12px] font-bold uppercase tracking-widest text-foreground">user-controller.js (PR #102)</span>
           </div>
-          <div className="p-4 overflow-x-auto text-sm font-mono text-slate-300 flex-1">
+          <div className="p-6 overflow-x-auto text-[14px] font-mono leading-[1.6] text-foreground flex-1">
             <pre>
               <code dangerouslySetInnerHTML={{
                 __html: MOCK_DIFF.replace(
                   /-  const query.*/g,
-                  '<span class="text-red-400 bg-red-500/10 block">$&</span>'
+                  '<span class="text-destructive bg-destructive/10 block">$&</span>'
                 ).replace(
                   /\+  \/\/ TODO:.*/g,
-                  '<span class="text-green-400 bg-green-500/10 block">$&</span>'
+                  '<span class="text-[#22c55e] bg-[#22c55e]/10 block">$&</span>'
                 ).replace(
                   /\+  const query.*/g,
-                  '<span class="text-green-400 bg-green-500/10 block">$&</span>'
+                  '<span class="text-[#22c55e] bg-[#22c55e]/10 block">$&</span>'
                 )
               }} />
             </pre>
@@ -80,22 +78,21 @@ export function McpTeaser() {
 
         {/* Right: Context + Controls */}
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.5, delay: 0.2 , ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col gap-6"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="flex flex-col bg-surface"
         >
           {/* Jira AC */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-xl overflow-hidden flex-1 flex flex-col">
-            <div className="bg-slate-950/50 border-b border-slate-800 px-4 py-3 flex items-center gap-2">
-              <Database className="h-4 w-4 text-blue-400" />
-              <span className="text-sm font-medium text-slate-300">MCP Context: Jira-7742</span>
+          <div className="flex-1 flex flex-col border-b border-border">
+            <div className="bg-surface-container-low border-b border-border px-6 py-4 flex items-center gap-3">
+              <Database className="h-4 w-4 text-foreground" />
+              <span className="text-[12px] font-bold uppercase tracking-widest text-foreground">MCP Context: Jira-7742</span>
             </div>
-            <div className="p-5 text-sm text-slate-300 space-y-3">
+            <div className="p-6 text-[14px] leading-[1.6] text-outline space-y-4">
               {MOCK_JIRA_AC.split('\n').map((ac, i) => (
-                <div key={i} className="flex gap-2">
-                  <FileCheck className="h-4 w-4 text-slate-500 shrink-0 mt-0.5" />
+                <div key={i} className="flex gap-3">
+                  <FileCheck className="h-4 w-4 text-foreground shrink-0 mt-1" />
                   <span>{ac}</span>
                 </div>
               ))}
@@ -105,12 +102,12 @@ export function McpTeaser() {
           <button
             onClick={handleRunReview}
             disabled={isLoading}
-            className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl bg-violet-600 hover:bg-violet-700 text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+            className="flex items-center justify-center gap-3 w-full py-6 bg-primary hover:bg-foreground text-on-primary hover:text-surface text-[14px] font-bold uppercase tracking-widest transition-colors disabled:opacity-50 disabled:cursor-not-allowed group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
           >
             {isLoading ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-              <Play className="h-5 w-5 group-hover:scale-110 transition-transform" />
+              <Play className="h-5 w-5" />
             )}
             {isLoading ? "Analyzing Context & Diff..." : "Run MCP Review"}
           </button>
@@ -123,32 +120,28 @@ export function McpTeaser() {
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
-            className="rounded-2xl border border-violet-500/30 bg-violet-500/5 backdrop-blur-xl overflow-hidden"
+            className="border-t border-border bg-surface overflow-hidden"
           >
-            <div className="bg-slate-950/50 border-b border-slate-800/50 px-5 py-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <SparklesIcon className="h-5 w-5 text-violet-400" />
-                <span className="font-semibold text-white">AI Code Review</span>
+            <div className="bg-surface-container-low border-b border-border px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <SparklesIcon className="h-4 w-4 text-foreground" />
+                <span className="text-[12px] font-bold uppercase tracking-widest text-foreground">AI Code Review Output</span>
               </div>
               {isLoading ? (
-                <span className="text-xs font-medium text-violet-400 flex items-center gap-1.5 bg-violet-500/10 px-2 py-1 rounded-full">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
-                  </span>
-                  Streaming
+                <span className="text-[10px] font-bold uppercase tracking-widest text-outline flex items-center gap-2 border border-border bg-surface px-3 py-1">
+                  <Loader2 className="h-3 w-3 animate-spin" /> Streaming
                 </span>
               ) : completion.toLowerCase().includes("approve") ? (
-                <span className="text-xs font-medium text-green-400 flex items-center gap-1.5 bg-green-500/10 px-2 py-1 rounded-full">
-                  <CheckCircle2 className="h-3.5 w-3.5" /> Approved
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#22c55e] flex items-center gap-2 border border-[#22c55e] bg-[#22c55e]/10 px-3 py-1">
+                  <CheckCircle2 className="h-3 w-3" /> Approved
                 </span>
               ) : (
-                <span className="text-xs font-medium text-red-400 flex items-center gap-1.5 bg-red-500/10 px-2 py-1 rounded-full">
-                  <XCircle className="h-3.5 w-3.5" /> Changes Requested
+                <span className="text-[10px] font-bold uppercase tracking-widest text-destructive flex items-center gap-2 border border-destructive bg-destructive/10 px-3 py-1">
+                  <XCircle className="h-3 w-3" /> Changes Requested
                 </span>
               )}
             </div>
-            <div className="p-6 prose prose-sm prose-invert max-w-none text-slate-300">
+            <div className="p-6 prose prose-sm max-w-none text-foreground text-[14px] leading-[1.6]">
               <ReactMarkdown>{completion}</ReactMarkdown>
             </div>
           </motion.div>

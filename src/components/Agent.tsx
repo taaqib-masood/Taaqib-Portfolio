@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Send, Loader2, BrainCircuit, Terminal, Wrench } from "lucide-react";
+import { Send, Loader2, Terminal, Wrench } from "lucide-react";
 
 const SUGGESTED_PROMPTS = [
   "What did you build at LTTS?",
@@ -22,8 +22,6 @@ const TOOL_LABELS: Record<string, string> = {
   get_live_demo: "get_live_demo",
 };
 
-// ── Helpers for AI SDK v6 message parts ──────────────────────────────────────
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK v6 parts are typed as any
 type AnyPart = any;
 
 function getTextFromParts(parts: AnyPart[] | undefined, content: string | undefined): string {
@@ -54,7 +52,6 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
   const [inputValue, setInputValue] = useState("");
   const [apiError, setApiError] = useState<string | null>(null);
 
-  // AI SDK v6 transport-based useChat
   const transport = useMemo(
     () => new DefaultChatTransport({ api: "/api/chat/stream" }),
     []
@@ -73,12 +70,10 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
 
   const isLoading = status === "streaming" || status === "submitted";
 
-  // Auto-scroll on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Auto-resize textarea
   useEffect(() => {
     const ta = textareaRef.current;
     if (!ta) return;
@@ -86,7 +81,6 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
     ta.style.height = `${Math.min(ta.scrollHeight, 160)}px`;
   }, [inputValue]);
 
-  // Pre-fill from project modal
   useEffect(() => {
     if (prefillMessage) {
       setInputValue(prefillMessage);
@@ -128,58 +122,87 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
   );
 
   return (
-    <section
-      id="agent"
-      aria-labelledby="agent-heading"
-      className="py-24 px-6 max-w-7xl mx-auto"
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.5 , ease: [0.16, 1, 0.3, 1] }}
-        className="mb-12 text-center"
-      >
-        <h2 id="agent-heading" className="font-heading text-4xl font-bold mb-4">
-          Ask the Agent
-        </h2>
-        <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-          This isn&apos;t a chatbot widget — it&apos;s a Groq-powered LLaMA 3.3
-          agent with tool-calling, streaming live on this site. Ask it anything
-          about my work.
-        </p>
-      </motion.div>
+    <section id="agent" className="max-w-[1440px] mx-auto border-b border-border">
+      
+      {/* Header */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 border-b border-border">
+        <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-border flex flex-col justify-center">
+          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1]">Agent Terminal</h2>
+        </div>
+        <div className="lg:col-span-8 p-6 md:p-8 bg-surface-container-low flex flex-col justify-center">
+          <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-outline">
+            Interface directly with the LLaMA 3.3 agent. Query tech stacks, availability, and neural paradigms.
+          </p>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* ── Chat Window ── */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.5, delay: 0.1 , ease: [0.16, 1, 0.3, 1] }}
-          className="lg:col-span-2 flex flex-col rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-xl overflow-hidden"
-          style={{ minHeight: 500 }}
-        >
+      <div className="grid grid-cols-1 lg:grid-cols-12">
+        {/* Info Panel */}
+        <div className="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-border flex flex-col">
+          <div className="p-6 md:p-8 border-b border-border bg-surface flex-1">
+            <h3 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-6">System Architecture</h3>
+            <ul className="space-y-4 text-[14px] leading-[1.5] text-outline">
+              <li className="flex items-start gap-3">
+                <span className="w-1.5 h-1.5 bg-foreground mt-1.5 flex-shrink-0" />
+                <span>Runs on <strong className="text-foreground">Groq LLaMA 3.3-70b</strong> via the Vercel AI SDK.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="w-1.5 h-1.5 bg-foreground mt-1.5 flex-shrink-0" />
+                <span>Uses <strong className="text-foreground">tool-calling</strong> to fetch grounded data — no hallucinations.</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="w-1.5 h-1.5 bg-foreground mt-1.5 flex-shrink-0" />
+                <span>Runs at the <strong className="text-foreground">Next.js Edge Runtime</strong> for sub-100ms latency.</span>
+              </li>
+            </ul>
+
+            <div className="mt-8 pt-8 border-t border-border">
+              <h3 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-6">Available Tools</h3>
+              <div className="flex flex-col gap-2">
+                {Object.keys(TOOL_LABELS).map((t) => (
+                  <div key={t} className="flex items-center gap-3 border border-border bg-surface-container px-3 py-2 text-[12px] font-semibold uppercase tracking-widest">
+                    <Wrench className="h-3 w-3 text-foreground shrink-0" />
+                    <span>{t}()</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="p-6 md:p-8 bg-surface-container-low">
+             <h3 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-4">Implementation Note</h3>
+             <p className="text-[14px] leading-[1.5] text-outline">
+               This deliberate tool-trigger architecture mirrors the LTTS Copilot I built at L&T Technology Services — scoped function-calling with prompt-engineered constraints to eliminate hallucinated tool calls in production.
+             </p>
+          </div>
+        </div>
+
+        {/* Chat Window */}
+        <div className="lg:col-span-8 flex flex-col bg-surface min-h-[500px]">
           {/* Message list */}
-          <div
-            className="flex-1 overflow-y-auto p-6 space-y-4"
-            role="log"
-            aria-live="polite"
-            aria-label="Agent conversation"
-            style={{ minHeight: 380, maxHeight: 520 }}
-          >
+          <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6" style={{ minHeight: 400, maxHeight: 600 }}>
             {messages.length === 0 && !apiError && (
-              <div className="flex flex-col items-center justify-center h-full gap-4 text-center py-16">
-                <BrainCircuit className="h-12 w-12 text-violet-500/50" />
-                <p className="text-slate-500 text-base">
-                  Ask me about Taaqib&apos;s projects, experience, or skills.
+              <div className="h-full flex flex-col items-start justify-center gap-6">
+                <p className="text-[16px] uppercase font-bold tracking-widest text-outline">
+                  Session initialized. Awaiting user input sequence.
                 </p>
+                <div className="flex flex-wrap gap-2">
+                  {SUGGESTED_PROMPTS.map((prompt) => (
+                    <button
+                      key={prompt}
+                      onClick={() => handleSuggestedPrompt(prompt)}
+                      disabled={isLoading}
+                      className="px-4 py-2 border border-border text-[12px] font-semibold uppercase tracking-widest bg-surface transition-colors hover:bg-foreground hover:text-surface disabled:opacity-50"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
             {apiError && (
-              <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-400 text-sm">
-                <strong>Agent unavailable:</strong> {apiError}
+              <div className="border border-border bg-surface-container p-4 text-[14px] font-semibold uppercase tracking-widest text-destructive">
+                Error: {apiError}
               </div>
             )}
 
@@ -187,13 +210,11 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
               {messages.map((msg) => {
                 if (msg.role !== "user" && msg.role !== "assistant") return null;
 
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK v6 UIMessage
                 const msgAny = msg as any;
                 const textContent = getTextFromParts(msgAny.parts, msgAny.content);
                 if (!textContent && msg.role === "assistant") return null;
 
-                const toolsUsed =
-                  msg.role === "assistant" ? getToolsFromParts(msgAny.parts) : [];
+                const toolsUsed = msg.role === "assistant" ? getToolsFromParts(msgAny.parts) : [];
 
                 return (
                   <motion.div
@@ -201,35 +222,26 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 , ease: [0.16, 1, 0.3, 1] }}
-                    className={`flex ${
-                      msg.role === "user" ? "justify-end" : "justify-start"
-                    }`}
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                        msg.role === "user"
-                          ? "bg-violet-600 text-white rounded-br-none"
-                          : "bg-slate-800/80 text-slate-200 rounded-bl-none"
+                      className={`max-w-[85%] border border-border px-6 py-4 text-[14px] leading-[1.6] ${
+                        msg.role === "user" ? "bg-foreground text-surface" : "bg-surface-container-low text-foreground"
                       }`}
                     >
                       {msg.role === "assistant" ? (
                         <>
-                          <div className="prose prose-sm prose-invert max-w-none">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                              {textContent}
-                            </ReactMarkdown>
+                          <div className="prose prose-sm max-w-none">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{textContent}</ReactMarkdown>
                           </div>
                           {toolsUsed.length > 0 && (
-                            <div className="mt-3 flex flex-wrap gap-2 pt-2 border-t border-slate-700/50">
-                              <span className="text-xs text-slate-500">
+                            <div className="mt-4 pt-4 border-t border-border flex flex-wrap gap-2">
+                              <span className="text-[10px] font-bold uppercase tracking-widest text-outline pt-1">
                                 Sources:
                               </span>
                               {toolsUsed.map((t) => (
-                                <span
-                                  key={t}
-                                  className="flex items-center gap-1 text-xs bg-violet-500/15 text-violet-400 border border-violet-500/30 rounded-full px-2 py-0.5"
-                                >
+                                <span key={t} className="flex items-center gap-2 border border-border bg-surface px-2 py-1 text-[10px] font-bold uppercase tracking-widest">
                                   <Wrench className="h-3 w-3" />
                                   {TOOL_LABELS[t] ?? t}
                                 </span>
@@ -246,152 +258,53 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
               })}
             </AnimatePresence>
 
-            {/* Typing / fetching indicator */}
             {isLoading && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex items-center gap-2 text-slate-500 text-sm"
-              >
-                <Loader2 className="h-4 w-4 animate-spin text-violet-400" />
-                <span>Fetching data...</span>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3 text-[12px] font-bold uppercase tracking-widest text-outline">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Processing...</span>
               </motion.div>
             )}
-
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Suggested prompts — only shown on empty state */}
-          {messages.length === 0 && (
-            <div className="px-6 pb-3 flex flex-wrap gap-2">
-              {SUGGESTED_PROMPTS.map((prompt) => (
-                <button
-                  key={prompt}
-                  onClick={() => handleSuggestedPrompt(prompt)}
-                  disabled={isLoading}
-                  className="text-xs bg-slate-800/60 hover:bg-slate-700/80 border border-slate-700 text-slate-300 rounded-full px-3 py-1.5 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-                >
-                  {prompt}
-                </button>
-              ))}
-            </div>
-          )}
-
           {/* Input area */}
-          <form
-            onSubmit={handleFormSubmit}
-            className="border-t border-slate-800 p-4 flex items-end gap-3"
-          >
-            <textarea
-              ref={textareaRef}
-              rows={1}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask about Taaqib's experience, projects, or tech stack..."
-              disabled={isLoading}
-              aria-label="Chat input"
-              className="flex-1 resize-none bg-slate-950/50 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent disabled:opacity-50 overflow-hidden"
-              style={{ minHeight: 44, maxHeight: 160 }}
-            />
+          <form onSubmit={handleFormSubmit} className="border-t border-border bg-surface p-6 flex items-end gap-4">
+            <div className="flex-1 border border-border relative">
+              <span className="absolute left-4 top-4 text-[10px] font-bold uppercase tracking-widest text-outline">Input</span>
+              <textarea
+                ref={textareaRef}
+                rows={1}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Execute command..."
+                disabled={isLoading}
+                aria-label="Chat input"
+                className="w-full resize-none bg-transparent pt-8 pb-4 px-4 text-[16px] placeholder-outline focus:outline-none focus:bg-surface-container-low transition-colors disabled:opacity-50"
+                style={{ minHeight: 80, maxHeight: 160 }}
+              />
+            </div>
             {isLoading ? (
               <button
                 type="button"
                 onClick={stop}
-                className="shrink-0 flex items-center justify-center h-11 w-11 rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                className="shrink-0 flex items-center justify-center h-[80px] w-[80px] border border-border bg-surface text-foreground hover:bg-surface-container transition-colors"
                 aria-label="Stop generation"
               >
-                <span className="h-3 w-3 rounded-sm bg-current" />
+                <span className="h-4 w-4 bg-foreground" />
               </button>
             ) : (
               <button
                 type="submit"
                 disabled={!inputValue.trim() || isLoading}
-                className="shrink-0 flex items-center justify-center h-11 w-11 rounded-xl bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                className="shrink-0 flex items-center justify-center h-[80px] w-[80px] border border-border bg-primary text-on-primary hover:bg-foreground hover:text-surface disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Send message"
               >
-                <Send className="h-4 w-4" />
+                <Send className="h-6 w-6" />
               </button>
             )}
           </form>
-        </motion.div>
-
-        {/* ── Info Panel ── */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.5, delay: 0.2 , ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col gap-6"
-        >
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-xl p-6">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="bg-violet-500/10 border border-violet-500/20 rounded-full p-2">
-                <Terminal className="h-5 w-5 text-violet-400" />
-              </div>
-              <h3 className="font-heading text-lg font-bold text-white">
-                How it works
-              </h3>
-            </div>
-            <ul className="space-y-4 text-sm text-slate-400">
-              <li className="flex items-start gap-2">
-                <span className="text-violet-500 mt-0.5">▸</span>
-                <span>
-                  Runs on{" "}
-                  <strong className="text-slate-300">Groq LLaMA 3.3-70b</strong>{" "}
-                  via the Vercel AI SDK.
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-violet-500 mt-0.5">▸</span>
-                <span>
-                  Uses{" "}
-                  <strong className="text-slate-300">tool-calling</strong> to
-                  fetch grounded data — no hallucinations.
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-violet-500 mt-0.5">▸</span>
-                <span>
-                  Runs at the{" "}
-                  <strong className="text-slate-300">
-                    Next.js Edge Runtime
-                  </strong>{" "}
-                  for sub-100ms first-token latency.
-                </span>
-              </li>
-            </ul>
-
-            <div className="mt-6 pt-5 border-t border-slate-800">
-              <p className="text-xs text-slate-500 mb-3 uppercase tracking-wider font-semibold">
-                Available Tools
-              </p>
-              <div className="flex flex-col gap-2">
-                {Object.keys(TOOL_LABELS).map((t) => (
-                  <div
-                    key={t}
-                    className="flex items-center gap-2 text-xs bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 text-slate-400"
-                  >
-                    <Wrench className="h-3 w-3 text-violet-500 shrink-0" />
-                    <code className="font-mono text-violet-300">{t}()</code>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-6 text-sm text-slate-400">
-            <p className="font-semibold text-violet-300 mb-2">
-              Same pattern used at LTTS
-            </p>
-            <p>
-              This deliberate tool-trigger architecture mirrors the LTTS Copilot
-              I built at L&T Technology Services — scoped function-calling with
-              prompt-engineered constraints to eliminate hallucinated tool calls
-              in production.
-            </p>
-          </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

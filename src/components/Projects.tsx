@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { projects, Project } from "@/data/projects";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -11,13 +10,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
 import { ExternalLink, Terminal } from "lucide-react";
 
 const GithubIcon = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
 );
-import Image from "next/image";
 
 const categories = ["All", "AI/LLM", "Full-Stack", "ML", "Edge"];
 
@@ -42,37 +39,32 @@ export function Projects({ onAskAgent }: { onAskAgent?: (title: string) => void 
   };
 
   return (
-    <section id="projects" className="py-24 px-6 max-w-7xl mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.5 , ease: [0.16, 1, 0.3, 1] }}
-        className="mb-12 text-center"
-      >
-        <h2 className="font-heading text-4xl font-bold mb-4">Featured Work</h2>
-        <p className="text-slate-400 text-lg">
-          Systems engineered for reliability, performance, and real-world impact.
-        </p>
-      </motion.div>
-
-      <div className="flex flex-wrap justify-center gap-2 mb-12">
-        {categories.map((category) => (
-          <button
-            key={category}
-            onClick={() => setActiveFilter(category)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${
-              activeFilter === category
-                ? "bg-violet-600 text-white"
-                : "bg-slate-800/50 text-slate-300 hover:bg-slate-800"
-            }`}
-          >
-            {category}
-          </button>
-        ))}
+    <section id="projects" className="max-w-[1440px] mx-auto border-b border-border">
+      
+      {/* Header & Filters */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 border-b border-border">
+        <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-border flex items-center">
+          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1]">Projects</h2>
+        </div>
+        <div className="lg:col-span-8 p-6 md:p-8 flex flex-wrap gap-2 items-center bg-surface">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setActiveFilter(category)}
+              className={`px-4 py-2 border border-border text-[12px] font-semibold uppercase tracking-[0.02em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                activeFilter === category
+                  ? "bg-foreground text-surface"
+                  : "bg-surface text-foreground hover:bg-primary hover:text-on-primary hover:border-primary"
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[300px]">
+      {/* Grid */}
+      <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
         <AnimatePresence mode="popLayout">
           {filteredProjects.map((project, idx) => {
             const isFeature = project.slug === "ltts-proctoring-portal" || project.slug === "mcp-code-review-pipeline";
@@ -80,13 +72,13 @@ export function Projects({ onAskAgent }: { onAskAgent?: (title: string) => void 
             return (
               <motion.div
                 layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3 , ease: [0.16, 1, 0.3, 1], delay: idx * 0.1 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1], delay: idx * 0.05 }}
                 key={project.slug}
                 onClick={() => setSelectedProject(project)}
-                className={`group cursor-pointer relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50 hover:border-violet-500/50 transition-colors ${
+                className={`group cursor-pointer relative bg-surface border-b md:border-r border-border p-6 md:p-8 flex flex-col justify-between transition-colors hover:bg-primary hover:text-on-primary hover:border-primary min-h-[300px] ${
                   isFeature ? "md:col-span-2" : "col-span-1"
                 } ${project.slug === "ltts-proctoring-portal" ? "lg:row-span-2 lg:col-span-2" : ""}`}
                 tabIndex={0}
@@ -97,38 +89,26 @@ export function Projects({ onAskAgent }: { onAskAgent?: (title: string) => void 
                   }
                 }}
               >
-                <div className="absolute inset-0 z-0">
-                  <Image
-                    src={`/projects/${project.slug}.jpg`}
-                    alt={project.title}
-                    fill
-                    className="object-cover opacity-30 group-hover:opacity-40 transition-opacity duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent" />
-                </div>
-                
-                <div className="relative z-10 p-6 h-full flex flex-col justify-end">
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {project.stack.slice(0, 3).map((tech) => (
-                      <Badge key={tech} variant="secondary" className="bg-slate-800/80 text-xs backdrop-blur-sm border-slate-700">
-                        {tech}
-                      </Badge>
-                    ))}
-                  </div>
-                  <h3 className="text-xl md:text-2xl font-bold font-heading mb-2 text-white group-hover:text-violet-300 transition-colors">
+                <div>
+                  <h4 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-4 opacity-50 group-hover:opacity-80">
+                    {project.categories[0]} / {new Date().getFullYear()}
+                  </h4>
+                  <h3 className="text-[24px] md:text-[32px] font-bold tracking-[-0.03em] leading-[1.1] mb-6 uppercase">
                     {project.title}
                   </h3>
-                  <p className="text-sm text-slate-400 line-clamp-2 mb-4">
+                </div>
+                
+                <div>
+                  <div className="h-px w-full bg-border group-hover:bg-on-primary/30 mb-4" />
+                  <p className="text-[14px] leading-[1.5] mb-4 opacity-80 line-clamp-2">
                     {project.blurb}
                   </p>
-                  <p className="text-sm font-medium text-violet-400">
-                    {project.metrics[0]}
-                  </p>
-                  
-                  <div className="absolute bottom-6 right-6 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                    <span className="text-sm font-semibold text-white flex items-center gap-1 bg-violet-600/80 backdrop-blur-md px-3 py-1.5 rounded-full">
-                      View case study →
-                    </span>
+                  <div className="flex flex-wrap gap-2">
+                    {project.stack.slice(0, 3).map((tech) => (
+                      <span key={tech} className="px-2 py-1 border border-border group-hover:border-on-primary/30 text-[10px] uppercase font-semibold tracking-wider">
+                        {tech}
+                      </span>
+                    ))}
                   </div>
                 </div>
               </motion.div>
@@ -138,62 +118,67 @@ export function Projects({ onAskAgent }: { onAskAgent?: (title: string) => void 
       </motion.div>
 
       <Dialog open={!!selectedProject} onOpenChange={(open) => !open && setSelectedProject(null)}>
-        <DialogContent className="max-w-2xl bg-slate-950/90 backdrop-blur-xl border-slate-800">
+        <DialogContent className="max-w-3xl bg-surface border border-border p-0 rounded-none gap-0">
           {selectedProject && (
             <>
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-heading mb-2">{selectedProject.title}</DialogTitle>
-                <DialogDescription className="text-slate-400 text-base">
-                  {selectedProject.blurb}
-                </DialogDescription>
-              </DialogHeader>
+              <div className="p-8 border-b border-border bg-surface">
+                <DialogHeader>
+                  <DialogTitle className="text-[32px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] mb-4 text-foreground">
+                    {selectedProject.title}
+                  </DialogTitle>
+                  <DialogDescription className="text-[16px] md:text-[18px] leading-[1.5] text-foreground/80 max-w-2xl">
+                    {selectedProject.blurb}
+                  </DialogDescription>
+                </DialogHeader>
+              </div>
               
-              <div className="my-6">
-                <h4 className="text-sm font-semibold text-slate-300 mb-3 uppercase tracking-wider">Tech Stack</h4>
-                <div className="flex flex-wrap gap-2">
-                  {selectedProject.stack.map((tech) => (
-                    <Badge key={tech} variant="outline" className="border-slate-700 bg-slate-900/50">
-                      {tech}
-                    </Badge>
-                  ))}
+              <div className="grid grid-cols-1 md:grid-cols-2">
+                <div className="p-8 border-b md:border-b-0 md:border-r border-border">
+                  <h4 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-6">Key Metrics & Outcomes</h4>
+                  <ul className="space-y-4">
+                    {selectedProject.metrics.map((metric, i) => (
+                      <li key={i} className="text-[14px] leading-[1.5] flex items-start gap-3">
+                        <span className="w-1.5 h-1.5 bg-foreground mt-1.5 flex-shrink-0" />
+                        <span>{metric}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              </div>
-
-              <div className="mb-6">
-                <h4 className="text-sm font-semibold text-slate-300 mb-3 uppercase tracking-wider">Key Metrics & Outcomes</h4>
-                <ul className="space-y-2">
-                  {selectedProject.metrics.map((metric, i) => (
-                    <li key={i} className="text-slate-300 flex items-start gap-2">
-                      <span className="text-violet-500 mt-1">•</span>
-                      <span>{metric}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="mb-6 pt-6 border-t border-slate-800">
-                <p className="text-sm text-slate-400 italic">
-                  {selectedProject.role}
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-3 pt-4">
-                <Button className="bg-violet-600 hover:bg-violet-700 gap-2" onClick={() => selectedProject && handleAgentClick(selectedProject.title)}>
-                  <Terminal className="h-4 w-4" />
-                  Ask agent about this
-                </Button>
-                {selectedProject.repo && (
-                  <a href={selectedProject.repo} target="_blank" rel="noopener noreferrer" className={buttonVariants({ variant: "outline", className: "border-slate-700 hover:bg-slate-800 gap-2" })}>
-                    <GithubIcon className="h-4 w-4" />
-                    Repository
-                  </a>
-                )}
-                {selectedProject.demo && (
-                  <a href={selectedProject.demo} target="_blank" rel="noopener noreferrer" className={buttonVariants({ variant: "outline", className: "border-slate-700 hover:bg-slate-800 gap-2" })}>
-                    <ExternalLink className="h-4 w-4" />
-                    Live Demo
-                  </a>
-                )}
+                
+                <div className="p-8 flex flex-col justify-between">
+                  <div>
+                    <h4 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-6">Tech Stack</h4>
+                    <div className="flex flex-wrap gap-2 mb-8">
+                      {selectedProject.stack.map((tech) => (
+                        <span key={tech} className="px-3 py-1.5 border border-border text-[12px] uppercase font-semibold tracking-wider bg-surface-container-low">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col gap-3">
+                    <button 
+                      className="w-full flex items-center justify-between border border-border bg-primary text-on-primary px-4 py-3 text-[12px] font-semibold uppercase tracking-widest hover:bg-foreground hover:text-surface transition-colors" 
+                      onClick={() => selectedProject && handleAgentClick(selectedProject.title)}
+                    >
+                      <span className="flex items-center gap-2"><Terminal className="h-4 w-4" /> Ask Agent</span>
+                      <ArrowUpRight className="h-4 w-4" />
+                    </button>
+                    <div className="flex gap-3">
+                      {selectedProject.repo && (
+                        <a href={selectedProject.repo} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 border border-border bg-surface px-4 py-3 text-[12px] font-semibold uppercase tracking-widest hover:bg-foreground hover:text-surface transition-colors">
+                          <GithubIcon className="h-4 w-4" /> Repo
+                        </a>
+                      )}
+                      {selectedProject.demo && (
+                        <a href={selectedProject.demo} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 border border-border bg-surface px-4 py-3 text-[12px] font-semibold uppercase tracking-widest hover:bg-foreground hover:text-surface transition-colors">
+                          <ExternalLink className="h-4 w-4" /> Demo
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             </>
           )}

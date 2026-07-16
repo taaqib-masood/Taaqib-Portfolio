@@ -11,48 +11,57 @@ export function About() {
   const contributions = 569;
 
   return (
-    <section id="about" className="py-24 px-6 max-w-7xl mx-auto">
-      <div className="flex flex-col lg:flex-row gap-12 lg:gap-24">
+    <section id="about" className="max-w-[1440px] mx-auto border-b border-border">
+      {/* Header */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 border-b border-border">
+        <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-border flex flex-col justify-center">
+          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1]">About</h2>
+        </div>
+        <div className="lg:col-span-8 p-6 md:p-8 bg-surface-container-low flex flex-col justify-center">
+          <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-outline">
+            AI Engineer · Dubai, UAE
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12">
         <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 , ease: [0.16, 1, 0.3, 1] }}
-          className="lg:w-1/3 shrink-0"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="lg:col-span-8 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-border bg-surface"
         >
-          <h2 className="font-heading text-3xl font-bold mb-2">About</h2>
-          <p className="text-violet-400 font-medium">AI Engineer · Dubai, UAE</p>
+          <div className="flex flex-col gap-6">
+            {aboutParagraphs.map((paragraph, index) => (
+              <p key={index} className="text-[16px] md:text-[18px] leading-[1.6] tracking-[-0.01em] text-foreground max-w-[65ch]">
+                {paragraph}
+              </p>
+            ))}
+          </div>
         </motion.div>
 
         <motion.div 
-          initial={{ opacity: 0, x: 20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6, delay: 0.2 , ease: [0.16, 1, 0.3, 1] }}
-          className="lg:w-2/3 flex flex-col gap-6"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="lg:col-span-4 flex flex-col bg-surface"
         >
-          {aboutParagraphs.map((paragraph, index) => (
-            <p key={index} className="text-slate-300 text-lg leading-relaxed max-w-[65ch]">
-              {paragraph}
-            </p>
-          ))}
-
-          <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 border-t border-slate-800">
-            <div className="flex flex-col">
-              <span className="text-3xl font-bold text-white">5+</span>
-              <span className="text-sm text-slate-500 mt-1">mos @ L&T</span>
+          <div className="grid grid-cols-2 lg:grid-cols-1 h-full">
+            <div className="p-6 md:p-8 border-r lg:border-r-0 lg:border-b border-border flex flex-col justify-center">
+              <span className="text-[32px] md:text-[48px] font-bold leading-[1] tracking-[-0.03em] uppercase mb-2">5+</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-outline">Months @ L&T</span>
             </div>
-            <div className="flex flex-col">
-              <span className="text-3xl font-bold text-white">{numProjects}</span>
-              <span className="text-sm text-slate-500 mt-1">shipped projects</span>
+            <div className="p-6 md:p-8 border-b lg:border-b border-border flex flex-col justify-center">
+              <span className="text-[32px] md:text-[48px] font-bold leading-[1] tracking-[-0.03em] uppercase mb-2">{numProjects}</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-outline">Shipped Projects</span>
             </div>
-            <div className="flex flex-col">
-              <span className="text-3xl font-bold text-white">{contributions}</span>
-              <span className="text-sm text-slate-500 mt-1">GitHub commits/yr</span>
+            <div className="p-6 md:p-8 border-r lg:border-r-0 lg:border-b border-border flex flex-col justify-center">
+              <span className="text-[32px] md:text-[48px] font-bold leading-[1] tracking-[-0.03em] uppercase mb-2">{contributions}</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-outline">GitHub Commits/Yr</span>
             </div>
-            <div className="flex flex-col">
-              <span className="text-3xl font-bold text-white">{numLanguages}</span>
-              <span className="text-sm text-slate-500 mt-1">languages spoken</span>
+            <div className="p-6 md:p-8 flex flex-col justify-center">
+              <span className="text-[32px] md:text-[48px] font-bold leading-[1] tracking-[-0.03em] uppercase mb-2">{numLanguages}</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-outline">Languages Spoken</span>
             </div>
           </div>
         </motion.div>

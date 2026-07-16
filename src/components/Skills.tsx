@@ -2,75 +2,40 @@
 
 import { motion } from "framer-motion";
 import { skills } from "@/data/resume";
-import { Badge } from "@/components/ui/badge";
-
-const primarySkills = [
-  "TypeScript", "Python", "Anthropic Claude", "Groq (LLaMA 3.1 / 3.3)", "MCP tooling", "RAG", "Angular 18/19 (standalone components, RxJS)", "Node.js"
-];
 
 export function Skills() {
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const item = {
-    hidden: { opacity: 0, scale: 0.9 },
-    show: { opacity: 1, scale: 1, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] as const } }
-  };
-
   return (
-    <section id="skills" className="py-24 px-6 max-w-7xl mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.5 , ease: [0.16, 1, 0.3, 1] as const }}
-        className="mb-16 text-center"
-      >
-        <h2 className="font-heading text-4xl font-bold mb-4">Technical Skills</h2>
-      </motion.div>
-
-      <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
-        {Object.entries(skills).map(([category, items]) => (
-          <motion.div
-            key={category}
-            variants={container}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-50px" }}
-            className="break-inside-avoid bg-slate-900/40 border border-slate-800 rounded-2xl p-6"
-          >
-            <h3 className="text-xl font-semibold text-slate-200 mb-6 font-heading border-b border-slate-800 pb-2">
-              {category}
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {items.map((skill) => {
-                const isPrimary = primarySkills.includes(skill);
-                return (
-                  <motion.div key={skill} variants={item}>
-                    <Badge
-                      variant="secondary"
-                      className={`
-                        transition-all hover:scale-105 cursor-default
-                        ${isPrimary 
-                          ? "bg-violet-600/20 text-violet-300 border-violet-500/30 font-semibold text-sm px-3 py-1.5" 
-                          : "bg-slate-800/60 text-slate-300 border-slate-700/50 text-xs px-2.5 py-1"}
-                      `}
-                    >
-                      {skill}
-                    </Badge>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </motion.div>
-        ))}
+    <section id="skills" className="max-w-[1440px] mx-auto border-b border-border">
+      <div className="grid grid-cols-1 lg:grid-cols-12">
+        <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-border flex items-start">
+          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1]">Skills</h2>
+        </div>
+        <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2">
+          {Object.entries(skills).map(([category, items], idx, arr) => (
+            <motion.div
+              key={category}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.3, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
+              className={`p-6 md:p-8 ${idx % 2 === 0 ? "border-r border-border" : ""} ${idx < arr.length - 2 ? "border-b border-border" : ""} ${idx === arr.length - 2 && arr.length % 2 === 0 ? "border-b border-border md:border-b-0" : ""} bg-surface`}
+            >
+              <h3 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-6 border-b border-border pb-4">
+                {category}
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {items.map((skill) => (
+                  <span
+                    key={skill}
+                    className="px-3 py-1.5 border border-border text-[12px] font-semibold uppercase tracking-widest bg-surface text-foreground"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );

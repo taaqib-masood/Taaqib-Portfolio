@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+
 import { CommandMenu } from "@/components/CommandMenu";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { cn } from "@/lib/utils";
@@ -43,21 +43,14 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning dir="ltr">
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased",
+          "min-h-screen bg-background font-sans antialiased text-foreground",
           inter.variable,
           outfit.variable
         )}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-          <CommandMenu />
-          <ScrollToTop />
-        </ThemeProvider>
+        {children}
+        <CommandMenu />
+        <ScrollToTop />
       </body>
     </html>
   );

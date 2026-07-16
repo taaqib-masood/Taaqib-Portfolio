@@ -22,7 +22,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-50 selection:bg-violet-500/30">
+    <main className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-on-primary">
       <Hero />
       <About />
       <Agent prefillMessage={agentPrefill} />
@@ -33,14 +33,14 @@ export default function Home() {
       <GithubGraph />
       <Contact />
 
-      <footer className="border-t border-slate-900 bg-slate-950 py-8 text-center text-sm text-slate-500 mt-24">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+      <footer className="border-t border-border bg-surface py-8 text-[12px] text-outline font-semibold uppercase tracking-widest mt-24">
+        <div className="max-w-[1440px] mx-auto px-6 md:px-16 flex flex-col md:flex-row justify-between items-center gap-4">
           <p>© 2026 Taaqib Masood</p>
-          <p className="italic">&quot;Model isn&apos;t the demo, it&apos;s the infrastructure.&quot;</p>
-          <p>Built with Next.js, shadcn/ui, Framer Motion</p>
+          <p className="hidden md:block border border-border px-4 py-2">Model isn&apos;t the demo, it&apos;s the infrastructure.</p>
+          <p>Built with Next.js & Framer Motion</p>
         </div>
       </footer>
-      <Toaster theme="dark" position="bottom-right" />
+      <Toaster position="bottom-right" className="rounded-none border-border" />
     </main>
   );
 }
