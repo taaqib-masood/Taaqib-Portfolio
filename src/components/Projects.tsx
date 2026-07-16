@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { projects, Project } from "@/data/projects";
+import { ParallaxNumber } from "@/components/ParallaxNumber";
+import { VerticalLine } from "@/components/VerticalLine";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +20,17 @@ const GithubIcon = ({ className }: { className?: string }) => (
 
 const categories = ["All", "AI/LLM", "Full-Stack", "ML", "Edge"];
 
-export function Projects({ onAskAgent }: { onAskAgent?: (title: string) => void }) {
+function getMetricTooltip(metric: string): string | null {
+  if (metric.includes("gaze-tracking")) return "MediaPipe Face Landmarker + solvePnP head-pose";
+  if (metric.includes("multi-face detection")) return "face-api.js with COCO-SSD fallbacks";
+  if (metric.includes("security issues")) return "Static analysis via Claude MCP agent cross-referencing Jama specs";
+  if (metric.includes("risk rules")) return "Real-time portfolio delta tracking and regime-switching gates";
+  if (metric.includes("UAE VAT-compliant payments")) return "Stripe Connect + Square POS API integration";
+  if (metric.includes("TensorFlow Lite")) return "Quantized INT8 models for edge deployment";
+  return null;
+}
+
+export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: string) => void, activeSkill?: string | null }) {
   const [activeFilter, setActiveFilter] = useState("All");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
@@ -42,19 +54,21 @@ export function Projects({ onAskAgent }: { onAskAgent?: (title: string) => void 
     <section id="projects" className="max-w-[1440px] mx-auto border-b border-border">
       
       {/* Header & Filters */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 border-b border-border">
-        <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-border flex items-center">
-          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1]">Projects</h2>
+      <div className="relative grid grid-cols-1 lg:grid-cols-12 border-b border-border overflow-hidden">
+        <ParallaxNumber number="01" />
+        <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 relative flex items-center">
+          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] relative z-10">Projects</h2>
+          <VerticalLine />
         </div>
-        <div className="lg:col-span-8 p-6 md:p-8 flex flex-wrap gap-2 items-center bg-surface">
+        <div className="lg:col-span-8 p-6 md:p-8 flex flex-wrap gap-4 items-center bg-surface">
           {categories.map((category) => (
             <button
               key={category}
               onClick={() => setActiveFilter(category)}
-              className={`px-4 py-2 border border-border text-[12px] font-semibold uppercase tracking-[0.02em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+              className={`px-4 py-2 border border-border text-[12px] font-semibold uppercase tracking-widest transition-colors ${
                 activeFilter === category
                   ? "bg-foreground text-surface"
-                  : "bg-surface text-foreground hover:bg-primary hover:text-on-primary hover:border-primary"
+                  : "bg-surface text-foreground hover:bg-surface-container"
               }`}
             >
               {category}
@@ -68,6 +82,8 @@ export function Projects({ onAskAgent }: { onAskAgent?: (title: string) => void 
         <AnimatePresence mode="popLayout">
           {filteredProjects.map((project, idx) => {
             const isFeature = project.slug === "ltts-proctoring-portal" || project.slug === "mcp-code-review-pipeline";
+            const matchesSkill = activeSkill ? project.stack.includes(activeSkill) : true;
+            const isFaded = activeSkill && !matchesSkill;
             
             return (
               <motion.div
@@ -77,10 +93,12 @@ export function Projects({ onAskAgent }: { onAskAgent?: (title: string) => void 
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.4, ease: [0.83, 0, 0.17, 1], delay: idx * 0.05 }}
                 key={project.slug}
-                onClick={() => setSelectedProject(project)}
-                className={`group cursor-pointer relative border-b md:border-r border-border p-6 md:p-8 flex flex-col justify-between transition-all duration-500 hover:z-10 min-h-[300px] overflow-hidden bg-surface hover:bg-[#1d4ed8] ${
+                onClick={() => { if (!isFaded) setSelectedProject(project); }}
+                className={`group cursor-pointer relative border-b md:border-r border-border p-6 md:p-8 flex flex-col justify-between min-h-[300px] overflow-hidden transition-all duration-300 ${
                   isFeature ? "md:col-span-2" : "col-span-1"
-                } ${project.slug === "ltts-proctoring-portal" ? "lg:row-span-2 lg:col-span-2" : ""}`}
+                } ${project.slug === "ltts-proctoring-portal" ? "lg:row-span-2 lg:col-span-2" : ""} ${
+                  isFaded ? "opacity-20 pointer-events-none" : ""
+                } ${activeSkill && matchesSkill ? "border border-[#2e5bff]" : ""}`}
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -89,36 +107,45 @@ export function Projects({ onAskAgent }: { onAskAgent?: (title: string) => void 
                   }
                 }}
               >
-                {/* Background Image Layer */}
+                {/* Base Layer: Blue Background */}
+                <div className="absolute inset-0 bg-[#1d4ed8] z-0" />
+                
+                {/* Base Layer: Image (if applicable) */}
                 {project.image && project.slug === "ltts-proctoring-portal" && (
                   <div 
-                    className="absolute inset-0 bg-cover bg-center transition-all duration-700 ease-out group-hover:scale-105 mix-blend-luminosity opacity-0 group-hover:opacity-60"
+                    className="absolute inset-0 bg-cover bg-center mix-blend-luminosity opacity-60 z-0"
                     style={{ backgroundImage: `url(${project.image})` }}
                   />
                 )}
                 
+                {/* Garage Door Layer (White Overlay) */}
+                <div 
+                  className="absolute inset-0 bg-surface z-10 translate-y-0 group-hover:-translate-y-full"
+                  style={{ transition: "transform 0.4s cubic-bezier(0.83, 0, 0.17, 1)" }}
+                />
+                
                 {/* Content Layer */}
-                <div className="relative z-10 flex flex-col h-full justify-between">
+                <div className="relative z-20 flex flex-col h-full justify-between pointer-events-none">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h4 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-4 text-foreground/50 group-hover:text-white/80 transition-colors">
+                      <h4 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-4 text-outline group-hover:text-surface/80 transition-colors duration-400">
                         {project.categories[0]} / {new Date().getFullYear()}
                       </h4>
-                      <h3 className="text-[24px] md:text-[32px] font-bold tracking-[-0.03em] leading-[1.1] mb-6 uppercase text-foreground group-hover:text-white group-hover:drop-shadow-md transition-colors">
+                      <h3 className="text-[24px] md:text-[32px] font-bold tracking-[-0.03em] leading-[1.1] mb-6 uppercase text-foreground group-hover:text-surface group-hover:drop-shadow-md transition-colors duration-400">
                         {project.title}
                       </h3>
                     </div>
-                    <ArrowUpRight className="h-6 w-6 text-white opacity-0 -translate-x-4 translate-y-4 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-300 ease-out" />
+                    <ArrowUpRight className="h-6 w-6 text-surface opacity-0 -translate-x-4 translate-y-4 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-400 ease-[cubic-bezier(0.83,0,0.17,1)]" />
                   </div>
                   
                   <div>
-                    <div className="h-px w-full bg-border group-hover:bg-white/50 mb-4 transition-colors" />
-                    <p className="text-[14px] leading-[1.5] mb-4 text-foreground/80 group-hover:text-white line-clamp-2 transition-colors">
+                    <div className="h-px w-full bg-border group-hover:bg-surface/20 mb-4 transition-colors duration-400" />
+                    <p className="text-[14px] leading-[1.5] mb-4 text-outline group-hover:text-surface line-clamp-2 transition-colors duration-400">
                       {project.blurb}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {project.stack.slice(0, 3).map((tech) => (
-                        <span key={tech} className="px-2 py-1 border border-border group-hover:border-white/50 text-foreground group-hover:text-white group-hover:bg-white/10 text-[10px] uppercase font-semibold tracking-wider transition-colors backdrop-blur-sm">
+                        <span key={tech} className="px-2 py-1 border border-border group-hover:border-surface/50 text-outline group-hover:text-surface group-hover:bg-surface/10 text-[10px] uppercase font-semibold tracking-wider transition-colors duration-400 backdrop-blur-sm">
                           {tech}
                         </span>
                       ))}
@@ -164,7 +191,7 @@ export function Projects({ onAskAgent }: { onAskAgent?: (title: string) => void 
       </motion.div>
 
       <Dialog open={!!selectedProject} onOpenChange={(open) => !open && setSelectedProject(null)}>
-        <DialogContent className="max-w-3xl bg-surface border border-border p-0 rounded-none gap-0">
+        <DialogContent className="max-w-5xl w-[95vw] bg-surface border border-border p-0 rounded-none gap-0 max-h-[90vh] overflow-y-auto">
           {selectedProject && (
             <>
               <div className="p-8 border-b border-border bg-surface">
@@ -182,12 +209,22 @@ export function Projects({ onAskAgent }: { onAskAgent?: (title: string) => void 
                 <div className="p-8 border-b md:border-b-0 md:border-r border-border">
                   <h4 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-6">Key Metrics & Outcomes</h4>
                   <ul className="space-y-4">
-                    {selectedProject.metrics.map((metric, i) => (
-                      <li key={i} className="text-[14px] leading-[1.5] flex items-start gap-3">
-                        <span className="w-1.5 h-1.5 bg-foreground mt-1.5 flex-shrink-0" />
-                        <span>{metric}</span>
-                      </li>
-                    ))}
+                    {selectedProject.metrics.map((metric, i) => {
+                      const tooltip = getMetricTooltip(metric);
+                      return (
+                        <li key={i} className="text-[14px] leading-[1.5] flex items-start gap-3 relative group/tooltip">
+                          <span className="w-1.5 h-1.5 bg-foreground mt-1.5 flex-shrink-0" />
+                          <span className={tooltip ? "border-b border-dotted border-black cursor-help" : ""}>
+                            {metric}
+                          </span>
+                          {tooltip && (
+                            <div className="absolute left-0 bottom-full mb-2 opacity-0 group-hover/tooltip:opacity-100 pointer-events-none bg-white text-black border border-[#1a1c1c] rounded-none px-3 py-2 z-50 text-[10px] uppercase tracking-wider min-w-[200px] max-w-xs shadow-none">
+                              {tooltip}
+                            </div>
+                          )}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
                 

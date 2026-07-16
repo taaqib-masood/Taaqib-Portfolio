@@ -114,6 +114,15 @@ export function Contact() {
                 </div>
               </li>
             </ul>
+            <div className="mt-8 pt-8 border-t border-border">
+              <a
+                href="/taaqib-masood-cv.pdf"
+                download
+                className="w-full border border-border bg-foreground text-surface hover:bg-primary transition-colors py-4 text-[14px] font-bold uppercase tracking-widest flex items-center justify-center"
+              >
+                Download CV (PDF)
+              </a>
+            </div>
           </div>
           
           <div className="border-t border-border grid grid-cols-3">

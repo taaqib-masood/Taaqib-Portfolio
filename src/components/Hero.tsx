@@ -1,17 +1,29 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 
 export function Hero() {
+  const containerRef = useRef<HTMLElement>(null);
+  
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"]
+  });
+
+  const clipPath = useTransform(scrollYProgress, [0, 0.4], ["inset(100% 0% 0% 0%)", "inset(0% 0% 0% 0%)"]);
+  const scale = useTransform(scrollYProgress, [0, 0.4], [1.2, 1]);
+  const filter = useTransform(scrollYProgress, [0, 0.75, 1], ["grayscale(100%)", "grayscale(100%)", "grayscale(0%)"]);
+
   const handleAgentClick = () => {
     const agentEl = document.getElementById("agent");
     agentEl?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
-    <section id="hero" className="relative min-h-screen pt-24 px-6 md:px-16 flex flex-col justify-between max-w-[1440px] mx-auto border-b border-border">
+    <section ref={containerRef} id="hero" className="relative min-h-screen pt-24 px-6 md:px-16 flex flex-col justify-between max-w-[1440px] mx-auto border-b border-border">
       
       {/* Massive Typography & Photo Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-0 mt-12 lg:mt-24">
@@ -19,43 +31,37 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.83, 0, 0.17, 1] }}
-          className="lg:col-span-8 flex flex-col justify-center"
+          className="lg:col-span-7 flex flex-col justify-center relative z-10"
         >
-          <h1 className="text-[60px] md:text-[120px] lg:text-[180px] font-black leading-[0.9] tracking-[-0.05em] text-foreground uppercase">
+          <h1 className="text-[60px] md:text-[120px] lg:text-[clamp(100px,11vw,180px)] font-black leading-[0.9] tracking-[-0.05em] text-foreground uppercase whitespace-nowrap">
             TAAQIB
             <br />
             MASOOD
           </h1>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.1, ease: [0.83, 0, 0.17, 1] }}
-          className="lg:col-span-4 flex justify-start lg:justify-end items-end"
-        >
+        <div className="lg:col-span-5 flex justify-start lg:justify-end items-end w-full">
           <motion.div 
-            whileInView={{ y: [-20, 20] }}
-            transition={{ duration: 2, ease: "linear", repeat: Infinity, repeatType: "mirror" }}
-            className="relative w-[300px] h-[400px] md:w-[450px] md:h-[600px] lg:w-[500px] lg:h-[700px] border border-border bg-surface-container overflow-hidden"
+            style={{ clipPath }}
+            className="relative w-full aspect-square md:aspect-[4/5] border border-border bg-surface-container overflow-hidden"
           >
             {/* User must place their photo at public/taaqib-photo.jpg */}
-            <Image
-              src="/taaqib-photo.jpg"
-              alt="Taaqib Masood"
-              fill
-              className="object-cover grayscale hover:grayscale-0 transition-all duration-700 hover:scale-105"
-              onError={(e) => {
-                // Fallback if image is missing
-                e.currentTarget.style.display = 'none';
-              }}
-            />
+            <motion.div style={{ scale, filter, width: "100%", height: "100%" }} className="relative origin-bottom">
+              <Image
+                src="/taaqib-photo.jpg"
+                alt="Taaqib Masood"
+                fill
+                className="object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            </motion.div>
             <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold uppercase tracking-widest text-outline -z-10">
               Replace with /taaqib-photo.jpg
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Structural Data Blocks */}
@@ -115,12 +121,21 @@ export function Hero() {
             <br />
             Available for Engineering roles.
           </p>
-          <button
-            onClick={handleAgentClick}
-            className="group flex items-center justify-between border border-border bg-surface px-4 py-3 text-[12px] font-semibold uppercase tracking-widest transition-colors hover:bg-primary hover:text-on-primary active:bg-foreground active:text-on-primary w-full"
-          >
-            Ask Agent <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-          </button>
+          <div className="flex flex-col gap-2 w-full">
+            <button
+              onClick={handleAgentClick}
+              className="group flex items-center justify-between border border-border bg-surface px-4 py-3 text-[12px] font-semibold uppercase tracking-widest transition-colors hover:bg-primary hover:text-on-primary active:bg-foreground active:text-on-primary w-full"
+            >
+              Ask Agent <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+            </button>
+            <a
+              href="/taaqib-masood-cv.pdf"
+              download
+              className="group flex items-center justify-between border border-border bg-surface px-4 py-3 text-[12px] font-semibold uppercase tracking-widest transition-colors hover:bg-primary hover:text-on-primary active:bg-foreground active:text-on-primary w-full"
+            >
+              Download CV <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+            </a>
+          </div>
         </motion.div>
 
       </div>

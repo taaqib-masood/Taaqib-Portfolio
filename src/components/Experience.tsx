@@ -2,14 +2,17 @@
 
 import { motion } from "framer-motion";
 import { experience, education, certifications, spokenLanguages } from "@/data/resume";
+import { ParallaxNumber } from "@/components/ParallaxNumber";
+import { VerticalLine } from "@/components/VerticalLine";
 
 export function Experience() {
   return (
     <section id="experience" className="max-w-[1440px] mx-auto border-b border-border">
       
       {/* Experience Header */}
-      <div className="border-b border-border p-6 md:p-8">
-        <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1]">Experience</h2>
+      <div className="relative border-b border-border p-6 md:p-8 overflow-hidden">
+        <ParallaxNumber number="03" />
+        <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] relative z-10">Experience</h2>
       </div>
 
       {/* Experience List */}
@@ -23,13 +26,14 @@ export function Experience() {
             transition={{ duration: 0.3, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="grid grid-cols-1 lg:grid-cols-12 border-b border-border"
           >
-            <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-border">
+            <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 relative">
               <h3 className="text-[18px] md:text-[24px] font-bold uppercase tracking-[-0.01em] leading-[1.2] mb-2">{exp.role}</h3>
               <p className="text-[16px] font-semibold text-outline uppercase tracking-[0.02em] mb-4">{exp.company}</p>
               <div className="flex justify-between text-[12px] uppercase font-semibold tracking-widest text-outline">
                 <span>{exp.period}</span>
                 <span>{exp.location}</span>
               </div>
+              <VerticalLine />
             </div>
             <div className="lg:col-span-8 p-6 md:p-8 flex flex-col justify-center">
               <ul className="space-y-4">
@@ -61,8 +65,9 @@ export function Experience() {
             transition={{ duration: 0.3, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="grid grid-cols-1 lg:grid-cols-12 border-b border-border"
           >
-            <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-border">
+            <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 relative">
               <h3 className="text-[18px] md:text-[24px] font-bold uppercase tracking-[-0.01em] leading-[1.2] mb-2">{edu.institution}</h3>
+              <VerticalLine />
             </div>
             <div className="lg:col-span-8 p-6 md:p-8">
               <p className="text-[16px] font-semibold uppercase tracking-[0.02em] mb-2">{edu.degree}</p>
@@ -78,7 +83,7 @@ export function Experience() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="p-6 md:p-8 border-b md:border-b-0 md:border-r border-border"
+          className="p-6 md:p-8 border-b md:border-b-0 relative"
         >
           <h3 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-6 border-b border-border pb-4">Certifications</h3>
           <ul className="space-y-4">
@@ -88,6 +93,7 @@ export function Experience() {
               </li>
             ))}
           </ul>
+          <VerticalLine />
         </motion.div>
         <motion.div
           initial={{ opacity: 0 }}
