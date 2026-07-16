@@ -8,6 +8,7 @@ export interface Project {
   repo: string;
   demo: string | null;
   role: string;
+  image?: string;
 }
 
 export const projects: Project[] = [
@@ -36,6 +37,7 @@ export const projects: Project[] = [
     repo: "https://github.com/taaqib-masood",
     demo: null,
     role: "Sole-built end-to-end at L&T Technology Services, Feb–Jun 2026",
+    image: "/projects/ltts-proctoring.jpg",
   },
   {
     slug: "mcp-code-review-pipeline",
@@ -60,6 +62,7 @@ export const projects: Project[] = [
     repo: "https://github.com/taaqib-masood",
     demo: null,
     role: "Built at L&T Technology Services",
+    image: "/projects/mcp-code-review.jpg",
   },
   {
     slug: "stock-forecasting-risk",
@@ -88,6 +91,7 @@ export const projects: Project[] = [
     repo: "https://github.com/taaqib-masood/stock-market-forecasting-risk-analytics",
     demo: "https://stocks-proj.netlify.app",
     role: "Personal project, Dec 2025 – present",
+    image: "/projects/stock-forecasting.jpg",
   },
   {
     slug: "salon-booking-saas",
@@ -120,6 +124,7 @@ export const projects: Project[] = [
     repo: "https://github.com/taaqib-masood/salon-booking-saas",
     demo: null,
     role: "Personal project, Feb–May 2026",
+    image: "/projects/salon-booking.jpg",
   },
   {
     slug: "predictive-maintenance",
@@ -146,6 +151,7 @@ export const projects: Project[] = [
     repo: "https://github.com/taaqib-masood/predictive-maintenance-industrial-machinery",
     demo: null,
     role: "Research project, VIT — dataset: NASA CMAPSS Turbofan Engine Dataset",
+    image: "/projects/predictive-maintenance.jpg",
   },
   {
     slug: "smart-hospital-agent",
@@ -160,5 +166,6 @@ export const projects: Project[] = [
     repo: "https://github.com/taaqib-masood/smart-hospital-agent",
     demo: null,
     role: "Personal project",
+    image: "/projects/smart-hospital.jpg",
   },
 ];

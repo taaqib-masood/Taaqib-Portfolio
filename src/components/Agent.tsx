@@ -126,11 +126,11 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
       
       {/* Header */}
       <div className="grid grid-cols-1 lg:grid-cols-12 border-b border-border">
-        <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-border flex flex-col justify-center">
-          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1]">Agent Terminal</h2>
+        <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-border flex flex-col justify-end bg-foreground text-surface min-h-[300px]">
+          <h2 className="text-[48px] md:text-[72px] lg:text-[80px] font-black uppercase tracking-[-0.03em] leading-[0.9]">AGENT<br/>TERMINAL</h2>
         </div>
-        <div className="lg:col-span-8 p-6 md:p-8 bg-surface-container-low flex flex-col justify-center">
-          <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-outline">
+        <div className="lg:col-span-8 p-6 md:p-8 bg-surface-container-low flex flex-col justify-end">
+          <p className="text-[16px] md:text-[20px] leading-[1.5] font-semibold tracking-[-0.01em] text-foreground">
             Interface directly with the LLaMA 3.3 agent. Query tech stacks, availability, and neural paradigms.
           </p>
         </div>
