@@ -40,7 +40,10 @@ export const tools = {
         ),
     }),
     // @ts-expect-error - AI SDK v6 / Zod v4 TS inference mismatch
-    execute: async (params: { slug: string }): Promise<string> => {
+    execute: async (params: { slug: string | null }): Promise<string> => {
+      if (!params || !params.slug) {
+        return JSON.stringify({ error: "Missing slug parameter", availableSlugs: projects.map((p) => p.slug) });
+      }
       const project = projects.find((p) => p.slug === params.slug);
       if (!project) {
         return JSON.stringify({
@@ -86,8 +89,12 @@ export const tools = {
         | "education"
         | "certifications"
         | "contact"
-        | "languages";
+        | "languages"
+        | null;
     }): Promise<string> => {
+      if (!params || !params.section) {
+        return JSON.stringify({ error: "Missing section parameter" });
+      }
       const sectionMap: Record<string, unknown> = {
         about: aboutParagraphs,
         skills,
@@ -164,7 +171,8 @@ export const tools = {
       slug: z.string().describe("Project slug"),
     }),
     // @ts-expect-error - AI SDK v6 / Zod v4 TS inference mismatch
-    execute: async (params: { slug: string }): Promise<string> => {
+    execute: async (params: { slug: string | null }): Promise<string> => {
+      if (!params || !params.slug) return JSON.stringify({ error: "Missing slug parameter" });
       const project = projects.find((p) => p.slug === params.slug);
       if (!project) return JSON.stringify({ error: "Project not found" });
       if (!project.demo)

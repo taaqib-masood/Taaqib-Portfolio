@@ -6,7 +6,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Send, Loader2, Wrench } from "lucide-react";
+import { Send, Wrench } from "lucide-react";
+import { ParallaxNumber } from "@/components/ParallaxNumber";
+import { VerticalLine } from "@/components/VerticalLine";
 
 const SUGGESTED_PROMPTS = [
   "What did you build at LTTS?",
@@ -122,15 +124,17 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
   );
 
   return (
-    <section id="agent" className="max-w-[1440px] mx-auto border-b border-border">
+    <section id="agent" className="max-w-[1440px] mx-auto border-b border-surface/20 bg-foreground text-surface">
       
       {/* Header */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 border-b border-border">
-        <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-border flex flex-col justify-center">
-          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1]">Agent Terminal</h2>
+      <div className="relative grid grid-cols-1 lg:grid-cols-12 border-b border-surface/20 overflow-hidden z-0">
+        <ParallaxNumber number="05" />
+        <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 relative flex flex-col justify-center">
+          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] relative z-10">Agent Terminal</h2>
+          <VerticalLine className="bg-surface/20" />
         </div>
-        <div className="lg:col-span-8 p-6 md:p-8 bg-surface-container-low flex flex-col justify-center">
-          <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-outline">
+        <div className="lg:col-span-8 p-6 md:p-8 bg-surface/5 flex flex-col justify-center">
+          <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-surface/60">
             Interface directly with the LLaMA 3.3 agent. Query tech stacks, availability, and neural paradigms.
           </p>
         </div>
@@ -138,51 +142,46 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-12">
         {/* Info Panel */}
-        <div className="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-border flex flex-col">
-          <div className="p-6 md:p-8 border-b border-border bg-surface flex-1">
+        <div className="lg:col-span-4 border-b lg:border-b-0 relative flex flex-col">
+          <VerticalLine className="bg-surface/20" />
+          <div className="p-6 md:p-8 border-b border-surface/20 bg-foreground flex-1">
             <h3 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-6">System Architecture</h3>
-            <ul className="space-y-4 text-[14px] leading-[1.5] text-outline">
+            <ul className="space-y-4 text-[14px] leading-[1.5] text-surface/60">
               <li className="flex items-start gap-3">
-                <span className="w-1.5 h-1.5 bg-foreground mt-1.5 flex-shrink-0" />
-                <span>Runs on <strong className="text-foreground">Groq LLaMA 3.3-70b</strong> via the Vercel AI SDK.</span>
+                <span className="w-1.5 h-1.5 bg-surface mt-1.5 flex-shrink-0" />
+                <span>Runs on <strong className="text-surface">Groq LLaMA 3.3-70b</strong> via the Vercel AI SDK.</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="w-1.5 h-1.5 bg-foreground mt-1.5 flex-shrink-0" />
-                <span>Uses <strong className="text-foreground">tool-calling</strong> to fetch grounded data — no hallucinations.</span>
+                <span className="w-1.5 h-1.5 bg-surface mt-1.5 flex-shrink-0" />
+                <span>Uses <strong className="text-surface">tool-calling</strong> to fetch grounded data — no hallucinations.</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="w-1.5 h-1.5 bg-foreground mt-1.5 flex-shrink-0" />
-                <span>Runs at the <strong className="text-foreground">Next.js Edge Runtime</strong> for sub-100ms latency.</span>
+                <span className="w-1.5 h-1.5 bg-surface mt-1.5 flex-shrink-0" />
+                <span>Runs at the <strong className="text-surface">Next.js Edge Runtime</strong> for sub-100ms latency.</span>
               </li>
             </ul>
 
-            <div className="mt-8 pt-8 border-t border-border">
+            <div className="mt-8 pt-8 border-t border-surface/20">
               <h3 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-6">Available Tools</h3>
               <div className="flex flex-col gap-2">
                 {Object.keys(TOOL_LABELS).map((t) => (
-                  <div key={t} className="flex items-center gap-3 border border-border bg-surface-container px-3 py-2 text-[12px] font-semibold uppercase tracking-widest">
-                    <Wrench className="h-3 w-3 text-foreground shrink-0" />
+                  <div key={t} className="flex items-center gap-3 border border-surface/20 bg-surface/10 px-3 py-2 text-[12px] font-semibold uppercase tracking-widest">
+                    <Wrench className="h-3 w-3 text-surface shrink-0" />
                     <span>{t}()</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-          <div className="p-6 md:p-8 bg-surface-container-low">
-             <h3 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-4">Implementation Note</h3>
-             <p className="text-[14px] leading-[1.5] text-outline">
-               This deliberate tool-trigger architecture mirrors the LTTS Copilot I built at L&T Technology Services — scoped function-calling with prompt-engineered constraints to eliminate hallucinated tool calls in production.
-             </p>
-          </div>
         </div>
 
         {/* Chat Window */}
-        <div className="lg:col-span-8 flex flex-col bg-surface min-h-[500px]">
+        <div className="lg:col-span-8 flex flex-col bg-foreground min-h-[500px]">
           {/* Message list */}
           <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6" style={{ minHeight: 400, maxHeight: 600 }}>
             {messages.length === 0 && !apiError && (
               <div className="h-full flex flex-col items-start justify-center gap-6">
-                <p className="text-[16px] uppercase font-bold tracking-widest text-outline">
+                <p className="text-[16px] uppercase font-bold tracking-widest text-surface/60">
                   Session initialized. Awaiting user input sequence.
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -191,7 +190,7 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
                       key={prompt}
                       onClick={() => handleSuggestedPrompt(prompt)}
                       disabled={isLoading}
-                      className="px-4 py-2 border border-border text-[12px] font-semibold uppercase tracking-widest bg-surface transition-colors hover:bg-foreground hover:text-surface disabled:opacity-50"
+                      className="px-4 py-2 border border-surface/20 text-[12px] font-semibold uppercase tracking-widest bg-foreground transition-colors hover:bg-surface hover:text-foreground disabled:opacity-50"
                     >
                       {prompt}
                     </button>
@@ -201,7 +200,7 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
             )}
 
             {apiError && (
-              <div className="border border-border bg-surface-container p-4 text-[14px] font-semibold uppercase tracking-widest text-destructive">
+              <div className="border border-surface/20 bg-surface/10 p-4 text-[14px] font-semibold uppercase tracking-widest text-red-500">
                 Error: {apiError}
               </div>
             )}
@@ -226,22 +225,25 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
                     className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`max-w-[85%] border border-border px-6 py-4 text-[14px] leading-[1.6] ${
-                        msg.role === "user" ? "bg-foreground text-surface" : "bg-surface-container-low text-foreground"
+                      className={`max-w-[85%] border border-surface/20 px-6 py-4 text-[14px] leading-[1.6] ${
+                        msg.role === "user" ? "bg-surface text-foreground" : "bg-surface/5 text-surface"
                       }`}
                     >
                       {msg.role === "assistant" ? (
                         <>
-                          <div className="prose prose-sm max-w-none">
+                          <div className="prose prose-sm max-w-none dark:prose-invert relative inline-block w-full">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>{textContent}</ReactMarkdown>
+                            {msg.id === messages[messages.length - 1]?.id && isLoading && (
+                              <span className="inline-block w-2.5 h-2.5 bg-surface ml-2 animate-[pulse_1s_ease-in-out_infinite] align-baseline" />
+                            )}
                           </div>
                           {toolsUsed.length > 0 && (
-                            <div className="mt-4 pt-4 border-t border-border flex flex-wrap gap-2">
-                              <span className="text-[10px] font-bold uppercase tracking-widest text-outline pt-1">
+                            <div className="mt-4 pt-4 border-t border-surface/20 flex flex-wrap gap-2">
+                              <span className="text-[10px] font-bold uppercase tracking-widest text-surface/60 pt-1">
                                 Sources:
                               </span>
                               {toolsUsed.map((t) => (
-                                <span key={t} className="flex items-center gap-2 border border-border bg-surface px-2 py-1 text-[10px] font-bold uppercase tracking-widest">
+                                <span key={t} className="flex items-center gap-2 border border-surface/20 bg-foreground px-2 py-1 text-[10px] font-bold uppercase tracking-widest">
                                   <Wrench className="h-3 w-3" />
                                   {TOOL_LABELS[t] ?? t}
                                 </span>
@@ -259,18 +261,17 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
             </AnimatePresence>
 
             {isLoading && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3 text-[12px] font-bold uppercase tracking-widest text-outline">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Processing...</span>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3 text-[12px] font-mono font-bold uppercase tracking-widest text-surface/60">
+                <span>[ FETCHING_DATA... ]</span>
               </motion.div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
           {/* Input area */}
-          <form onSubmit={handleFormSubmit} className="border-t border-border bg-surface p-6 flex items-end gap-4">
-            <div className="flex-1 border border-border relative">
-              <span className="absolute left-4 top-4 text-[10px] font-bold uppercase tracking-widest text-outline">Input</span>
+          <form onSubmit={handleFormSubmit} className="border-t border-surface/20 bg-foreground p-6 flex items-end gap-4">
+            <div className="flex-1 border border-surface/20 relative">
+              <span className="absolute left-4 top-4 text-[10px] font-bold uppercase tracking-widest text-surface/60">Input</span>
               <textarea
                 ref={textareaRef}
                 rows={1}
@@ -280,7 +281,7 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
                 placeholder="Execute command..."
                 disabled={isLoading}
                 aria-label="Chat input"
-                className="w-full resize-none bg-transparent pt-8 pb-4 px-4 text-[16px] placeholder-outline focus:outline-none focus:bg-surface-container-low transition-colors disabled:opacity-50"
+                className="w-full resize-none bg-transparent pt-8 pb-4 px-4 text-[16px] text-surface placeholder-surface/60 focus:outline-none focus:bg-surface/5 transition-colors disabled:opacity-50"
                 style={{ minHeight: 80, maxHeight: 160 }}
               />
             </div>
@@ -288,16 +289,16 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
               <button
                 type="button"
                 onClick={stop}
-                className="shrink-0 flex items-center justify-center h-[80px] w-[80px] border border-border bg-surface text-foreground hover:bg-surface-container transition-colors"
+                className="shrink-0 flex items-center justify-center h-[80px] w-[80px] border border-surface/20 bg-foreground text-surface hover:bg-surface/10 transition-colors"
                 aria-label="Stop generation"
               >
-                <span className="h-4 w-4 bg-foreground" />
+                <span className="h-4 w-4 bg-surface" />
               </button>
             ) : (
               <button
                 type="submit"
                 disabled={!inputValue.trim() || isLoading}
-                className="shrink-0 flex items-center justify-center h-[80px] w-[80px] border border-border bg-primary text-on-primary hover:bg-foreground hover:text-surface disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="shrink-0 flex items-center justify-center h-[80px] w-[80px] border border-surface/20 bg-surface text-foreground hover:bg-surface/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Send message"
               >
                 <Send className="h-6 w-6" />

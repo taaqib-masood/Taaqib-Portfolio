@@ -64,7 +64,7 @@ export function CommandMenu() {
             open={open}
             onOpenChange={setOpen}
             label="Global Command Menu"
-            className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] sm:pt-[20vh]"
+            className="fixed inset-0 z-50 flex items-start justify-center"
           >
             <motion.div
               initial={{ opacity: 0 }}
@@ -76,13 +76,13 @@ export function CommandMenu() {
             />
 
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="relative w-[90vw] max-w-2xl bg-surface border border-border shadow-none"
+              initial={{ y: "-100%" }}
+              animate={{ y: "0%" }}
+              exit={{ y: "-100%" }}
+              transition={{ duration: 0.4, ease: [0.83, 0, 0.17, 1] }}
+              className="absolute top-0 left-0 w-full bg-[#ffffff] border-b border-black shadow-none"
             >
-              <div className="flex items-center border-b border-border px-4 focus-within:border-primary transition-colors">
+              <div className="flex items-center border-b border-border px-4 focus-within:ring-2 focus-within:ring-[#2e5bff] focus-within:ring-offset-0 transition-shadow">
                 <Command.Input 
                   autoFocus 
                   placeholder="Type a command or search..." 
@@ -112,7 +112,7 @@ export function CommandMenu() {
                 <Command.Separator className="my-2 h-px bg-border" />
 
                 <Command.Group heading="Links" className="text-[10px] uppercase font-bold tracking-widest text-outline px-2 py-3">
-                  <Item onSelect={() => runCommand(() => window.open("/resume.pdf", "_blank"))} icon={<FileText />} label="Download CV" />
+                  <Item onSelect={() => runCommand(() => window.open("/taaqib-masood-cv.pdf", "_blank"))} icon={<FileText />} label="Download CV" />
                   <Item onSelect={() => runCommand(() => window.open("https://github.com/taaqib-masood", "_blank"))} icon={<GithubIcon />} label="View GitHub" />
                 </Command.Group>
               </Command.List>
@@ -136,7 +136,7 @@ function Item({ onSelect, icon, label }: { onSelect: () => void; icon: React.Rea
   return (
     <Command.Item
       onSelect={onSelect}
-      className="flex cursor-pointer items-center gap-3 px-3 py-3 text-[14px] font-medium text-foreground transition-colors aria-selected:bg-primary aria-selected:text-on-primary border border-transparent aria-selected:border-primary mb-1"
+      className="flex cursor-pointer items-center gap-3 px-3 py-3 text-[14px] font-medium text-foreground transition-colors aria-selected:bg-primary aria-selected:text-on-primary border border-transparent aria-selected:border-[#2e5bff] mb-1"
     >
       <div className="flex h-5 w-5 items-center justify-center [&>svg]:h-4 [&>svg]:w-4">
         {icon}

@@ -83,11 +83,11 @@ export async function POST(req: Request) {
     );
   }
 
-  // --- Stream with Groq LLaMA 3.3-70b ---
+  // --- Stream with Groq LLaMA 3.1-8b (to avoid 70b rate limits) ---
   const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
 
   const result = streamText({
-    model: groq("llama-3.3-70b-versatile"),
+    model: groq("llama3-8b-8192"),
     system: SYSTEM_PROMPT,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK v6 accepts model messages
     messages: messages as any,
@@ -100,5 +100,9 @@ export async function POST(req: Request) {
     headers: {
       "X-RateLimit-Remaining": String(remaining),
     },
+    onError: (error) => {
+      console.error("[Chat Agent Error]", error);
+      return "An error occurred while generating the response.";
+    }
   });
 }

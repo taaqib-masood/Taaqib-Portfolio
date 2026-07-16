@@ -8,6 +8,7 @@ export interface Project {
   repo: string;
   demo: string | null;
   role: string;
+  image?: string;
 }
 
 export const projects: Project[] = [
@@ -36,6 +37,7 @@ export const projects: Project[] = [
     repo: "https://github.com/taaqib-masood",
     demo: null,
     role: "Sole-built end-to-end at L&T Technology Services, Feb–Jun 2026",
+    image: "/projects/ltts-proctoring.jpg",
   },
   {
     slug: "mcp-code-review-pipeline",
@@ -60,6 +62,7 @@ export const projects: Project[] = [
     repo: "https://github.com/taaqib-masood",
     demo: null,
     role: "Built at L&T Technology Services",
+    image: "/projects/mcp-code-review.jpg",
   },
   {
     slug: "stock-forecasting-risk",
@@ -88,6 +91,7 @@ export const projects: Project[] = [
     repo: "https://github.com/taaqib-masood/stock-market-forecasting-risk-analytics",
     demo: "https://stocks-proj.netlify.app",
     role: "Personal project, Dec 2025 – present",
+    image: "/projects/stock-forecasting.jpg",
   },
   {
     slug: "salon-booking-saas",
@@ -120,6 +124,7 @@ export const projects: Project[] = [
     repo: "https://github.com/taaqib-masood/salon-booking-saas",
     demo: null,
     role: "Personal project, Feb–May 2026",
+    image: "/projects/salon-booking.jpg",
   },
   {
     slug: "predictive-maintenance",
@@ -146,19 +151,33 @@ export const projects: Project[] = [
     repo: "https://github.com/taaqib-masood/predictive-maintenance-industrial-machinery",
     demo: null,
     role: "Research project, VIT — dataset: NASA CMAPSS Turbofan Engine Dataset",
+    image: "/projects/predictive-maintenance.jpg",
   },
   {
     slug: "smart-hospital-agent",
-    title: "Smart Hospital Agent",
-    blurb: "Frontend-based AI hospital monitoring dashboard — real-time patient and ward intelligence for healthcare settings.",
-    stack: ["HTML", "TypeScript", "AI monitoring"],
+    title: "Reva AI — WhatsApp Receptionist",
+    blurb: "AI-powered WhatsApp bot replacing clinic front desks — autonomously books appointments, sends reminders, collects deposits via Razorpay, and manages patient records 24/7 with a real-time dashboard.",
+    stack: [
+      "Next.js (App Router)",
+      "TypeScript",
+      "Tailwind CSS",
+      "Framer Motion",
+      "Supabase (PostgreSQL)",
+      "Supabase Auth",
+      "Meta Cloud API",
+      "Razorpay",
+      "Vercel Cron",
+    ],
     metrics: [
-      "Healthcare monitoring use case",
-      "Real-time dashboard",
+      "Automated state-machine booking via WhatsApp",
+      "AI no-show prediction risk scoring",
+      "Live patient queue & dynamic slot blocker",
+      "Digital consent forms & prescriptions",
     ],
     categories: ["AI/LLM", "Full-Stack"],
-    repo: "https://github.com/taaqib-masood/smart-hospital-agent",
+    repo: "https://github.com/taaqib-masood/reva-ai",
     demo: null,
-    role: "Personal project",
+    role: "Personal project / SaaS",
+    image: "/projects/smart-hospital.jpg",
   },
 ];

@@ -1,175 +1,67 @@
 "use client";
 
-import { useCompletion } from "@ai-sdk/react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Play, Database, GitPullRequest, FileCheck, CheckCircle2, XCircle, Loader2 } from "lucide-react";
-import ReactMarkdown from "react-markdown";
-
-const MOCK_DIFF = `@@ -15,7 +15,7 @@
- export async function getUser(req, res) {
-   const { id } = req.body;
--  const query = \`SELECT * FROM users WHERE id = \${id}\`;
-+  // TODO: Maybe sanitize this later?
-+  const query = \`SELECT * FROM users WHERE id = \${id}\`;
-   const result = await db.query(query);
-   return res.json(result);
- }`;
-
-const MOCK_JIRA_AC = "AC-1: Must use parameterized queries for all SQL inputs to prevent SQL injection.\nAC-2: Function must return 404 if user is not found.";
+import { motion } from "framer-motion";
+import { Terminal, Crosshair } from "lucide-react";
 
 export function McpTeaser() {
-  const { completion, complete, isLoading } = useCompletion({
-    api: "/api/mcp-review",
-    onError: (err) => console.error("MCP Teaser Error:", err),
-  });
-
-  const handleRunReview = () => {
-    complete("", {
-      body: {
-        prDiff: MOCK_DIFF,
-        jiraAc: MOCK_JIRA_AC,
-      },
-    });
+  const handleWakeUp = () => {
+    // Actually, to pre-fill the agent from outside, we need a global state or to pass an event.
+    // The prompt says "scrolls up to the Agent.tsx section and pre-fills the input with 'Access Neural Web'".
+    // Since page.tsx already has handleAskAgentAboutProject which sets `agentPrefill`,
+    // maybe I should dispatch a custom event, or just let the user type.
+    // Wait, let's just scroll for now, or use a custom event since we don't have the prop passed down.
+    const evt = new CustomEvent("wakeUpAgent", { detail: "Access Neural Web" });
+    window.dispatchEvent(evt);
+    const agentEl = document.getElementById("agent");
+    agentEl?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
-    <section className="max-w-[1440px] mx-auto border-b border-border">
-      {/* Header */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 border-b border-border">
-        <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-border flex flex-col justify-center">
-          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1]">MCP Pipeline</h2>
+    <section className="max-w-[1440px] mx-auto border-b border-border bg-[#1a1c1c] text-[#ffffff] overflow-hidden relative min-h-[400px] flex flex-col md:flex-row">
+      {/* Brutalist + Grid Pattern */}
+      <div 
+        className="absolute inset-0 z-0 opacity-20 pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0v40M0 20h40' stroke='%23ffffff' stroke-width='1' fill='none'/%3E%3C/svg%3E")`,
+          backgroundSize: '40px 40px'
+        }}
+      />
+      
+      <div className="relative z-10 p-6 md:p-12 md:w-1/2 flex flex-col justify-center border-b md:border-b-0 md:border-r border-[#333333]">
+        <div className="flex items-center gap-3 mb-6">
+          <Crosshair className="h-6 w-6 text-[#2e5bff]" />
+          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1]">Neural Web</h2>
         </div>
-        <div className="lg:col-span-8 p-6 md:p-8 bg-surface-container-low flex flex-col justify-center">
-          <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-outline">
-            At LTTS, I built an automated code review pipeline that injects live Jira and Confluence context directly into the PR. Here is a simulated interactive demo.
-          </p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2">
-        {/* Left: PR Diff */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="border-b lg:border-b-0 lg:border-r border-border bg-surface flex flex-col"
+        <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-[#a1a1aa] mb-8">
+          Explore the neural architecture of TAAQIB.MASOOD. This node provides direct access to the central logic core and project synapses.
+        </p>
+        <button
+          onClick={handleWakeUp}
+          className="group flex items-center justify-between border border-[#ffffff] bg-transparent px-6 py-4 text-[14px] font-bold uppercase tracking-widest transition-colors hover:bg-[#ffffff] hover:text-[#1a1c1c] active:bg-[#e2e2e2] w-fit"
         >
-          <div className="bg-surface-container-low border-b border-border px-6 py-4 flex items-center gap-3">
-            <GitPullRequest className="h-4 w-4 text-foreground" />
-            <span className="text-[12px] font-bold uppercase tracking-widest text-foreground">user-controller.js (PR #102)</span>
-          </div>
-          <div className="p-6 overflow-x-auto text-[14px] font-mono leading-[1.6] text-foreground flex-1">
-            <pre>
-              <code dangerouslySetInnerHTML={{
-                __html: MOCK_DIFF.replace(
-                  /-  const query.*/g,
-                  '<span class="text-destructive bg-destructive/10 block">$&</span>'
-                ).replace(
-                  /\+  \/\/ TODO:.*/g,
-                  '<span class="text-[#22c55e] bg-[#22c55e]/10 block">$&</span>'
-                ).replace(
-                  /\+  const query.*/g,
-                  '<span class="text-[#22c55e] bg-[#22c55e]/10 block">$&</span>'
-                )
-              }} />
-            </pre>
-          </div>
-        </motion.div>
-
-        {/* Right: Context + Controls */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="flex flex-col bg-surface"
-        >
-          {/* Jira AC */}
-          <div className="flex-1 flex flex-col border-b border-border">
-            <div className="bg-surface-container-low border-b border-border px-6 py-4 flex items-center gap-3">
-              <Database className="h-4 w-4 text-foreground" />
-              <span className="text-[12px] font-bold uppercase tracking-widest text-foreground">MCP Context: Jira-7742</span>
-            </div>
-            <div className="p-6 text-[14px] leading-[1.6] text-outline space-y-4">
-              {MOCK_JIRA_AC.split('\n').map((ac, i) => (
-                <div key={i} className="flex gap-3">
-                  <FileCheck className="h-4 w-4 text-foreground shrink-0 mt-1" />
-                  <span>{ac}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <button
-            onClick={handleRunReview}
-            disabled={isLoading}
-            className="flex items-center justify-center gap-3 w-full py-6 bg-primary hover:bg-foreground text-on-primary hover:text-surface text-[14px] font-bold uppercase tracking-widest transition-colors disabled:opacity-50 disabled:cursor-not-allowed group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
-          >
-            {isLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <Play className="h-5 w-5" />
-            )}
-            {isLoading ? "Analyzing Context & Diff..." : "Run MCP Review"}
-          </button>
-        </motion.div>
+          <span className="flex items-center gap-3">
+            <Terminal className="h-5 w-5" />
+            Wake Up Agent
+          </span>
+        </button>
       </div>
-
-      {/* Results Box */}
-      <AnimatePresence>
-        {(completion || isLoading) && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            className="border-t border-border bg-surface overflow-hidden"
-          >
-            <div className="bg-surface-container-low border-b border-border px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <SparklesIcon className="h-4 w-4 text-foreground" />
-                <span className="text-[12px] font-bold uppercase tracking-widest text-foreground">AI Code Review Output</span>
-              </div>
-              {isLoading ? (
-                <span className="text-[10px] font-bold uppercase tracking-widest text-outline flex items-center gap-2 border border-border bg-surface px-3 py-1">
-                  <Loader2 className="h-3 w-3 animate-spin" /> Streaming
-                </span>
-              ) : completion.toLowerCase().includes("approve") ? (
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#22c55e] flex items-center gap-2 border border-[#22c55e] bg-[#22c55e]/10 px-3 py-1">
-                  <CheckCircle2 className="h-3 w-3" /> Approved
-                </span>
-              ) : (
-                <span className="text-[10px] font-bold uppercase tracking-widest text-destructive flex items-center gap-2 border border-destructive bg-destructive/10 px-3 py-1">
-                  <XCircle className="h-3 w-3" /> Changes Requested
-                </span>
-              )}
-            </div>
-            <div className="p-6 prose prose-sm max-w-none text-foreground text-[14px] leading-[1.6]">
-              <ReactMarkdown>{completion}</ReactMarkdown>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      
+      <div className="relative z-10 p-6 md:p-12 md:w-1/2 flex flex-col justify-center items-center">
+         {/* Abstract Neural Node Visualization */}
+         <div className="relative w-full h-full min-h-[200px] flex items-center justify-center">
+            <motion.div 
+              animate={{ rotate: 360 }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              className="absolute w-[150px] h-[150px] border border-[#2e5bff] rounded-full"
+            />
+            <motion.div 
+              animate={{ rotate: -360 }}
+              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+              className="absolute w-[100px] h-[100px] border border-[#ffffff] rounded-none rotate-45"
+            />
+            <div className="absolute w-[20px] h-[20px] bg-[#2e5bff]" />
+         </div>
+      </div>
     </section>
-  );
-}
-
-function SparklesIcon(props: React.ComponentProps<"svg">) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
-      <path d="M5 3v4" />
-      <path d="M19 17v4" />
-      <path d="M3 5h4" />
-      <path d="M17 19h4" />
-    </svg>
   );
 }

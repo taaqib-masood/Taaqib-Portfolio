@@ -122,7 +122,7 @@ export function GithubGraph() {
             username="taaqib-masood"
             colorScheme="light"
             theme={{
-              light: ["#f1f5f9", "#cbd5e1", "#94a3b8", "#475569", "#0f172a"],
+              light: ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"],
             }}
             blockSize={14}
             blockMargin={6}

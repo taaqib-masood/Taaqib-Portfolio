@@ -41,6 +41,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning dir="ltr">
+      <head>
+        <script type="text/javascript" dangerouslySetInnerHTML={{
+          __html: `
+            function googleTranslateElementInit() {
+              new google.translate.TranslateElement({pageLanguage: 'en', includedLanguages: 'ar,en', autoDisplay: false}, 'google_translate_element');
+            }
+          `
+        }}></script>
+        <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
+      </head>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased text-foreground",

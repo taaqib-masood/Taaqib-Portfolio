@@ -60,3 +60,45 @@
     scroll-behavior: smooth;
   }
 }
+
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  /* Hide interactive, animated, and dark sections */
+  #agent, #mcp-teaser, .github-graph, #status-bar, #language-toggle, #scroll-hairline, footer, .framer-motion, .marquee {
+    display: none !important;
+  }
+
+  * {
+    border-color: #000000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    clip-path: none !important;
+    filter: none !important;
+  }
+  
+  /* Ensure main sections are paginated cleanly */
+  section {
+    page-break-inside: avoid;
+    margin-bottom: 2rem !important;
+    border-bottom: 1px solid #000 !important;
+  }
+}
+
+/* Hide Google Translate UI */
+.skiptranslate {
+  display: none !important;
+}
+body {
+  top: 0px !important;
+}
+iframe.skiptranslate {
+  display: none !important;
+}
