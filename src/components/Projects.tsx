@@ -68,21 +68,19 @@ export function Projects({ onAskAgent }: { onAskAgent?: (title: string) => void 
         <AnimatePresence mode="popLayout">
           {filteredProjects.map((project, idx) => {
             const isFeature = project.slug === "ltts-proctoring-portal" || project.slug === "mcp-code-review-pipeline";
-            const isLtts = project.slug === "ltts-proctoring-portal";
             
             return (
               <motion.div
                 layout
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.5, ease: [0.83, 0, 0.17, 1], delay: idx * 0.1 }}
+                transition={{ duration: 0.4, ease: [0.83, 0, 0.17, 1], delay: idx * 0.05 }}
                 key={project.slug}
                 onClick={() => setSelectedProject(project)}
-                className={`group cursor-pointer relative border-b md:border-r border-border p-6 md:p-8 flex flex-col justify-between transition-all duration-500 hover:z-10 min-h-[300px] overflow-hidden ${
-                  isLtts ? "bg-[#1d4ed8]" : "bg-surface hover:bg-[#1d4ed8]"
-                } ${isFeature ? "md:col-span-2" : "col-span-1"} ${isLtts ? "lg:row-span-2 lg:col-span-2" : ""}`}
+                className={`group cursor-pointer relative border-b md:border-r border-border p-6 md:p-8 flex flex-col justify-between transition-all duration-500 hover:z-10 min-h-[300px] overflow-hidden bg-surface hover:bg-[#1d4ed8] ${
+                  isFeature ? "md:col-span-2" : "col-span-1"
+                } ${project.slug === "ltts-proctoring-portal" ? "lg:row-span-2 lg:col-span-2" : ""}`}
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -92,11 +90,9 @@ export function Projects({ onAskAgent }: { onAskAgent?: (title: string) => void 
                 }}
               >
                 {/* Background Image Layer */}
-                {project.image && (
+                {project.image && project.slug === "ltts-proctoring-portal" && (
                   <div 
-                    className={`absolute inset-0 bg-cover bg-center transition-all duration-700 ease-out group-hover:scale-105 mix-blend-luminosity ${
-                      isLtts ? "opacity-60" : "opacity-0 group-hover:opacity-60"
-                    }`}
+                    className="absolute inset-0 bg-cover bg-center transition-all duration-700 ease-out group-hover:scale-105 mix-blend-luminosity opacity-0 group-hover:opacity-60"
                     style={{ backgroundImage: `url(${project.image})` }}
                   />
                 )}
@@ -105,14 +101,10 @@ export function Projects({ onAskAgent }: { onAskAgent?: (title: string) => void 
                 <div className="relative z-10 flex flex-col h-full justify-between">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h4 className={`text-[12px] font-semibold uppercase tracking-[0.02em] mb-4 transition-colors ${
-                        isLtts ? "text-white/60" : "text-foreground/50 group-hover:text-white/80"
-                      }`}>
+                      <h4 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-4 text-foreground/50 group-hover:text-white/80 transition-colors">
                         {project.categories[0]} / {new Date().getFullYear()}
                       </h4>
-                      <h3 className={`text-[24px] md:text-[32px] font-bold tracking-[-0.03em] leading-[1.1] mb-6 uppercase transition-colors ${
-                        isLtts ? "text-white drop-shadow-md" : "text-foreground group-hover:text-white group-hover:drop-shadow-md"
-                      }`}>
+                      <h3 className="text-[24px] md:text-[32px] font-bold tracking-[-0.03em] leading-[1.1] mb-6 uppercase text-foreground group-hover:text-white group-hover:drop-shadow-md transition-colors">
                         {project.title}
                       </h3>
                     </div>
@@ -120,21 +112,13 @@ export function Projects({ onAskAgent }: { onAskAgent?: (title: string) => void 
                   </div>
                   
                   <div>
-                    <div className={`h-px w-full mb-4 transition-colors ${
-                      isLtts ? "bg-white/20" : "bg-border group-hover:bg-white/50"
-                    }`} />
-                    <p className={`text-[14px] leading-[1.5] mb-4 line-clamp-2 transition-colors ${
-                      isLtts ? "text-white/80" : "text-foreground/80 group-hover:text-white"
-                    }`}>
+                    <div className="h-px w-full bg-border group-hover:bg-white/50 mb-4 transition-colors" />
+                    <p className="text-[14px] leading-[1.5] mb-4 text-foreground/80 group-hover:text-white line-clamp-2 transition-colors">
                       {project.blurb}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {project.stack.slice(0, 3).map((tech) => (
-                        <span key={tech} className={`px-2 py-1 border text-[10px] uppercase font-semibold tracking-wider transition-colors backdrop-blur-sm ${
-                          isLtts 
-                            ? "border-white/20 text-white bg-transparent" 
-                            : "border-border group-hover:border-white/50 text-foreground group-hover:text-white group-hover:bg-white/10"
-                        }`}>
+                        <span key={tech} className="px-2 py-1 border border-border group-hover:border-white/50 text-foreground group-hover:text-white group-hover:bg-white/10 text-[10px] uppercase font-semibold tracking-wider transition-colors backdrop-blur-sm">
                           {tech}
                         </span>
                       ))}
@@ -144,6 +128,38 @@ export function Projects({ onAskAgent }: { onAskAgent?: (title: string) => void 
               </motion.div>
             );
           })}
+          <motion.div
+            layout
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.4, ease: [0.83, 0, 0.17, 1], delay: filteredProjects.length * 0.05 }}
+            onClick={() => {
+              const agentEl = document.getElementById("agent");
+              agentEl?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="group cursor-pointer relative border-b md:border-r border-border p-6 md:p-8 flex flex-col justify-between transition-all duration-500 hover:z-10 min-h-[300px] overflow-hidden bg-foreground text-surface col-span-1 md:col-span-2"
+          >
+            <div className="relative z-10 flex flex-col h-full justify-between">
+              <div className="flex justify-between items-start">
+                <h3 className="text-[32px] md:text-[64px] font-black tracking-[-0.03em] leading-[0.9] mb-6 uppercase drop-shadow-md">
+                  AGENT<br/>TERMINAL
+                </h3>
+                <ArrowUpRight className="h-6 w-6 text-surface opacity-0 -translate-x-4 translate-y-4 group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-300 ease-out" />
+              </div>
+              <div>
+                <div className="h-px w-full bg-surface/20 mb-4" />
+                <p className="text-[14px] leading-[1.5] mb-4 text-surface/80 drop-shadow-sm">
+                  Interface directly with the TAAQIB system. Query tech stacks, availability, and neural paradigms.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <span className="px-2 py-1 border border-surface/20 text-surface text-[10px] uppercase font-semibold tracking-wider">
+                    SYSTEM
+                  </span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </AnimatePresence>
       </motion.div>
 
