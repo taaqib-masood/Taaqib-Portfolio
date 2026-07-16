@@ -13,9 +13,9 @@ export function Hero() {
     offset: ["start start", "end start"]
   });
 
-  const clipPath = useTransform(scrollYProgress, [0, 0.4], ["inset(100% 0% 0% 0%)", "inset(0% 0% 0% 0%)"]);
-  const scale = useTransform(scrollYProgress, [0, 0.4], [1.2, 1]);
-  const filter = useTransform(scrollYProgress, [0, 0.75, 1], ["grayscale(100%)", "grayscale(100%)", "grayscale(0%)"]);
+  const clipPath = useTransform(scrollYProgress, [0, 0.15], ["inset(100% 0% 0% 0%)", "inset(0% 0% 0% 0%)"]);
+  const scale = useTransform(scrollYProgress, [0, 0.15], [1.2, 1]);
+  const filter = useTransform(scrollYProgress, [0, 0.5, 1], ["grayscale(100%)", "grayscale(100%)", "grayscale(0%)"]);
 
   const handleAgentClick = () => {
     const agentEl = document.getElementById("agent");
