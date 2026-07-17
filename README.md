@@ -1,7 +1,7 @@
 # TAAQIB MASOOD
 ### AI Engineer · Full-Stack Architect · Autonomous Systems Builder
 
-**Dubai, UAE** · [taaqib.masood@icloud.com](mailto:taaqib.masood@icloud.com) · text=Hi%20Taaqib%2C%20I%20reviewed%20your%20portfolio.) · [LinkedIn](https://linkedin.com/in/taaqib-masood) · [GitHub](https://github.com/taaqib-masood)
+**Dubai, UAE** · [taaqib.masood@icloud.com](mailto:taaqib.masood@icloud.com) ·  [Portfolio](https://taaqib-portfolio.vercel.app) · [LinkedIn](https://linkedin.com/in/taaqib-masood) · [GitHub](https://github.com/taaqib-masood)
 
 ---
 
