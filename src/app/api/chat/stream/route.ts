@@ -83,11 +83,11 @@ export async function POST(req: Request) {
     );
   }
 
-  // --- Stream with Groq LLaMA 3.1-8b (to avoid 70b rate limits) ---
-  const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
+  // --- Stream with Groq LLaMA 3.3-70b ---
+  const groqModel = createGroq({ apiKey: process.env.GROQ_API_KEY });
 
   const result = streamText({
-    model: groq("llama3-8b-8192"),
+    model: groqModel("llama-3.3-70b-versatile"),
     system: SYSTEM_PROMPT,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK v6 accepts model messages
     messages: messages as any,

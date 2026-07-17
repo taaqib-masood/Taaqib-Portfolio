@@ -33,7 +33,7 @@ export function Hero() {
           transition={{ duration: 0.5, ease: [0.83, 0, 0.17, 1] }}
           className="lg:col-span-7 flex flex-col justify-center relative z-10"
         >
-          <h1 className="text-[60px] md:text-[120px] lg:text-[clamp(100px,11vw,180px)] font-black leading-[0.9] tracking-[-0.05em] text-foreground uppercase whitespace-nowrap">
+          <h1 className="text-[48px] sm:text-[60px] md:text-[120px] lg:text-[clamp(100px,11vw,180px)] font-black leading-[0.9] tracking-[-0.05em] text-foreground uppercase whitespace-nowrap">
             TAAQIB
             <br />
             MASOOD
