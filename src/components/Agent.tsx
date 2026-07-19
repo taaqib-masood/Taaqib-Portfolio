@@ -97,6 +97,7 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
       setApiError(null);
       sendMessage({
         role: "user",
+        content: trimmed,
         parts: [{ type: "text", text: trimmed }],
       });
       setInputValue("");
