@@ -91,7 +91,8 @@ export async function POST(req: Request) {
     system: SYSTEM_PROMPT,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK v6 accepts model messages
     messages: await convertToModelMessages(messages as any),
-    tools,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK v6 tool inference mismatch
+    tools: tools as any,
     stopWhen: stepCountIs(5), // allow up to 5 tool-call steps (replaces maxSteps in v6)
   });
 

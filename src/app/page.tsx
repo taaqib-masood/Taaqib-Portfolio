@@ -39,8 +39,8 @@ export default function BrutalistPortfolio() {
         checkDarkSection();
 
         // Hover States
-        const isText = target.tagName && target.tagName.match(/H1|H2|H3|P|SPAN/) && !target.closest('.project-row') && !target.closest('.spec-cell') && !target.closest('.garage-link');
-        const isCta = target.closest('.btn-magnet') || target.closest('.project-row') || target.closest('.garage-link');
+        const isText = target.tagName && target.tagName.match(/H1|H2|H3|P|SPAN/) && !target.closest('.project-row') && !target.closest('.inversion-band') && !target.closest('.garage-link');
+        const isCta = target.closest('.btn-magnet') || target.closest('.project-row') || target.closest('.garage-link') || target.closest('.inversion-band');
 
         if (isCta) {
             cursor.classList.add("cta-hover");
@@ -55,7 +55,7 @@ export default function BrutalistPortfolio() {
 
     document.addEventListener("mousemove", handleMouseMove);
 
-    // Smooth Cursor Loop (Hydraulic lerp approximation)
+    // Smooth Cursor Loop
     function renderCursor() {
         cursorX += (mouseX - cursorX) * 0.4;
         cursorY += (mouseY - cursorY) * 0.4;
@@ -86,21 +86,19 @@ export default function BrutalistPortfolio() {
         btn.addEventListener('mouseleave', handleMagnetLeave);
     });
 
-    // 3. Chaos Tag Scramble Initialization
-    const chaosContainer = document.querySelector(".chaos-container");
-    if (chaosContainer) {
-        const tags = chaosContainer.querySelectorAll(".chaos-tag");
-        tags.forEach(t => {
-            const tag = t as HTMLElement;
-            const randX = (Math.random() - 0.5) * 800;
-            const randY = (Math.random() - 0.5) * 600;
-            const randRot = (Math.random() - 0.5) * 180;
-            tag.style.transform = `translate(${randX}px, ${randY}px) rotate(${randRot}deg) scale(0.5)`;
-            tag.style.opacity = '0';
-        });
-    }
+    // 3. CLI Typewriter
+    const words = document.querySelectorAll('.cli-word');
+    let wordIndex = 0;
+    const typeInterval = setInterval(() => {
+        if (wordIndex < words.length) {
+            words[wordIndex].classList.add('revealed');
+            wordIndex++;
+        } else {
+            clearInterval(typeInterval);
+        }
+    }, 40);
 
-    // 4. Scroll Logic (Hairline, Drift, Parallax)
+    // 4. Scroll Logic
     const progress = document.getElementById("progress-bar");
     const heroContent = document.querySelector(".hero-content") as HTMLElement;
     const numerals = document.querySelectorAll(".bg-numeral");
@@ -115,8 +113,6 @@ export default function BrutalistPortfolio() {
         // Scroll-Progress Hairline
         if (progress) {
             progress.style.transform = `scaleX(${ratio})`;
-
-            // Hairline Color Inversion
             let invertedProgress = false;
             const darkSections = document.querySelectorAll('.dark, .footer-monolith');
             darkSections.forEach(sec => {
@@ -151,23 +147,17 @@ export default function BrutalistPortfolio() {
     
     window.addEventListener("scroll", handleScroll);
 
-    // 5. Intersection Observer for Reveals & Chaos Snap
+    // 5. Intersection Observer
     const observerOptions = { threshold: 0.15, rootMargin: '0px 0px -10% 0px' };
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add("in-view");
-                
-                // Chaos Snap
-                if (entry.target.classList.contains("chaos-section")) {
-                    const chaos = entry.target.querySelector(".chaos-container");
-                    if (chaos) chaos.classList.add("snapped");
-                }
             }
         });
     }, observerOptions);
 
-    document.querySelectorAll(".reveal-group, .chaos-section, .footer-monolith").forEach(el => {
+    document.querySelectorAll(".reveal-group, .footer-monolith").forEach(el => {
         observer.observe(el);
     });
 
@@ -179,19 +169,20 @@ export default function BrutalistPortfolio() {
             btn.removeEventListener('mousemove', handleMagnetMove);
             btn.removeEventListener('mouseleave', handleMagnetLeave);
         });
+        clearInterval(typeInterval);
         observer.disconnect();
     };
   }, []);
 
   return (
-    <div className="brutalist-theme">
+    <div className="monolith-theme">
       <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
         
-        .brutalist-theme {
+        .monolith-theme {
             --ink: #0A0A0A;
-            --paper: #d6d1c5;
-            --faint: #c4bfb2;
+            --paper: #F4F4F0;
+            --faint: #E8E8E4;
             --hydraulic: cubic-bezier(0.83, 0, 0.17, 1);
             
             background-color: var(--paper);
@@ -201,9 +192,8 @@ export default function BrutalistPortfolio() {
             cursor: none;
         }
 
-        /* Override global styles for this page */
         html, body {
-            background-color: #d6d1c5 !important;
+            background-color: #F4F4F0 !important;
             color: #0A0A0A !important;
         }
 
@@ -211,12 +201,12 @@ export default function BrutalistPortfolio() {
             cursor: none !important;
         }
 
-        .brutalist-theme ::selection {
+        .monolith-theme ::selection {
             background-color: var(--ink);
             color: var(--paper);
         }
 
-        /* Micro-Interactions: Custom Brutalist Cursor */
+        /* Cursor */
         .custom-cursor {
             position: fixed;
             top: 0; left: 0;
@@ -244,7 +234,7 @@ export default function BrutalistPortfolio() {
             background-color: var(--paper);
         }
 
-        /* Scroll-Progress Hairline */
+        /* Progress Hairline */
         #progress-bar {
             position: fixed;
             top: 0; left: 0;
@@ -260,39 +250,38 @@ export default function BrutalistPortfolio() {
         }
 
         /* Typography */
-        .brutalist-theme h1, .brutalist-theme h2, .brutalist-theme h3 {
+        .monolith-theme h1, .monolith-theme h2, .monolith-theme h3 {
             font-weight: 900;
             letter-spacing: -0.04em;
             text-transform: uppercase;
         }
-        .brutalist-theme .mono {
+        .monolith-theme .mono {
             font-family: 'JetBrains Mono', monospace;
             text-transform: uppercase;
             letter-spacing: 0.1em;
         }
 
-        /* Layout & Sections */
-        .brutalist-theme section {
+        /* Sections */
+        .monolith-theme section {
             position: relative;
             min-height: 100vh;
             padding: 15vh 5vw;
         }
-        .brutalist-theme section.dark {
+        .monolith-theme section.dark {
             background-color: var(--ink);
             color: var(--paper);
         }
-        
-        .brutalist-theme section.acrylic {
+        .monolith-theme section.acrylic {
             margin-top: -15vh;
             padding-top: 25vh;
             z-index: 3;
             border-top: 1px solid var(--ink);
         }
-        .brutalist-theme section.dark.acrylic {
+        .monolith-theme section.dark.acrylic {
             border-top: 1px solid var(--paper);
         }
 
-        /* Brutalist Parallax Numerals */
+        /* Parallax Numerals */
         .bg-numeral {
             position: absolute;
             top: 5vh; right: 5vw;
@@ -305,19 +294,19 @@ export default function BrutalistPortfolio() {
             line-height: 0.8;
             letter-spacing: -0.05em;
         }
-        .brutalist-theme section.dark .bg-numeral {
+        .monolith-theme section.dark .bg-numeral {
             color: #1a1a1a;
             opacity: 1;
         }
 
-        .brutalist-theme .container {
+        .monolith-theme .container {
             position: relative;
             z-index: 1;
             max-width: 1400px;
             margin: 0 auto;
         }
 
-        /* Mechanical Stagger Reveals */
+        /* Stagger Reveals */
         .reveal-group .reveal-item {
             opacity: 0;
             transform: translateY(20px);
@@ -331,13 +320,9 @@ export default function BrutalistPortfolio() {
         .reveal-group .reveal-item:nth-child(2) { transition-delay: 0.10s; }
         .reveal-group .reveal-item:nth-child(3) { transition-delay: 0.15s; }
         .reveal-group .reveal-item:nth-child(4) { transition-delay: 0.20s; }
-        .reveal-group .reveal-item:nth-child(5) { transition-delay: 0.25s; }
-        .reveal-group .reveal-item:nth-child(6) { transition-delay: 0.30s; }
-        .reveal-group .reveal-item:nth-child(7) { transition-delay: 0.35s; }
-        .reveal-group .reveal-item:nth-child(8) { transition-delay: 0.40s; }
 
-        /* Hero Section */
-        .brutalist-theme .hero {
+        /* Hero */
+        .monolith-theme .hero {
             display: flex;
             align-items: center;
         }
@@ -357,9 +342,23 @@ export default function BrutalistPortfolio() {
             font-weight: 700;
             margin-left: 2vw;
         }
-        .hero-about p {
-            margin-bottom: 24px;
+        
+        /* CLI Typewriter */
+        .cli-word {
+            opacity: 0;
         }
+        .cli-word.revealed {
+            opacity: 1;
+        }
+        .cli-cursor {
+            display: inline-block;
+            width: 10px; height: 10px;
+            background-color: var(--ink);
+            margin-left: 5px;
+            margin-bottom: 4px;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
 
         /* Magnetic CTAs */
         .btn-magnet {
@@ -376,6 +375,7 @@ export default function BrutalistPortfolio() {
             transition: transform 0.2s linear; 
             position: relative;
             z-index: 10;
+            margin-top: 4rem;
         }
         .btn-magnet:hover {
             background: var(--ink) !important;
@@ -383,73 +383,70 @@ export default function BrutalistPortfolio() {
             transition: background 0s, color 0s;
         }
 
-        /* Chaos to Order Snap */
-        .chaos-section {
-            padding-top: 10vh;
+        /* Massive Inversion Bands */
+        .bands-container {
+            margin-top: 10vh;
         }
-        .chaos-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            padding: 4rem;
-            background: var(--faint);
-            border: 1px solid var(--ink);
-            margin-bottom: 10vh;
-        }
-        .chaos-tag {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--ink);
+        .inversion-band {
+            position: relative;
+            width: 100%;
+            height: 100px;
+            overflow: hidden;
+            border-top: 1px solid var(--ink);
             background-color: var(--paper);
             color: var(--ink);
-            font-weight: 700;
-            font-size: 14px;
-            transition: transform 1.2s var(--hydraulic), opacity 1.2s var(--hydraulic);
-            will-change: transform, opacity;
+            cursor: none;
         }
-        .chaos-container.snapped .chaos-tag {
-            transform: translate(0, 0) rotate(0deg) scale(1) !important;
-            opacity: 1 !important;
+        .inversion-band:last-child {
+            border-bottom: 1px solid var(--ink);
+        }
+        
+        .inversion-band::before {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: var(--ink);
+            transform-origin: bottom;
+            transform: scaleY(0);
+            transition: transform 0.4s var(--hydraulic);
+            z-index: 1;
         }
 
-        /* Mechanical Spec Sheet (Skills) */
-        .spec-sheet {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            border-top: 1px solid var(--ink);
-            border-left: 1px solid var(--ink);
-        }
-        @media (max-width: 1024px) {
-            .spec-sheet { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 600px) {
-            .spec-sheet { grid-template-columns: 1fr; }
-        }
-        .spec-cell {
-            border-right: 1px solid var(--ink);
-            border-bottom: 1px solid var(--ink);
-            background-color: transparent;
-            color: var(--ink);
-            padding: 2.5rem 2rem;
+        .inversion-band-content {
+            position: relative;
+            z-index: 2;
             display: flex;
-            flex-direction: column;
+            align-items: center;
             justify-content: space-between;
-            min-height: 220px;
-            transition: background-color 0.4s var(--hydraulic), color 0.4s var(--hydraulic);
+            width: 100%;
+            height: 100%;
+            padding: 0 2vw;
+            transform-origin: center;
+            transition: transform 0.4s var(--hydraulic), color 0.4s var(--hydraulic);
         }
-        .spec-cell:hover {
-            background-color: var(--ink);
+
+        .inversion-band:hover::before {
+            transform: scaleY(1);
+        }
+        
+        .inversion-band:hover .inversion-band-content {
+            transform: scaleY(1.4);
             color: var(--paper);
         }
-        .spec-label {
-            font-size: 12px;
-            opacity: 0.5;
-            margin-bottom: 2rem;
+
+        .band-category {
+            font-size: clamp(24px, 4vw, 48px);
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            text-transform: uppercase;
         }
-        .spec-value {
-            font-size: clamp(24px, 3vw, 42px);
-            line-height: 1.1;
-            font-weight: 700;
-            letter-spacing: -0.02em;
+        
+        .band-skills {
+            font-size: 14px;
+            opacity: 0.7;
+            text-align: right;
+            max-width: 50%;
         }
 
         /* Terminal Project Log */
@@ -523,24 +520,26 @@ export default function BrutalistPortfolio() {
             padding-top: 25vh;
             z-index: 3;
         }
-        .ghost-svg {
+        
+        /* Botanical SVG motif */
+        .botanical-svg {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 90vmin;
-            height: 90vmin;
+            width: 100vmin;
+            height: 100vmin;
             opacity: 0.10;
             pointer-events: none;
             z-index: 0;
         }
-        .ghost-svg path {
+        .botanical-svg path {
             fill: none;
             stroke: var(--paper);
             stroke-width: 1;
-            stroke-dasharray: 4000;
-            stroke-dashoffset: 4000;
+            stroke-dasharray: 5000;
+            stroke-dashoffset: 5000;
         }
-        .footer-monolith.in-view .ghost-svg path {
+        .footer-monolith.in-view .botanical-svg path {
             animation: drawSvg 2.5s var(--hydraulic) forwards;
         }
         @keyframes drawSvg {
@@ -636,35 +635,34 @@ export default function BrutalistPortfolio() {
           <div className="bg-numeral" data-speed="-0.3">01</div>
           <div className="container hero-content reveal-group">
               <h1 className="hero-title reveal-item">TAAQIB MASOOD</h1>
-              <div className="hero-about">
-                  {aboutParagraphs.map((p, idx) => (
-                      <p key={idx} className="reveal-item">{p}</p>
-                  ))}
-                  <div className="reveal-item" style={{ marginTop: '4rem' }}>
-                      <a href="#projects" className="btn-magnet magnet">View Works</a>
-                  </div>
+              <div className="hero-about reveal-item">
+                  <p>
+                    {aboutParagraphs.join(" ").split(" ").map((word, idx) => (
+                      <span key={idx}>
+                        <span className="cli-word">{word}</span>
+                        <span> </span>
+                      </span>
+                    ))}
+                    <span className="cli-cursor"></span>
+                  </p>
+                  <a href="#projects" className="btn-magnet magnet">View Works</a>
               </div>
           </div>
       </section>
 
-      {/* 02 SKILLS / CHAOS TO ORDER */}
-      <section className="chaos-section" id="skills">
+      {/* 02 SKILLS / MASSIVE INVERSION BANDS */}
+      <section id="skills">
           <div className="bg-numeral" data-speed="-0.3">02</div>
           <div className="container reveal-group">
               <h2 className="hero-title reveal-item" style={{ fontSize: 'clamp(40px, 8vw, 100px)' }}>CORE SYSTEMS</h2>
               
-              <div className="chaos-container reveal-item">
-                  {Object.values(skills).flat().map((skill, i) => (
-                      <div key={i} className="chaos-tag mono">{skill}</div>
-                  ))}
-              </div>
-
-              {/* Mechanical Spec Sheet */}
-              <div className="spec-sheet reveal-item">
-                  {Object.entries(skills).map(([category, items], i) => (
-                      <div key={category} className="spec-cell">
-                          <span className="spec-label mono">SYS.0{i+1} / {category.toUpperCase()}</span>
-                          <span className="spec-value">{items.slice(0, 3).map(s => s.split(' ')[0].toUpperCase()).join(', ')}</span>
+              <div className="bands-container reveal-item">
+                  {Object.entries(skills).map(([category, items]) => (
+                      <div key={category} className="inversion-band">
+                          <div className="inversion-band-content">
+                              <span className="band-category">{category}</span>
+                              <span className="band-skills mono">{items.join(', ')}</span>
+                          </div>
                       </div>
                   ))}
               </div>
@@ -692,8 +690,9 @@ export default function BrutalistPortfolio() {
 
       {/* 04 MONOLITH FOOTER */}
       <footer className="footer-monolith">
-          <svg className="ghost-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <path d="M50 100 L50 20 M50 20 L20 50 M50 20 L80 50 M50 50 L30 30 M50 50 L70 30 M50 70 L20 80 M50 70 L80 80 M20 50 L30 70 M80 50 L70 70 M30 30 L10 40 M70 30 L90 40 M50 10 L50 0 M20 20 L50 50 M80 20 L50 50 M10 70 L50 90 M90 70 L50 90" />
+          <svg className="botanical-svg" viewBox="0 0 200 200" preserveAspectRatio="none">
+              {/* Minimal geometric botanical stem/leaf motif */}
+              <path d="M100 200 L100 20 C100 20, 140 40, 160 20 C160 20, 140 80, 100 100 C100 100, 60 40, 40 20 C40 20, 60 80, 100 100 M100 120 C100 120, 130 130, 150 110 C150 110, 130 160, 100 140 M100 140 C100 140, 70 130, 50 110 C50 110, 70 160, 100 140" />
           </svg>
 
           <div className="container reveal-group">
