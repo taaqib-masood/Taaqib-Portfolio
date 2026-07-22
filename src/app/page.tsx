@@ -478,48 +478,51 @@ export default function BrutalistPortfolio() {
         }
         
         .hero-layout {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
             gap: 4vw;
             width: 100%;
+            align-items: center;
         }
         .hero-text {
-            flex: 1;
             max-width: 800px;
         }
         .hero-photo-wrapper {
-            flex: 0 0 35%;
             display: flex;
-            justify-content: flex-end;
+            flex-direction: column;
+            align-items: flex-end;
+            width: 100%;
+        }
+        
+        .brutalist-photo-spec {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 450px;
+        }
+        
+        .brutalist-photo-label {
+            font-size: 12px;
+            padding: 8px 0;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
         }
         
         .brutalist-photo-container {
             width: 100%;
-            max-width: 400px;
             aspect-ratio: 3/4;
             border: 1px solid var(--ink);
             overflow: hidden;
             position: relative;
-            clip-path: inset(100% 0% 0% 0%);
-            transition: clip-path 1.2s var(--hydraulic);
-            transition-delay: 0.2s;
         }
-        .snap-section.in-view .brutalist-photo-container {
-            clip-path: inset(0% 0% 0% 0%);
-        }
+
         .brutalist-photo {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            filter: grayscale(100%) contrast(1.1);
-            transform: scale(1.2);
-            transition: transform 1.2s var(--hydraulic);
-            transition-delay: 0.2s;
-        }
-        .snap-section.in-view .brutalist-photo {
-            transform: scale(1);
+            filter: grayscale(20%);
+            display: block;
         }
 
         .hero-about {
@@ -959,9 +962,13 @@ export default function BrutalistPortfolio() {
                       </div>
                       
                       <div className="hero-photo-wrapper">
-                          <div className="brutalist-photo-container">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src="/taaqib-photo.jpg" alt="Taaqib Masood" className="brutalist-photo" />
+                          <div className="brutalist-photo-spec">
+                              <span className="brutalist-photo-label mono">SUBJECT: TAAQIB MASOOD</span>
+                              <div className="brutalist-photo-container">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src="/taaqib-photo.jpg" alt="Taaqib Masood" className="brutalist-photo" />
+                              </div>
+                              <span className="brutalist-photo-label mono" style={{ textAlign: 'right' }}>LOC: DUBAI, UAE // STATUS: ACTIVE</span>
                           </div>
                       </div>
                   </div>
