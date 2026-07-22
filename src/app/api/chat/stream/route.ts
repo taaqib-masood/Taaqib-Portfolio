@@ -1,4 +1,4 @@
-import { createGroq } from "@ai-sdk/groq";
+import { createOpenAI } from "@ai-sdk/openai";
 import { stepCountIs, streamText } from "ai";
 import { tools } from "@/lib/tools";
 
@@ -40,11 +40,11 @@ function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
 
 export async function POST(req: Request) {
   // --- API key guard ---
-  if (!process.env.GROQ_API_KEY) {
+  if (!process.env.OPENROUTER_API_KEY) {
     return new Response(
       JSON.stringify({
-        error: "GROQ_API_KEY is not configured on the server.",
-        hint: "Add GROQ_API_KEY to your .env.local file.",
+        error: "OPENROUTER_API_KEY is not configured on the server.",
+        hint: "Add OPENROUTER_API_KEY to your .env.local file.",
       }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
@@ -83,11 +83,14 @@ export async function POST(req: Request) {
     );
   }
 
-  // --- Stream with Groq LLaMA 3.3-70b ---
-  const groqModel = createGroq({ apiKey: process.env.GROQ_API_KEY });
+  // --- Stream with OpenRouter ---
+  const openrouter = createOpenAI({
+    baseURL: 'https://openrouter.ai/api/v1',
+    apiKey: process.env.OPENROUTER_API_KEY,
+  });
 
   const result = streamText({
-    model: groqModel("llama-3.3-70b-versatile"),
+    model: openrouter("meta-llama/llama-3.3-70b-instruct"),
     system: SYSTEM_PROMPT,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK v6 accepts model messages
     messages: messages as any,

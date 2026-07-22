@@ -80,7 +80,7 @@ export function CommandMenu() {
               animate={{ y: "0%" }}
               exit={{ y: "-100%" }}
               transition={{ duration: 0.4, ease: [0.83, 0, 0.17, 1] }}
-              className="absolute top-0 left-0 w-full bg-[#ffffff] border-b border-black shadow-none"
+              className="absolute top-0 left-0 w-full bg-[#000000] border-b border-white shadow-none"
             >
               <div className="flex items-center border-b border-border px-4 focus-within:ring-2 focus-within:ring-[#2e5bff] focus-within:ring-offset-0 transition-shadow">
                 <Command.Input 
@@ -106,7 +106,7 @@ export function CommandMenu() {
 
                 <Command.Group heading="AI Tools" className="text-[10px] uppercase font-bold tracking-widest text-outline px-2 py-3">
                   <Item onSelect={() => runCommand(() => scrollTo("agent"))} icon={<Sparkles />} label="Ask the Agent" />
-                  <Item onSelect={() => runCommand(() => router.push("/playground"))} icon={<Terminal />} label="Groq Playground" />
+                  <Item onSelect={() => runCommand(() => router.push("/playground"))} icon={<Terminal />} label="OpenRouter Playground" />
                 </Command.Group>
 
                 <Command.Separator className="my-2 h-px bg-border" />

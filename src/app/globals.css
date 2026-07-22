@@ -14,32 +14,32 @@
 
 @layer base {
   :root {
-    --background: #f9f9f9;
-    --foreground: #1a1c1c;
+    --background: #000000;
+    --foreground: #ffffff;
 
-    --card: #ffffff;
-    --card-foreground: #1a1c1c;
+    --card: #000000;
+    --card-foreground: #ffffff;
 
-    --popover: #ffffff;
-    --popover-foreground: #1a1c1c;
+    --popover: #000000;
+    --popover-foreground: #ffffff;
 
-    --primary: #0040e0;
+    --primary: #2e5bff;
     --primary-foreground: #ffffff;
 
-    --secondary: #e2e2e2;
-    --secondary-foreground: #1a1c1c;
+    --secondary: #1a1c1c;
+    --secondary-foreground: #e2e2e2;
 
-    --muted: #e8e8e8;
-    --muted-foreground: #434656;
+    --muted: #1a1c1c;
+    --muted-foreground: #a3a6b6;
 
-    --accent: #2e5bff;
+    --accent: #0040e0;
     --accent-foreground: #ffffff;
 
     --destructive: #ba1a1a;
     --destructive-foreground: #ffffff;
 
-    --border: #1a1c1c;
-    --input: #1a1c1c;
+    --border: #ffffff;
+    --input: #ffffff;
     --ring: #2e5bff;
 
     --radius: 0rem;

@@ -218,7 +218,7 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
                             {metric}
                           </span>
                           {tooltip && (
-                            <div className="absolute left-0 bottom-full mb-2 opacity-0 group-hover/tooltip:opacity-100 pointer-events-none bg-white text-black border border-[#1a1c1c] rounded-none px-3 py-2 z-50 text-[10px] uppercase tracking-wider min-w-[200px] max-w-xs shadow-none">
+                            <div className="absolute left-0 bottom-full mb-2 opacity-0 group-hover/tooltip:opacity-100 pointer-events-none bg-black text-white border border-[#ffffff] rounded-none px-3 py-2 z-50 text-[10px] uppercase tracking-wider min-w-[200px] max-w-xs shadow-none">
                               {tooltip}
                             </div>
                           )}

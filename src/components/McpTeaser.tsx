@@ -17,7 +17,7 @@ export function McpTeaser() {
   };
 
   return (
-    <section className="max-w-[1440px] mx-auto border-b border-border bg-[#1a1c1c] text-[#ffffff] overflow-hidden relative min-h-[400px] flex flex-col md:flex-row">
+    <section className="max-w-[1440px] mx-auto border-b border-border bg-[#ffffff] text-[#000000] overflow-hidden relative min-h-[400px] flex flex-col md:flex-row">
       {/* Brutalist + Grid Pattern */}
       <div 
         className="absolute inset-0 z-0 opacity-20 pointer-events-none"
@@ -37,7 +37,7 @@ export function McpTeaser() {
         </p>
         <button
           onClick={handleWakeUp}
-          className="group flex items-center justify-between border border-[#ffffff] bg-transparent px-6 py-4 text-[14px] font-bold uppercase tracking-widest transition-colors hover:bg-[#ffffff] hover:text-[#1a1c1c] active:bg-[#e2e2e2] w-fit"
+          className="group flex items-center justify-between border border-[#000000] bg-transparent px-6 py-4 text-[14px] font-bold uppercase tracking-widest transition-colors hover:bg-[#000000] hover:text-[#ffffff] active:bg-[#e2e2e2] w-fit"
         >
           <span className="flex items-center gap-3">
             <Terminal className="h-5 w-5" />
