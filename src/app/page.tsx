@@ -966,7 +966,7 @@ export default function BrutalistPortfolio() {
                               <span className="brutalist-photo-label mono">SUBJECT: TAAQIB MASOOD</span>
                               <div className="brutalist-photo-container">
                                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img src="/taaqib-photo.jpg" alt="Taaqib Masood" className="brutalist-photo" />
+                                  <img src="/taaqib-photo.png" alt="Taaqib Masood" className="brutalist-photo" />
                               </div>
                               <span className="brutalist-photo-label mono" style={{ textAlign: 'right' }}>LOC: DUBAI, UAE // STATUS: ACTIVE</span>
                           </div>
