@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 
-import { CommandMenu } from "@/components/CommandMenu";
-import { ScrollToTop } from "@/components/ScrollToTop";
+
 import { cn } from "@/lib/utils";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -65,14 +64,12 @@ export default function RootLayout({
       </head>
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased text-foreground overflow-x-hidden",
+          "min-h-screen font-sans antialiased overflow-x-hidden",
           inter.variable,
           outfit.variable
         )}
       >
         {children}
-        <CommandMenu />
-        <ScrollToTop />
         <Analytics />
         <SpeedInsights />
       </body>
