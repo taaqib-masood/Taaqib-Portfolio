@@ -800,7 +800,7 @@ export default function BrutalistPortfolio() {
         }
 
         .footer-wordmark {
-            font-size: clamp(40px, 8vw, 100px);
+            font-size: clamp(60px, 14vw, 200px);
             text-align: center;
             line-height: 0.8;
             white-space: nowrap;
