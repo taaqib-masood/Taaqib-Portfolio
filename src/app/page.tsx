@@ -454,19 +454,78 @@ export default function BrutalistPortfolio() {
             margin: 0 auto;
         }
 
-        /* Hero */
-        .hero-title {
+        .hero-title-masked {
             font-size: clamp(56px, 14vw, 180px);
             line-height: 0.85;
             margin-bottom: 6vh;
-            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
         }
+        .mask-wrapper {
+            overflow: hidden;
+            border-bottom: 1px solid var(--ink);
+            width: fit-content;
+        }
+        .mask-text {
+            display: inline-block;
+            transform: translateY(-100%);
+            opacity: 0;
+            transition: transform 0.8s var(--hydraulic), opacity 0.8s var(--hydraulic);
+        }
+        .snap-section.in-view .mask-text {
+            transform: translateY(0%);
+            opacity: 1;
+        }
+        
+        .hero-layout {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4vw;
+            width: 100%;
+        }
+        .hero-text {
+            flex: 1;
+            max-width: 800px;
+        }
+        .hero-photo-wrapper {
+            flex: 0 0 35%;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .brutalist-photo-container {
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 3/4;
+            border: 1px solid var(--ink);
+            overflow: hidden;
+            position: relative;
+            clip-path: inset(100% 0% 0% 0%);
+            transition: clip-path 1.2s var(--hydraulic);
+            transition-delay: 0.2s;
+        }
+        .snap-section.in-view .brutalist-photo-container {
+            clip-path: inset(0% 0% 0% 0%);
+        }
+        .brutalist-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%) contrast(1.1);
+            transform: scale(1.2);
+            transition: transform 1.2s var(--hydraulic);
+            transition-delay: 0.2s;
+        }
+        .snap-section.in-view .brutalist-photo {
+            transform: scale(1);
+        }
+
         .hero-about {
             font-size: clamp(16px, 2vw, 24px);
-            max-width: 800px;
             line-height: 1.5;
             font-weight: 700;
-            margin-left: 2vw;
         }
         
         /* CLI Typewriter */
@@ -738,7 +797,7 @@ export default function BrutalistPortfolio() {
         }
 
         .footer-wordmark {
-            font-size: clamp(60px, 18vw, 300px);
+            font-size: clamp(40px, 8vw, 100px);
             text-align: center;
             line-height: 0.8;
             white-space: nowrap;
@@ -876,20 +935,34 @@ export default function BrutalistPortfolio() {
           <section className="snap-section hero" id="about">
               <div className="bg-numeral" data-speed="-0.1">01</div>
               <div className="container hero-content acrylic-reveal">
-                  <h1 className="hero-title scramble-text">TAAQIB MASOOD</h1>
-                  <div className="hero-about">
-                      <p style={{ minHeight: '100px' }}>
-                        {aboutParagraphs.join(" ").split(" ").map((word, idx) => (
-                          <span key={idx}>
-                            <span className="cli-word">{word}</span>
-                            <span> </span>
-                          </span>
-                        ))}
-                        <span className="cli-cursor inline"></span>
-                      </p>
-                      <div style={{ display: 'flex', gap: '20px', marginTop: '4rem' }}>
-                          <a href="#projects" className="btn-magnet magnet">View Works</a>
-                          <a href="/assets/cv.pdf" download className="btn-magnet magnet">Download CV</a>
+                  <div className="hero-layout">
+                      <div className="hero-text">
+                          <h1 className="hero-title-masked">
+                              <div className="mask-wrapper"><span className="mask-text" style={{ transitionDelay: '0s' }}>TAAQIB</span></div>
+                              <div className="mask-wrapper"><span className="mask-text" style={{ transitionDelay: '0.1s' }}>MASOOD</span></div>
+                          </h1>
+                          <div className="hero-about">
+                              <p style={{ minHeight: '100px' }}>
+                                {aboutParagraphs.join(" ").split(" ").map((word, idx) => (
+                                  <span key={idx}>
+                                    <span className="cli-word">{word}</span>
+                                    <span> </span>
+                                  </span>
+                                ))}
+                                <span className="cli-cursor inline"></span>
+                              </p>
+                              <div style={{ display: 'flex', gap: '20px', marginTop: '4rem' }}>
+                                  <a href="#projects" className="btn-magnet magnet">View Works</a>
+                                  <a href="/assets/cv.pdf" download className="btn-magnet magnet">Download CV</a>
+                              </div>
+                          </div>
+                      </div>
+                      
+                      <div className="hero-photo-wrapper">
+                          <div className="brutalist-photo-container">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src="/taaqib-photo.jpg" alt="Taaqib Masood" className="brutalist-photo" />
+                          </div>
                       </div>
                   </div>
               </div>
