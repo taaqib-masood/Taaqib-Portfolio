@@ -16,14 +16,7 @@ export default function BrutalistPortfolio() {
     let cursorY = mouseY;
     let animationFrameId: number;
     
-    const handleMouseMove = (e: MouseEvent) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        
-        const target = e.target as HTMLElement;
-        if (!target) return;
-        
-        // Determine if over dark section for inversion
+    const checkDarkSection = () => {
         const darkSections = document.querySelectorAll('.dark, .footer-monolith');
         let isDark = false;
         darkSections.forEach(sec => {
@@ -32,9 +25,18 @@ export default function BrutalistPortfolio() {
                 isDark = true;
             }
         });
-
         if (isDark) cursor.classList.add("inverted");
         else cursor.classList.remove("inverted");
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        
+        const target = e.target as HTMLElement;
+        if (!target) return;
+        
+        checkDarkSection();
 
         // Hover States
         const isText = target.tagName && target.tagName.match(/H1|H2|H3|P|SPAN/) && !target.closest('.project-row') && !target.closest('.spec-cell') && !target.closest('.garage-link');
@@ -108,13 +110,15 @@ export default function BrutalistPortfolio() {
         const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
         const ratio = Math.max(0, Math.min(1, scrolled / maxScroll));
         
+        checkDarkSection();
+
         // Scroll-Progress Hairline
         if (progress) {
             progress.style.transform = `scaleX(${ratio})`;
 
             // Hairline Color Inversion
-            const darkSections = document.querySelectorAll('.dark, .footer-monolith');
             let invertedProgress = false;
+            const darkSections = document.querySelectorAll('.dark, .footer-monolith');
             darkSections.forEach(sec => {
                 const rect = sec.getBoundingClientRect();
                 if (rect.top <= 0 && rect.bottom >= 0) invertedProgress = true;
@@ -284,6 +288,9 @@ export default function BrutalistPortfolio() {
             z-index: 3;
             border-top: 1px solid var(--ink);
         }
+        .brutalist-theme section.dark.acrylic {
+            border-top: 1px solid var(--paper);
+        }
 
         /* Brutalist Parallax Numerals */
         .bg-numeral {
@@ -408,8 +415,8 @@ export default function BrutalistPortfolio() {
         .spec-sheet {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            border-top: 1px solid var(--paper);
-            border-left: 1px solid var(--paper);
+            border-top: 1px solid var(--ink);
+            border-left: 1px solid var(--ink);
         }
         @media (max-width: 1024px) {
             .spec-sheet { grid-template-columns: repeat(2, 1fr); }
@@ -418,13 +425,20 @@ export default function BrutalistPortfolio() {
             .spec-sheet { grid-template-columns: 1fr; }
         }
         .spec-cell {
-            border-right: 1px solid var(--paper);
-            border-bottom: 1px solid var(--paper);
+            border-right: 1px solid var(--ink);
+            border-bottom: 1px solid var(--ink);
+            background-color: transparent;
+            color: var(--ink);
             padding: 2.5rem 2rem;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             min-height: 220px;
+            transition: background-color 0.4s var(--hydraulic), color 0.4s var(--hydraulic);
+        }
+        .spec-cell:hover {
+            background-color: var(--ink);
+            color: var(--paper);
         }
         .spec-label {
             font-size: 12px;
@@ -440,25 +454,48 @@ export default function BrutalistPortfolio() {
 
         /* Terminal Project Log */
         .project-list {
-            border-top: 1px solid var(--ink);
+            border-top: 1px solid var(--paper);
             margin-top: 10vh;
         }
         .project-row {
             display: flex;
             align-items: baseline;
             padding: 2.5rem 1rem;
-            border-bottom: 1px solid var(--ink);
+            border-bottom: 1px solid var(--paper);
             text-decoration: none;
-            color: var(--ink);
+            color: var(--paper);
             position: relative;
             z-index: 10;
-            transition: background-color 0.4s var(--hydraulic), color 0.4s var(--hydraulic), padding-left 0.4s var(--hydraulic), padding-right 0.4s var(--hydraulic);
+            overflow: hidden;
+            transition: padding-left 0.4s var(--hydraulic), padding-right 0.4s var(--hydraulic);
+        }
+        .project-row::before {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: var(--paper);
+            transform: translateY(101%);
+            transition: transform 0s;
+            z-index: -1;
+        }
+        .project-row:hover::before {
+            transform: translateY(0%);
+            transition: transform 0.4s var(--hydraulic);
         }
         .project-row:hover {
-            background-color: var(--ink);
-            color: var(--paper);
+            color: var(--ink);
             padding-left: 2.5rem;
             padding-right: 2.5rem;
+            transition: color 0s 0.25s, padding-left 0.4s var(--hydraulic), padding-right 0.4s var(--hydraulic);
+        }
+        .project-row:not(:hover) {
+            color: var(--paper);
+            transition: color 0s;
+        }
+        .project-row:not(:hover)::before {
+            transform: translateY(101%);
+            transition: transform 0s;
         }
         .project-index { width: 10%; font-size: 14px; opacity: 0.5; }
         .project-title { width: 45%; font-size: clamp(20px, 3vw, 48px); font-weight: 900; letter-spacing: -0.03em; }
@@ -482,6 +519,9 @@ export default function BrutalistPortfolio() {
             color: var(--paper);
             padding: 10vh 5vw;
             border-top: 1px solid var(--paper);
+            margin-top: -15vh;
+            padding-top: 25vh;
+            z-index: 3;
         }
         .ghost-svg {
             position: absolute;
@@ -576,7 +616,7 @@ export default function BrutalistPortfolio() {
             position: absolute;
             bottom: 0; left: 0;
             height: 1px;
-            background-color: white; 
+            background-color: var(--paper); 
             width: 100%;
             transform-origin: 0 50%;
             transform: scaleX(0);
@@ -608,7 +648,7 @@ export default function BrutalistPortfolio() {
       </section>
 
       {/* 02 SKILLS / CHAOS TO ORDER */}
-      <section className="dark acrylic chaos-section" id="skills">
+      <section className="chaos-section" id="skills">
           <div className="bg-numeral" data-speed="-0.3">02</div>
           <div className="container reveal-group">
               <h2 className="hero-title reveal-item" style={{ fontSize: 'clamp(40px, 8vw, 100px)' }}>CORE SYSTEMS</h2>
@@ -632,7 +672,7 @@ export default function BrutalistPortfolio() {
       </section>
 
       {/* 03 SELECTED WORKS */}
-      <section className="acrylic" id="projects" style={{ backgroundColor: 'var(--paper)', color: 'var(--ink)' }}>
+      <section className="dark acrylic" id="projects">
           <div className="bg-numeral" data-speed="-0.3">03</div>
           <div className="container reveal-group">
               <h2 className="hero-title reveal-item" style={{ fontSize: 'clamp(40px, 8vw, 100px)' }}>SELECTED WORKS</h2>
