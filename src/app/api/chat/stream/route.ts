@@ -90,7 +90,7 @@ export async function POST(req: Request) {
     model: groqModel("llama-3.3-70b-versatile"),
     system: SYSTEM_PROMPT,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK v6 accepts model messages
-    messages: convertToModelMessages(messages as any),
+    messages: await convertToModelMessages(messages as any),
     tools,
     stopWhen: stepCountIs(5), // allow up to 5 tool-call steps (replaces maxSteps in v6)
   });
