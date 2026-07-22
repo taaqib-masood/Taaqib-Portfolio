@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taaqib Masood | Brutalist Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #0A0A0A;
+            --paper: #d6d1c5;
+            --faint: #c4bfb2;
+            --hydraulic: cubic-bezier(0.83, 0, 0.17, 1);
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            cursor: none; /* Custom brutalist cursor overrides */
+        }
+        body {
+            background-color: var(--paper);
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        ::selection {
+            background-color: var(--ink);
+            color: var(--paper);
+        }
+
+        /* Micro-Interactions: Custom Brutalist Cursor */
+        .custom-cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: 16px; height: 16px;
+            border: 1px solid var(--ink);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s var(--hydraulic), height 0.3s var(--hydraulic), background-color 0.3s var(--hydraulic), border-color 0.3s var(--hydraulic);
+        }
+
+        .custom-cursor.text-hover {
+            width: 4px; height: 4px;
+            background-color: var(--ink);
+        }
+        .custom-cursor.cta-hover {
+            width: 40px; height: 40px;
+            background-color: var(--ink);
+            z-index: 9998; /* Behind CTA */
+        }
+        .custom-cursor.inverted {
+            border-color: var(--paper);
+        }
+        .custom-cursor.inverted.text-hover, .custom-cursor.inverted.cta-hover {
+            background-color: var(--paper);
+        }
+
+        /* Scroll-Progress Hairline */
+        #progress-bar {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 2px;
+            background-color: var(--ink);
+            transform-origin: 0% 50%;
+            transform: scaleX(0);
+            z-index: 9999;
+            transition: background-color 0.3s var(--hydraulic);
+        }
+        #progress-bar.inverted {
+            background-color: white;
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            text-transform: uppercase;
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Layout & Sections */
+        section {
+            position: relative;
+            min-height: 100vh;
+            padding: 15vh 5vw;
+        }
+        section.dark {
+            background-color: var(--ink);
+            color: var(--paper);
+        }
+        
+        /* The Subtle Acrylic Overlap */
+        section.acrylic {
+            margin-top: -15vh;
+            padding-top: 25vh;
+            z-index: 3;
+            border-top: 1px solid var(--ink);
+        }
+
+        /* Brutalist Parallax Numerals */
+        .bg-numeral {
+            position: absolute;
+            top: 5vh; right: 5vw;
+            font-size: 350px;
+            font-weight: 900;
+            color: var(--faint);
+            opacity: 0.3;
+            z-index: 0;
+            pointer-events: none;
+            line-height: 0.8;
+            letter-spacing: -0.05em;
+        }
+        section.dark .bg-numeral {
+            color: #1a1a1a;
+            opacity: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Mechanical Stagger Reveals */
+        .reveal-group .reveal-item {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s var(--hydraulic), transform 0.8s var(--hydraulic);
+        }
+        .reveal-group.in-view .reveal-item {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-group .reveal-item:nth-child(1) { transition-delay: 0.05s; }
+        .reveal-group .reveal-item:nth-child(2) { transition-delay: 0.10s; }
+        .reveal-group .reveal-item:nth-child(3) { transition-delay: 0.15s; }
+        .reveal-group .reveal-item:nth-child(4) { transition-delay: 0.20s; }
+        .reveal-group .reveal-item:nth-child(5) { transition-delay: 0.25s; }
+
+        /* Hero Section (The Hero Drift) */
+        .hero {
+            display: flex;
+            align-items: center;
+        }
+        .hero-content {
+            will-change: transform, opacity;
+        }
+        .hero-title {
+            font-size: clamp(56px, 14vw, 180px);
+            line-height: 0.85;
+            margin-bottom: 6vh;
+            max-width: 1200px;
+        }
+        .hero-about {
+            font-size: clamp(16px, 2vw, 24px);
+            max-width: 800px;
+            line-height: 1.5;
+            font-weight: 700;
+            margin-left: 2vw;
+        }
+        .hero-about p {
+            margin-bottom: 24px;
+        }
+
+        /* Magnetic CTAs & Inversion Active States */
+        .btn-magnet {
+            display: inline-block;
+            padding: 1rem 3rem;
+            border: 1px solid var(--ink);
+            background: transparent;
+            color: var(--ink);
+            text-decoration: none;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            font-size: 20px;
+            transition: transform 0.2s linear; /* Fast track for mousemove */
+            position: relative;
+            z-index: 10;
+        }
+        /* Instantly inverts on hover, no scale, no shadow */
+        .btn-magnet:hover {
+            background: var(--ink) !important;
+            color: var(--paper) !important;
+            transition: background 0s, color 0s;
+        }
+
+        /* Chaos to Order Snap (Skills Tags) */
+        .chaos-section {
+            padding-top: 10vh;
+        }
+        .chaos-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 4rem;
+            background: var(--faint);
+            border: 1px solid var(--ink);
+            margin-bottom: 10vh;
+        }
+        .chaos-tag {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--ink);
+            background-color: var(--paper);
+            color: var(--ink);
+            font-weight: 700;
+            font-size: 14px;
+            transition: transform 1.2s var(--hydraulic), opacity 1.2s var(--hydraulic);
+            will-change: transform, opacity;
+        }
+        .chaos-container.snapped .chaos-tag {
+            transform: translate(0, 0) rotate(0deg) scale(1) !important;
+            opacity: 1 !important;
+        }
+
+        /* Mechanical Spec Sheet (Skills) */
+        .spec-sheet {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-top: 1px solid var(--paper);
+            border-left: 1px solid var(--paper);
+        }
+        @media (max-width: 1024px) {
+            .spec-sheet { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .spec-sheet { grid-template-columns: 1fr; }
+        }
+        .spec-cell {
+            border-right: 1px solid var(--paper);
+            border-bottom: 1px solid var(--paper);
+            padding: 2.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 220px;
+        }
+        .spec-label {
+            font-size: 12px;
+            opacity: 0.5;
+            margin-bottom: 2rem;
+        }
+        .spec-value {
+            font-size: clamp(24px, 3vw, 42px);
+            line-height: 1.1;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        /* Terminal Project Log (Selected Works) */
+        .project-list {
+            border-top: 1px solid var(--ink);
+            margin-top: 10vh;
+        }
+        .project-row {
+            display: flex;
+            align-items: baseline;
+            padding: 2.5rem 1rem;
+            border-bottom: 1px solid var(--ink);
+            text-decoration: none;
+            color: var(--ink);
+            position: relative;
+            z-index: 10;
+            transition: background-color 0.4s var(--hydraulic), color 0.4s var(--hydraulic), padding-left 0.4s var(--hydraulic), padding-right 0.4s var(--hydraulic);
+        }
+        .project-row:hover {
+            background-color: var(--ink);
+            color: var(--paper);
+            padding-left: 2.5rem;
+            padding-right: 2.5rem;
+        }
+        .project-index { width: 10%; font-size: 14px; opacity: 0.5; }
+        .project-title { width: 45%; font-size: clamp(20px, 3vw, 48px); font-weight: 900; letter-spacing: -0.03em; }
+        .project-stack { width: 35%; font-size: 12px; opacity: 0.7; }
+        .project-arrow { width: 10%; text-align: right; font-size: 24px; font-weight: 400; }
+        
+        .project-row:hover .project-index,
+        .project-row:hover .project-stack {
+            opacity: 1;
+        }
+
+        /* The Massive Monolith Footer */
+        .footer-monolith {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            position: relative;
+            overflow: hidden;
+            background-color: var(--ink);
+            color: var(--paper);
+            padding: 10vh 5vw;
+            border-top: 1px solid var(--paper);
+        }
+        .ghost-svg {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90vmin;
+            height: 90vmin;
+            opacity: 0.10;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .ghost-svg path {
+            fill: none;
+            stroke: var(--paper);
+            stroke-width: 1;
+            stroke-dasharray: 4000;
+            stroke-dashoffset: 4000;
+        }
+        .footer-monolith.in-view .ghost-svg path {
+            animation: drawSvg 2.5s var(--hydraulic) forwards;
+        }
+        @keyframes drawSvg {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 4rem;
+            justify-content: center;
+            margin-bottom: 10vh;
+            z-index: 10;
+        }
+
+        /* Garage Door Reveal */
+        .garage-link {
+            position: relative;
+            text-decoration: none;
+            color: var(--paper);
+            font-size: clamp(16px, 2vw, 32px);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            padding: 1rem 2rem;
+            overflow: hidden;
+            border: 1px solid var(--paper);
+            display: inline-block;
+        }
+        .garage-door {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: var(--paper);
+            transform: translateY(101%);
+            transition: transform 0s;
+            z-index: -1;
+        }
+        .garage-link:hover .garage-door {
+            transform: translateY(0%);
+            transition: transform 0.4s var(--hydraulic);
+        }
+        .garage-link:hover {
+            color: var(--ink);
+            transition: color 0s 0.25s; /* Instantly invert text as door covers it */
+        }
+        .garage-link:not(:hover) {
+            color: var(--paper);
+            transition: color 0s; /* Slam back */
+        }
+        .garage-link:not(:hover) .garage-door {
+            transform: translateY(101%);
+            transition: transform 0s; /* Slam back */
+        }
+
+        .footer-wordmark {
+            font-size: clamp(60px, 18vw, 300px);
+            text-align: center;
+            line-height: 0.8;
+            white-space: nowrap;
+            position: relative;
+            z-index: 10;
+            margin-bottom: 2rem;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 1s var(--hydraulic), opacity 1s var(--hydraulic);
+        }
+        .footer-monolith.in-view .footer-wordmark {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .footer-hairline {
+            position: absolute;
+            bottom: 0; left: 0;
+            height: 1px;
+            background-color: white; /* 1px solid white hairline */
+            width: 100%;
+            transform-origin: 0 50%;
+            transform: scaleX(0);
+            transition: transform 1.5s var(--hydraulic);
+            transition-delay: 0.5s;
+        }
+        .footer-monolith.in-view .footer-hairline {
+            transform: scaleX(1);
+        }
+
+    </style>
+</head>
+<body>
+    <div id="progress-bar"></div>
+    <div class="custom-cursor"></div>
+
+    <!-- 01 HERO -->
+    <section class="hero" id="about">
+        <div class="bg-numeral" data-speed="-0.3">01</div>
+        <div class="container hero-content reveal-group">
+            <h1 class="hero-title reveal-item">TAAQIB MASOOD</h1>
+            <div class="hero-about">
+                <p class="reveal-item">AI engineer who builds systems where the model isn't the demo, it's the infrastructure. I work at the layer where LLMs stop being a chatbot widget and start making decisions inside a real product: agentic tool-calling systems that don't hallucinate their way into bad actions, real-time pipelines that fuse computer vision with language reasoning, and multi-source AI agents that pull context from wherever the truth actually lives before generating an answer.</p>
+                <p class="reveal-item">I care about the unglamorous part of AI engineering: making sure the agent calls the right tool, the RAG pipeline retrieves the right context, and the system fails safely when it isn't sure. Full-stack (Python, TypeScript, Node.js, cloud infra) is the toolkit; getting AI to behave reliably in production is the actual job. Based in Dubai, UAE. Open to AI Engineering and AI-integrated full-stack roles.</p>
+                <div class="reveal-item" style="margin-top: 4rem;">
+                    <a href="#projects" class="btn-magnet magnet">View Works</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 02 SKILLS / CHAOS TO ORDER -->
+    <section class="dark acrylic chaos-section" id="skills">
+        <div class="bg-numeral" data-speed="-0.3">02</div>
+        <div class="container reveal-group">
+            <h2 class="hero-title reveal-item" style="font-size: clamp(40px, 8vw, 100px);">CORE SYSTEMS</h2>
+            
+            <div class="chaos-container reveal-item">
+                <div class="chaos-tag mono">TypeScript</div>
+                <div class="chaos-tag mono">Python</div>
+                <div class="chaos-tag mono">Angular 19</div>
+                <div class="chaos-tag mono">React</div>
+                <div class="chaos-tag mono">Node.js</div>
+                <div class="chaos-tag mono">Express.js</div>
+                <div class="chaos-tag mono">MongoDB Atlas</div>
+                <div class="chaos-tag mono">PostgreSQL</div>
+                <div class="chaos-tag mono">Redis</div>
+                <div class="chaos-tag mono">Anthropic Claude</div>
+                <div class="chaos-tag mono">Groq LLaMA 3.3</div>
+                <div class="chaos-tag mono">RAG</div>
+                <div class="chaos-tag mono">MCP Tooling</div>
+                <div class="chaos-tag mono">LiveKit WebRTC</div>
+                <div class="chaos-tag mono">Deepgram Nova-2</div>
+                <div class="chaos-tag mono">LightGBM</div>
+                <div class="chaos-tag mono">ARIMA</div>
+                <div class="chaos-tag mono">Docker</div>
+                <div class="chaos-tag mono">Kubernetes</div>
+                <div class="chaos-tag mono">Terraform</div>
+            </div>
+
+            <!-- Mechanical Spec Sheet -->
+            <div class="spec-sheet reveal-item">
+                <div class="spec-cell">
+                    <span class="spec-label mono">SYS.01 / LANGUAGES</span>
+                    <span class="spec-value">TS, JS(ES6+), PYTHON, SQL</span>
+                </div>
+                <div class="spec-cell">
+                    <span class="spec-label mono">SYS.02 / FRONTEND</span>
+                    <span class="spec-value">ANGULAR 19, REACT, VITE</span>
+                </div>
+                <div class="spec-cell">
+                    <span class="spec-label mono">SYS.03 / BACKEND</span>
+                    <span class="spec-value">NODE.JS, EXPRESS, BULLMQ</span>
+                </div>
+                <div class="spec-cell">
+                    <span class="spec-label mono">SYS.04 / DATABASES</span>
+                    <span class="spec-value">MONGODB, POSTGRESQL, REDIS</span>
+                </div>
+                <div class="spec-cell">
+                    <span class="spec-label mono">SYS.05 / AI & LLM</span>
+                    <span class="spec-value">CLAUDE, GROQ, MCP, RAG</span>
+                </div>
+                <div class="spec-cell">
+                    <span class="spec-label mono">SYS.06 / ML & DATA</span>
+                    <span class="spec-value">LIGHTGBM, ARIMA, SHAP</span>
+                </div>
+                <div class="spec-cell">
+                    <span class="spec-label mono">SYS.07 / DEVOPS</span>
+                    <span class="spec-value">DOCKER, K8S, TERRAFORM</span>
+                </div>
+                <div class="spec-cell">
+                    <span class="spec-label mono">SYS.08 / CLOUD</span>
+                    <span class="spec-value">AZURE, VERCEL, RENDER</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 03 SELECTED WORKS -->
+    <section class="acrylic" id="projects" style="background-color: var(--paper); color: var(--ink);">
+        <div class="bg-numeral" data-speed="-0.3">03</div>
+        <div class="container reveal-group">
+            <h2 class="hero-title reveal-item" style="font-size: clamp(40px, 8vw, 100px);">SELECTED WORKS</h2>
+            
+            <div class="project-list reveal-item">
+                <a href="https://github.com/taaqib-masood" class="project-row" target="_blank">
+                    <span class="project-index mono">001</span>
+                    <span class="project-title">LTTS Test Management & Live Interview Proctoring Portal</span>
+                    <span class="project-stack mono">Angular 19, Node.js, LiveKit, Groq llama-3.3-70b, MediaPipe</span>
+                    <span class="project-arrow">↗</span>
+                </a>
+                <a href="https://github.com/taaqib-masood" class="project-row" target="_blank">
+                    <span class="project-index mono">002</span>
+                    <span class="project-title">MCP AI Code-Review Pipeline</span>
+                    <span class="project-stack mono">Python, Model Context Protocol, Anthropic Claude, Jira, GitHub</span>
+                    <span class="project-arrow">↗</span>
+                </a>
+                <a href="https://stocks-proj.netlify.app" class="project-row" target="_blank">
+                    <span class="project-index mono">003</span>
+                    <span class="project-title">Stock Market Forecasting & Risk Analytics</span>
+                    <span class="project-stack mono">Python, ARIMA, LightGBM, FinBERT, Telegram Bot API</span>
+                    <span class="project-arrow">↗</span>
+                </a>
+                <a href="https://github.com/taaqib-masood/salon-booking-saas" class="project-row" target="_blank">
+                    <span class="project-index mono">004</span>
+                    <span class="project-title">Salon Booking SaaS (UAE)</span>
+                    <span class="project-stack mono">React, Node.js, PostgreSQL, Redis, Kubernetes, Stripe</span>
+                    <span class="project-arrow">↗</span>
+                </a>
+                <a href="https://github.com/taaqib-masood/predictive-maintenance-industrial-machinery" class="project-row" target="_blank">
+                    <span class="project-index mono">005</span>
+                    <span class="project-title">Predictive Maintenance of Industrial Machinery</span>
+                    <span class="project-stack mono">Python, TensorFlow, LSTM, CNN, TensorFlow Lite</span>
+                    <span class="project-arrow">↗</span>
+                </a>
+                <a href="https://github.com/taaqib-masood/reva-ai" class="project-row" target="_blank">
+                    <span class="project-index mono">006</span>
+                    <span class="project-title">Reva AI — WhatsApp Receptionist</span>
+                    <span class="project-stack mono">Next.js, Supabase, Meta Cloud API, Razorpay</span>
+                    <span class="project-arrow">↗</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 04 MONOLITH FOOTER -->
+    <footer class="footer-monolith">
+        <svg class="ghost-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <!-- Geometric Botanical Abstract -->
+            <path d="M50 100 L50 20 M50 20 L20 50 M50 20 L80 50 M50 50 L30 30 M50 50 L70 30 M50 70 L20 80 M50 70 L80 80 M20 50 L30 70 M80 50 L70 70 M30 30 L10 40 M70 30 L90 40 M50 10 L50 0 M20 20 L50 50 M80 20 L50 50 M10 70 L50 90 M90 70 L50 90" />
+        </svg>
+
+        <div class="container reveal-group">
+            <div class="footer-links reveal-item">
+                <a href="https://www.linkedin.com/in/taaqib-masood" target="_blank" class="garage-link mono">
+                    LINKEDIN
+                    <div class="garage-door"></div>
+                </a>
+                <a href="https://github.com/taaqib-masood" target="_blank" class="garage-link mono">
+                    GITHUB
+                    <div class="garage-door"></div>
+                </a>
+                <a href="mailto:taaqib.masood@icloud.com" class="garage-link mono">
+                    EMAIL
+                    <div class="garage-door"></div>
+                </a>
+            </div>
+        </div>
+
+        <h1 class="footer-wordmark">LET'S BUILD</h1>
+        <div class="footer-hairline"></div>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // 1. Custom Brutalist Cursor
+            const cursor = document.querySelector(".custom-cursor");
+            let mouseX = window.innerWidth / 2;
+            let mouseY = window.innerHeight / 2;
+            let cursorX = mouseX;
+            let cursorY = mouseY;
+            
+            document.addEventListener("mousemove", (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                
+                const target = e.target;
+                
+                // Determine if over dark section for inversion
+                // elementFromPoint is heavy, relying on closest('.dark') or manually checking bounds
+                const darkSections = document.querySelectorAll('.dark, .footer-monolith');
+                let isDark = false;
+                darkSections.forEach(sec => {
+                    const rect = sec.getBoundingClientRect();
+                    if (mouseY >= rect.top && mouseY <= rect.bottom) {
+                        isDark = true;
+                    }
+                });
+
+                if (isDark) cursor.classList.add("inverted");
+                else cursor.classList.remove("inverted");
+
+                // Hover States
+                const isText = target.tagName.match(/H1|H2|H3|P|SPAN/) && !target.closest('.project-row') && !target.closest('.spec-cell') && !target.closest('.garage-link');
+                const isCta = target.closest('.btn-magnet') || target.closest('.project-row') || target.closest('.garage-link');
+
+                if (isCta) {
+                    cursor.classList.add("cta-hover");
+                    cursor.classList.remove("text-hover");
+                } else if (isText) {
+                    cursor.classList.add("text-hover");
+                    cursor.classList.remove("cta-hover");
+                } else {
+                    cursor.classList.remove("text-hover", "cta-hover");
+                }
+            });
+
+            // Smooth Cursor Loop (Hydraulic lerp approximation)
+            function renderCursor() {
+                // Harsh acceleration, quick snap
+                cursorX += (mouseX - cursorX) * 0.4;
+                cursorY += (mouseY - cursorY) * 0.4;
+                cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
+                requestAnimationFrame(renderCursor);
+            }
+            requestAnimationFrame(renderCursor);
+
+            // 2. Magnetic CTAs
+            const magnets = document.querySelectorAll('.magnet');
+            magnets.forEach(btn => {
+                btn.addEventListener('mousemove', (e) => {
+                    const rect = btn.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
+                    btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+                });
+                btn.addEventListener('mouseleave', () => {
+                    btn.style.transform = `translate(0px, 0px)`;
+                });
+            });
+
+            // 3. Chaos Tag Scramble Initialization
+            const chaosContainer = document.querySelector(".chaos-container");
+            if (chaosContainer) {
+                const tags = chaosContainer.querySelectorAll(".chaos-tag");
+                tags.forEach(tag => {
+                    // Random scatter
+                    const randX = (Math.random() - 0.5) * 800;
+                    const randY = (Math.random() - 0.5) * 600;
+                    const randRot = (Math.random() - 0.5) * 180;
+                    // Apply inline chaos
+                    tag.style.transform = `translate(${randX}px, ${randY}px) rotate(${randRot}deg) scale(0.5)`;
+                    tag.style.opacity = '0';
+                });
+            }
+
+            // 4. Scroll Logic (Hairline, Drift, Parallax)
+            const progress = document.getElementById("progress-bar");
+            const heroContent = document.querySelector(".hero-content");
+            const numerals = document.querySelectorAll(".bg-numeral");
+
+            window.addEventListener("scroll", () => {
+                const scrolled = window.scrollY;
+                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                const ratio = Math.max(0, Math.min(1, scrolled / maxScroll));
+                
+                // Scroll-Progress Hairline
+                progress.style.transform = `scaleX(${ratio})`;
+
+                // Hairline Color Inversion
+                const darkSections = document.querySelectorAll('.dark, .footer-monolith');
+                let invertedProgress = false;
+                darkSections.forEach(sec => {
+                    const rect = sec.getBoundingClientRect();
+                    if (rect.top <= 0 && rect.bottom >= 0) invertedProgress = true;
+                });
+                if (invertedProgress) progress.classList.add("inverted");
+                else progress.classList.remove("inverted");
+
+                // Hero Drift
+                if (heroContent) {
+                    const driftY = scrolled * 0.35;
+                    const opacity = Math.max(0, 1 - (scrolled / 600));
+                    heroContent.style.transform = `translateY(-${driftY}px)`;
+                    heroContent.style.opacity = opacity;
+                }
+
+                // Parallax Numerals
+                numerals.forEach(num => {
+                    const speed = parseFloat(num.getAttribute('data-speed') || '-0.3');
+                    const rect = num.parentElement.getBoundingClientRect();
+                    // only animate if in viewport or slightly above/below
+                    if (rect.top < window.innerHeight && rect.bottom > 0) {
+                        const offset = (window.innerHeight - rect.top) * speed;
+                        num.style.transform = `translateY(${offset}px)`;
+                    }
+                });
+            });
+
+            // 5. Intersection Observer for Reveals & Chaos Snap
+            const observerOptions = { threshold: 0.15, rootMargin: '0px 0px -10% 0px' };
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("in-view");
+                        
+                        // Chaos Snap
+                        if (entry.target.classList.contains("chaos-section")) {
+                            const chaos = entry.target.querySelector(".chaos-container");
+                            if (chaos) chaos.classList.add("snapped");
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll(".reveal-group, .chaos-section, .footer-monolith").forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>
