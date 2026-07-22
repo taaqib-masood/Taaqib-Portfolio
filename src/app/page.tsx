@@ -265,7 +265,7 @@ export default function BrutalistPortfolio() {
     snapContainer.addEventListener("scroll", handleScroll);
 
     // 5. Intersection Observer for Snap Reveals & Scrambler
-    const observerOptions = { threshold: 0.5 }; // Fire when 50% snapped in
+    const observerOptions = { threshold: 0.15 }; // Fire when 15% snapped in
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
