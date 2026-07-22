@@ -1,32 +1,125 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { projects } from "@/data/projects";
 import { skills, aboutParagraphs, contact } from "@/data/resume";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
+
+function ChatWidget() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [input, setInput] = useState("");
+  
+  const transport = React.useMemo(
+    () => new DefaultChatTransport({ api: "/api/chat/stream" }),
+    []
+  );
+
+  const { messages, sendMessage, status } = useChat({
+    transport,
+  });
+  
+  const isLoading = status === "streaming" || status === "submitted";
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
+  if (!isOpen) {
+    return (
+      <button 
+        className="chat-toggle"
+        onClick={() => setIsOpen(true)}
+      >
+        <span className="mono hover-text">CHAT</span>
+      </button>
+    );
+  }
+
+  return (
+    <div className="chat-window">
+      <div className="chat-header">
+        <span className="mono">AI.AGENT // ONLINE</span>
+        <button className="chat-close mono" onClick={() => setIsOpen(false)}>X</button>
+      </div>
+      <div className="chat-messages mono">
+        {messages.length === 0 && (
+          <div className="chat-msg system">
+            SYSTEM: Connection established. Ask about Taaqib&apos;s experience or projects.
+          </div>
+        )}
+        {messages.map(m => {
+          let textContent = "";
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const msgAny = m as any;
+          if (msgAny.parts) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            textContent = msgAny.parts.filter((p: any) => p.type === "text").map((p: any) => p.text).join("");
+          } else {
+            textContent = msgAny.content || "";
+          }
+          if (!textContent) return null;
+          return (
+            <div key={m.id} className={`chat-msg ${m.role === 'user' ? 'user' : 'assistant'}`}>
+              <span className="msg-prefix">{m.role === 'user' ? 'USER:' : 'SYS:'}</span> {textContent}
+            </div>
+          );
+        })}
+        {isLoading && <div className="chat-msg assistant"><span className="msg-prefix">SYS:</span> <span className="cli-cursor inline"></span></div>}
+        <div ref={messagesEndRef} />
+      </div>
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        if (!input.trim() || isLoading) return;
+        sendMessage({ role: "user", parts: [{ type: "text", text: input.trim() }] });
+        setInput("");
+      }} className="chat-input-form">
+        <input 
+          className="chat-input mono"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="TYPE MESSAGE..."
+          autoFocus
+        />
+        <button type="submit" className="chat-submit mono" disabled={isLoading || !input.trim()}>
+          {'>'}
+        </button>
+      </form>
+    </div>
+  );
+}
 
 export default function BrutalistPortfolio() {
   useEffect(() => {
+    const snapContainer = document.querySelector('.snap-container') as HTMLElement;
+    if (!snapContainer) return;
+
     // 1. Custom Brutalist Cursor
     const cursor = document.querySelector(".custom-cursor") as HTMLElement;
-    if (!cursor) return;
-
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;
     let cursorX = mouseX;
     let cursorY = mouseY;
     let animationFrameId: number;
+    let marqueeOffset = 0;
     
     const checkDarkSection = () => {
         const darkSections = document.querySelectorAll('.dark, .footer-monolith');
         let isDark = false;
         darkSections.forEach(sec => {
             const rect = sec.getBoundingClientRect();
-            if (mouseY >= rect.top && mouseY <= rect.bottom) {
+            // Using viewport coordinates for standard check
+            if (rect.top <= mouseY && rect.bottom >= mouseY) {
                 isDark = true;
             }
         });
-        if (isDark) cursor.classList.add("inverted");
-        else cursor.classList.remove("inverted");
+        if (cursor) {
+            if (isDark) cursor.classList.add("inverted");
+            else cursor.classList.remove("inverted");
+        }
     };
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -38,33 +131,69 @@ export default function BrutalistPortfolio() {
         
         checkDarkSection();
 
-        // Hover States
         const isText = target.tagName && target.tagName.match(/H1|H2|H3|P|SPAN/) && !target.closest('.project-row') && !target.closest('.inversion-band') && !target.closest('.garage-link');
-        const isCta = target.closest('.btn-magnet') || target.closest('.project-row') || target.closest('.garage-link') || target.closest('.inversion-band');
+        const isCta = target.closest('.btn-magnet') || target.closest('.project-row') || target.closest('.garage-link') || target.closest('.inversion-band') || target.closest('button') || target.closest('a');
 
-        if (isCta) {
-            cursor.classList.add("cta-hover");
-            cursor.classList.remove("text-hover");
-        } else if (isText) {
-            cursor.classList.add("text-hover");
-            cursor.classList.remove("cta-hover");
-        } else {
-            cursor.classList.remove("text-hover", "cta-hover");
+        if (cursor) {
+            if (isCta) {
+                cursor.classList.add("cta-hover");
+                cursor.classList.remove("text-hover");
+            } else if (isText) {
+                cursor.classList.add("text-hover");
+                cursor.classList.remove("cta-hover");
+            } else {
+                cursor.classList.remove("text-hover", "cta-hover");
+            }
         }
     };
 
     document.addEventListener("mousemove", handleMouseMove);
 
-    // Smooth Cursor Loop
-    function renderCursor() {
+    // Text Scrambler Util
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
+    const scrambleText = (el: HTMLElement) => {
+        const originalText = el.getAttribute('data-text') || el.innerText;
+        if (!el.getAttribute('data-text')) el.setAttribute('data-text', originalText);
+        
+        let iteration = 0;
+        
+        const scrambleInterval = setInterval(() => {
+            el.innerText = originalText.split("").map((char, index) => {
+                if (index < iteration) return originalText[index];
+                if (char === " ") return " ";
+                return chars[Math.floor(Math.random() * chars.length)];
+            }).join("");
+            
+            if (iteration >= originalText.length) {
+                clearInterval(scrambleInterval);
+            }
+            iteration += 1 / 3;
+        }, 30);
+    };
+
+    // Smooth Cursor Loop & Marquee
+    const marqueeContent = document.querySelector('.marquee-content') as HTMLElement;
+    function renderFrame() {
+        // Cursor Lerp
         cursorX += (mouseX - cursorX) * 0.4;
         cursorY += (mouseY - cursorY) * 0.4;
         if (cursor) {
             cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
         }
-        animationFrameId = requestAnimationFrame(renderCursor);
+
+        // Magnetic Marquee logic based on mouse X
+        if (marqueeContent) {
+            const normX = (mouseX / window.innerWidth) - 0.5; // -0.5 to +0.5
+            const speed = 1.5 + (normX * 3); // 0 to 3
+            marqueeOffset -= speed * 0.05; // Use percentage
+            if (marqueeOffset <= -50) marqueeOffset = 0;
+            if (marqueeOffset > 0) marqueeOffset = -50;
+            marqueeContent.style.transform = `translateX(${marqueeOffset}%)`;
+        }
+
+        animationFrameId = requestAnimationFrame(renderFrame);
     }
-    renderCursor();
+    renderFrame();
 
     // 2. Magnetic CTAs
     const magnets = document.querySelectorAll('.magnet');
@@ -80,7 +209,6 @@ export default function BrutalistPortfolio() {
         const btn = e.currentTarget as HTMLElement;
         btn.style.transform = `translate(0px, 0px)`;
     };
-    
     magnets.forEach(btn => {
         btn.addEventListener('mousemove', handleMagnetMove);
         btn.addEventListener('mouseleave', handleMagnetLeave);
@@ -98,19 +226,17 @@ export default function BrutalistPortfolio() {
         }
     }, 40);
 
-    // 4. Scroll Logic
+    // 4. Scroll Logic (Parallax & Hairline on snap container)
     const progress = document.getElementById("progress-bar");
-    const heroContent = document.querySelector(".hero-content") as HTMLElement;
     const numerals = document.querySelectorAll(".bg-numeral");
 
     const handleScroll = () => {
-        const scrolled = window.scrollY;
-        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = snapContainer.scrollTop;
+        const maxScroll = snapContainer.scrollHeight - snapContainer.clientHeight;
         const ratio = Math.max(0, Math.min(1, scrolled / maxScroll));
         
         checkDarkSection();
 
-        // Scroll-Progress Hairline
         if (progress) {
             progress.style.transform = `scaleX(${ratio})`;
             let invertedProgress = false;
@@ -123,47 +249,41 @@ export default function BrutalistPortfolio() {
             else progress.classList.remove("inverted");
         }
 
-        // Hero Drift
-        if (heroContent) {
-            const driftY = scrolled * 0.35;
-            const opacity = Math.max(0, 1 - (scrolled / 600));
-            heroContent.style.transform = `translateY(-${driftY}px)`;
-            heroContent.style.opacity = opacity.toString();
-        }
-
-        // Parallax Numerals
+        // Snap-based Parallax Numerals
         numerals.forEach(n => {
             const num = n as HTMLElement;
             const speed = parseFloat(num.getAttribute('data-speed') || '-0.3');
             if (num.parentElement) {
+                // Determine offset relative to viewport
                 const rect = num.parentElement.getBoundingClientRect();
-                if (rect.top < window.innerHeight && rect.bottom > 0) {
-                    const offset = (window.innerHeight - rect.top) * speed;
-                    num.style.transform = `translateY(${offset}px)`;
-                }
+                // When rect.top is 0, the section is fully snapped.
+                const offset = rect.top * speed;
+                num.style.transform = `translateY(${offset}px)`;
             }
         });
     };
-    
-    window.addEventListener("scroll", handleScroll);
+    snapContainer.addEventListener("scroll", handleScroll);
 
-    // 5. Intersection Observer
-    const observerOptions = { threshold: 0.15, rootMargin: '0px 0px -10% 0px' };
+    // 5. Intersection Observer for Snap Reveals & Scrambler
+    const observerOptions = { threshold: 0.5 }; // Fire when 50% snapped in
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add("in-view");
+                if (!entry.target.classList.contains("in-view")) {
+                    entry.target.classList.add("in-view");
+                    // Trigger scrambler on headings
+                    const scrambles = entry.target.querySelectorAll(".scramble-text");
+                    scrambles.forEach(el => scrambleText(el as HTMLElement));
+                }
             }
         });
     }, observerOptions);
 
-    document.querySelectorAll(".reveal-group, .footer-monolith").forEach(el => {
-        observer.observe(el);
-    });
+    document.querySelectorAll(".snap-section").forEach(el => observer.observe(el));
 
     return () => {
         document.removeEventListener("mousemove", handleMouseMove);
-        window.removeEventListener("scroll", handleScroll);
+        snapContainer.removeEventListener("scroll", handleScroll);
         cancelAnimationFrame(animationFrameId);
         magnets.forEach(btn => {
             btn.removeEventListener('mousemove', handleMagnetMove);
@@ -195,6 +315,7 @@ export default function BrutalistPortfolio() {
         html, body {
             background-color: #F4F4F0 !important;
             color: #0A0A0A !important;
+            overflow: hidden; /* Hide main scrollbar */
         }
 
         * {
@@ -204,6 +325,46 @@ export default function BrutalistPortfolio() {
         .monolith-theme ::selection {
             background-color: var(--ink);
             color: var(--paper);
+        }
+
+        /* Snap Architecture */
+        .snap-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            /* Hide scrollbar for aesthetics */
+            scrollbar-width: none;
+        }
+        .snap-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .snap-section {
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            padding: 10vh 5vw;
+        }
+
+        /* Acrylic Snap Reveal */
+        .acrylic-reveal {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transform: translateY(100%);
+            opacity: 0;
+            transition: transform 0.8s var(--hydraulic), opacity 0.8s var(--hydraulic);
+        }
+        .snap-section.in-view .acrylic-reveal {
+            transform: translateY(0%);
+            opacity: 1;
         }
 
         /* Cursor */
@@ -261,24 +422,10 @@ export default function BrutalistPortfolio() {
             letter-spacing: 0.1em;
         }
 
-        /* Sections */
-        .monolith-theme section {
-            position: relative;
-            min-height: 100vh;
-            padding: 15vh 5vw;
-        }
-        .monolith-theme section.dark {
+        /* Colors */
+        .monolith-theme .dark {
             background-color: var(--ink);
             color: var(--paper);
-        }
-        .monolith-theme section.acrylic {
-            margin-top: -15vh;
-            padding-top: 25vh;
-            z-index: 3;
-            border-top: 1px solid var(--ink);
-        }
-        .monolith-theme section.dark.acrylic {
-            border-top: 1px solid var(--paper);
         }
 
         /* Parallax Numerals */
@@ -294,41 +441,20 @@ export default function BrutalistPortfolio() {
             line-height: 0.8;
             letter-spacing: -0.05em;
         }
-        .monolith-theme section.dark .bg-numeral {
+        .monolith-theme .dark .bg-numeral {
             color: #1a1a1a;
             opacity: 1;
         }
 
-        .monolith-theme .container {
+        .container {
             position: relative;
             z-index: 1;
+            width: 100%;
             max-width: 1400px;
             margin: 0 auto;
         }
 
-        /* Stagger Reveals */
-        .reveal-group .reveal-item {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.8s var(--hydraulic), transform 0.8s var(--hydraulic);
-        }
-        .reveal-group.in-view .reveal-item {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .reveal-group .reveal-item:nth-child(1) { transition-delay: 0.05s; }
-        .reveal-group .reveal-item:nth-child(2) { transition-delay: 0.10s; }
-        .reveal-group .reveal-item:nth-child(3) { transition-delay: 0.15s; }
-        .reveal-group .reveal-item:nth-child(4) { transition-delay: 0.20s; }
-
         /* Hero */
-        .monolith-theme .hero {
-            display: flex;
-            align-items: center;
-        }
-        .hero-content {
-            will-change: transform, opacity;
-        }
         .hero-title {
             font-size: clamp(56px, 14vw, 180px);
             line-height: 0.85;
@@ -350,19 +476,20 @@ export default function BrutalistPortfolio() {
         .cli-word.revealed {
             opacity: 1;
         }
-        .cli-cursor {
+        .cli-cursor.inline {
             display: inline-block;
             width: 10px; height: 10px;
-            background-color: var(--ink);
+            background-color: currentColor;
             margin-left: 5px;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
             animation: blink 1s step-end infinite;
         }
         @keyframes blink { 50% { opacity: 0; } }
 
         /* Magnetic CTAs */
         .btn-magnet {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
             padding: 1rem 3rem;
             border: 1px solid var(--ink);
             background: transparent;
@@ -375,7 +502,6 @@ export default function BrutalistPortfolio() {
             transition: transform 0.2s linear; 
             position: relative;
             z-index: 10;
-            margin-top: 4rem;
         }
         .btn-magnet:hover {
             background: var(--ink) !important;
@@ -383,9 +509,35 @@ export default function BrutalistPortfolio() {
             transition: background 0s, color 0s;
         }
 
+        /* Marquee */
+        .marquee-wrapper {
+            position: absolute;
+            bottom: 0;
+            left: 0; width: 100%;
+            overflow: hidden;
+            border-top: 1px solid var(--ink);
+            background: var(--ink);
+            color: var(--paper);
+            padding: 1rem 0;
+            z-index: 10;
+        }
+        .marquee-content {
+            display: flex;
+            width: 200%;
+            font-size: 24px;
+            font-weight: bold;
+            will-change: transform;
+        }
+        .marquee-content span {
+            width: 50%;
+            display: block;
+            text-align: center;
+        }
+
         /* Massive Inversion Bands */
         .bands-container {
-            margin-top: 10vh;
+            margin-top: 5vh;
+            width: 100%;
         }
         .inversion-band {
             position: relative;
@@ -452,7 +604,8 @@ export default function BrutalistPortfolio() {
         /* Terminal Project Log */
         .project-list {
             border-top: 1px solid var(--paper);
-            margin-top: 10vh;
+            margin-top: 5vh;
+            width: 100%;
         }
         .project-row {
             display: flex;
@@ -506,19 +659,9 @@ export default function BrutalistPortfolio() {
 
         /* Monolith Footer */
         .footer-monolith {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            position: relative;
-            overflow: hidden;
             background-color: var(--ink);
             color: var(--paper);
-            padding: 10vh 5vw;
             border-top: 1px solid var(--paper);
-            margin-top: -15vh;
-            padding-top: 25vh;
-            z-index: 3;
         }
         
         /* Botanical SVG motif */
@@ -550,7 +693,7 @@ export default function BrutalistPortfolio() {
             display: flex;
             gap: 4rem;
             justify-content: center;
-            margin-bottom: 10vh;
+            margin-bottom: 5vh;
             z-index: 10;
         }
 
@@ -602,13 +745,6 @@ export default function BrutalistPortfolio() {
             position: relative;
             z-index: 10;
             margin-bottom: 2rem;
-            transform: translateY(100px);
-            opacity: 0;
-            transition: transform 1s var(--hydraulic), opacity 1s var(--hydraulic);
-        }
-        .footer-monolith.in-view .footer-wordmark {
-            transform: translateY(0);
-            opacity: 1;
         }
 
         .footer-hairline {
@@ -625,96 +761,215 @@ export default function BrutalistPortfolio() {
         .footer-monolith.in-view .footer-hairline {
             transform: scaleX(1);
         }
+
+        /* Chat Widget */
+        .chat-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 40px;
+            height: 40px;
+            background-color: var(--ink);
+            color: var(--ink); /* hidden by default */
+            border: 1px solid var(--ink);
+            z-index: 9999;
+            cursor: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: width 0.3s var(--hydraulic), background-color 0s;
+            overflow: hidden;
+        }
+        .chat-toggle:hover {
+            width: 100px;
+            background-color: var(--paper);
+            border-color: var(--ink);
+            color: var(--ink);
+        }
+        .chat-toggle .hover-text {
+            opacity: 0;
+            transition: opacity 0.1s;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .chat-toggle:hover .hover-text {
+            opacity: 1;
+        }
+        
+        .chat-window {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 300px;
+            height: 400px;
+            background-color: var(--paper);
+            border: 1px solid var(--ink);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 0 0 transparent; /* No shadow */
+        }
+        .chat-header {
+            padding: 10px;
+            background: var(--ink);
+            color: var(--paper);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .chat-close {
+            background: transparent;
+            color: var(--paper);
+            border: none;
+            cursor: none;
+            font-weight: bold;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            font-size: 12px;
+            line-height: 1.4;
+            scrollbar-width: none;
+        }
+        .chat-messages::-webkit-scrollbar { display: none; }
+        
+        .chat-msg { margin-bottom: 10px; }
+        .chat-msg.system { color: #888; }
+        .chat-msg.assistant { color: var(--ink); }
+        .chat-msg.user { color: var(--ink); text-align: right; }
+        .msg-prefix { font-weight: bold; }
+        
+        .chat-input-form {
+            display: flex;
+            border-top: 1px solid var(--ink);
+        }
+        .chat-input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            padding: 15px;
+            color: var(--ink);
+            font-size: 12px;
+            outline: none;
+        }
+        .chat-submit {
+            background: var(--ink);
+            color: var(--paper);
+            border: none;
+            padding: 0 15px;
+            font-weight: bold;
+            cursor: none;
+        }
       `}} />
 
       <div id="progress-bar"></div>
       <div className="custom-cursor"></div>
+      
+      <ChatWidget />
 
-      {/* 01 HERO */}
-      <section className="hero" id="about">
-          <div className="bg-numeral" data-speed="-0.3">01</div>
-          <div className="container hero-content reveal-group">
-              <h1 className="hero-title reveal-item">TAAQIB MASOOD</h1>
-              <div className="hero-about reveal-item">
-                  <p>
-                    {aboutParagraphs.join(" ").split(" ").map((word, idx) => (
-                      <span key={idx}>
-                        <span className="cli-word">{word}</span>
-                        <span> </span>
-                      </span>
-                    ))}
-                    <span className="cli-cursor"></span>
-                  </p>
-                  <a href="#projects" className="btn-magnet magnet">View Works</a>
-              </div>
-          </div>
-      </section>
-
-      {/* 02 SKILLS / MASSIVE INVERSION BANDS */}
-      <section id="skills">
-          <div className="bg-numeral" data-speed="-0.3">02</div>
-          <div className="container reveal-group">
-              <h2 className="hero-title reveal-item" style={{ fontSize: 'clamp(40px, 8vw, 100px)' }}>CORE SYSTEMS</h2>
-              
-              <div className="bands-container reveal-item">
-                  {Object.entries(skills).map(([category, items]) => (
-                      <div key={category} className="inversion-band">
-                          <div className="inversion-band-content">
-                              <span className="band-category">{category}</span>
-                              <span className="band-skills mono">{items.join(', ')}</span>
-                          </div>
+      <div className="snap-container">
+          
+          {/* 01 HERO */}
+          <section className="snap-section hero" id="about">
+              <div className="bg-numeral" data-speed="-0.1">01</div>
+              <div className="container hero-content acrylic-reveal">
+                  <h1 className="hero-title scramble-text">TAAQIB MASOOD</h1>
+                  <div className="hero-about">
+                      <p style={{ minHeight: '100px' }}>
+                        {aboutParagraphs.join(" ").split(" ").map((word, idx) => (
+                          <span key={idx}>
+                            <span className="cli-word">{word}</span>
+                            <span> </span>
+                          </span>
+                        ))}
+                        <span className="cli-cursor inline"></span>
+                      </p>
+                      <div style={{ display: 'flex', gap: '20px', marginTop: '4rem' }}>
+                          <a href="#projects" className="btn-magnet magnet">View Works</a>
+                          <a href="/assets/cv.pdf" download className="btn-magnet magnet">Download CV</a>
                       </div>
-                  ))}
+                  </div>
               </div>
-          </div>
-      </section>
 
-      {/* 03 SELECTED WORKS */}
-      <section className="dark acrylic" id="projects">
-          <div className="bg-numeral" data-speed="-0.3">03</div>
-          <div className="container reveal-group">
-              <h2 className="hero-title reveal-item" style={{ fontSize: 'clamp(40px, 8vw, 100px)' }}>SELECTED WORKS</h2>
-              
-              <div className="project-list reveal-item">
-                  {projects.map((proj, i) => (
-                      <a key={proj.slug} href={proj.demo || proj.repo} className="project-row" target="_blank" rel="noreferrer">
-                          <span className="project-index mono">{(i + 1).toString().padStart(3, '0')}</span>
-                          <span className="project-title">{proj.title}</span>
-                          <span className="project-stack mono">{proj.stack.slice(0, 5).join(', ')}</span>
-                          <span className="project-arrow">↗</span>
-                      </a>
-                  ))}
+              <div className="marquee-wrapper">
+                  <div className="marquee-content mono">
+                      <span>AVAILABLE FOR WORK // DUBAI, UAE // AI ENGINEER // </span>
+                      <span>AVAILABLE FOR WORK // DUBAI, UAE // AI ENGINEER // </span>
+                  </div>
               </div>
-          </div>
-      </section>
+          </section>
 
-      {/* 04 MONOLITH FOOTER */}
-      <footer className="footer-monolith">
-          <svg className="botanical-svg" viewBox="0 0 200 200" preserveAspectRatio="none">
-              {/* Minimal geometric botanical stem/leaf motif */}
-              <path d="M100 200 L100 20 C100 20, 140 40, 160 20 C160 20, 140 80, 100 100 C100 100, 60 40, 40 20 C40 20, 60 80, 100 100 M100 120 C100 120, 130 130, 150 110 C150 110, 130 160, 100 140 M100 140 C100 140, 70 130, 50 110 C50 110, 70 160, 100 140" />
-          </svg>
-
-          <div className="container reveal-group">
-              <div className="footer-links reveal-item">
-                  <a href={contact.linkedin} target="_blank" rel="noreferrer" className="garage-link mono">
-                      LINKEDIN
-                      <div className="garage-door"></div>
-                  </a>
-                  <a href={contact.github} target="_blank" rel="noreferrer" className="garage-link mono">
-                      GITHUB
-                      <div className="garage-door"></div>
-                  </a>
-                  <a href={`mailto:${contact.email}`} className="garage-link mono">
-                      EMAIL
-                      <div className="garage-door"></div>
-                  </a>
+          {/* 02 SKILLS / MASSIVE INVERSION BANDS */}
+          <section className="snap-section" id="skills">
+              <div className="bg-numeral" data-speed="-0.1">02</div>
+              <div className="container acrylic-reveal">
+                  <h2 className="hero-title scramble-text" style={{ fontSize: 'clamp(40px, 8vw, 100px)' }}>CORE SYSTEMS</h2>
+                  
+                  <div className="bands-container">
+                      {Object.entries(skills).map(([category, items]) => (
+                          <div key={category} className="inversion-band">
+                              <div className="inversion-band-content">
+                                  <span className="band-category">{category}</span>
+                                  <span className="band-skills mono">{items.join(', ')}</span>
+                              </div>
+                          </div>
+                      ))}
+                  </div>
               </div>
-          </div>
+          </section>
 
-          <h1 className="footer-wordmark">LET&apos;S BUILD</h1>
-          <div className="footer-hairline"></div>
-      </footer>
+          {/* 03 SELECTED WORKS */}
+          <section className="snap-section dark" id="projects">
+              <div className="bg-numeral" data-speed="-0.1">03</div>
+              <div className="container acrylic-reveal">
+                  <h2 className="hero-title scramble-text" style={{ fontSize: 'clamp(40px, 8vw, 100px)' }}>SELECTED WORKS</h2>
+                  
+                  <div className="project-list">
+                      {projects.map((proj, i) => (
+                          <a key={proj.slug} href={proj.demo || proj.repo} className="project-row" target="_blank" rel="noreferrer">
+                              <span className="project-index mono">{(i + 1).toString().padStart(3, '0')}</span>
+                              <span className="project-title">{proj.title}</span>
+                              <span className="project-stack mono">{proj.stack.slice(0, 5).join(', ')}</span>
+                              <span className="project-arrow">↗</span>
+                          </a>
+                      ))}
+                  </div>
+              </div>
+          </section>
+
+          {/* 04 MONOLITH FOOTER */}
+          <footer className="snap-section footer-monolith dark">
+              <div className="acrylic-reveal" style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', position: 'relative' }}>
+                  <svg className="botanical-svg" viewBox="0 0 200 200" preserveAspectRatio="none">
+                      <path d="M100 200 L100 20 C100 20, 140 40, 160 20 C160 20, 140 80, 100 100 C100 100, 60 40, 40 20 C40 20, 60 80, 100 100 M100 120 C100 120, 130 130, 150 110 C150 110, 130 160, 100 140 M100 140 C100 140, 70 130, 50 110 C50 110, 70 160, 100 140" />
+                  </svg>
+
+                  <div className="container">
+                      <div className="footer-links">
+                          <a href={contact.linkedin} target="_blank" rel="noreferrer" className="garage-link mono">
+                              LINKEDIN
+                              <div className="garage-door"></div>
+                          </a>
+                          <a href={contact.github} target="_blank" rel="noreferrer" className="garage-link mono">
+                              GITHUB
+                              <div className="garage-door"></div>
+                          </a>
+                          <a href={`mailto:${contact.email}`} className="garage-link mono">
+                              EMAIL
+                              <div className="garage-door"></div>
+                          </a>
+                      </div>
+                  </div>
+
+                  <h1 className="footer-wordmark scramble-text">LET&apos;S BUILD</h1>
+                  <div className="footer-hairline"></div>
+              </div>
+          </footer>
+          
+      </div>
     </div>
   );
 }
