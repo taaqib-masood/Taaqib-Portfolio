@@ -111,19 +111,19 @@ export function Hero() {
             <br />
             Available for Engineering roles.
           </p>
-          <div className="flex flex-col gap-2 w-full">
+          <div className="flex flex-col gap-3 w-full">
             <button
               onClick={handleAgentClick}
-              className="group flex items-center justify-between border border-border bg-surface px-4 py-3 text-[12px] font-semibold uppercase tracking-widest transition-colors hover:bg-primary hover:text-on-primary active:bg-foreground active:text-on-primary w-full"
+              className="group flex items-center justify-between border-2 border-[#ffffff] bg-transparent px-6 py-4 text-[14px] font-bold uppercase tracking-widest text-[#ffffff] transition-all hover:bg-[#ffffff] hover:text-[#000000] w-full"
             >
-              Ask Agent <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+              Ask Agent <ArrowUpRight className="h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
             </button>
             <a
               href="/taaqib-masood-cv.pdf"
               download
-              className="group flex items-center justify-between border border-border bg-surface px-4 py-3 text-[12px] font-semibold uppercase tracking-widest transition-colors hover:bg-primary hover:text-on-primary active:bg-foreground active:text-on-primary w-full"
+              className="group flex items-center justify-between border-2 border-[#ffffff] bg-transparent px-6 py-4 text-[14px] font-bold uppercase tracking-widest text-[#ffffff] transition-all hover:bg-[#ffffff] hover:text-[#000000] w-full"
             >
-              Download CV <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+              Download CV <ArrowUpRight className="h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
             </a>
           </div>
         </motion.div>

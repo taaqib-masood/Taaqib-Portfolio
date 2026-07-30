@@ -110,14 +110,6 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
                 {/* Base Layer: Blue Background */}
                 <div className="absolute inset-0 bg-[#1d4ed8] z-0" />
                 
-                {/* Base Layer: Image (if applicable) */}
-                {project.image && project.slug === "ltts-proctoring-portal" && (
-                  <div 
-                    className="absolute inset-0 bg-cover bg-center mix-blend-luminosity opacity-60 z-0"
-                    style={{ backgroundImage: `url(${project.image})` }}
-                  />
-                )}
-                
                 {/* Garage Door Layer (White Overlay) */}
                 <div 
                   className="absolute inset-0 bg-surface z-10 translate-y-0 group-hover:-translate-y-full"
