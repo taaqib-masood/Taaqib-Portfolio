@@ -71,29 +71,33 @@ export async function POST(req: Request) {
   }
 
   // --- Parse body ---
-  interface ClientMessage {
-    role: string;
-    content?: string;
-    parts?: Array<{ type: string; text?: string }>;
-  }
-
-  let messages: Array<{ role: string; content: string }>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let messages: any[];
   try {
-    const body = (await req.json()) as { messages: ClientMessage[] };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const body = (await req.json()) as { messages: any[] };
     if (!Array.isArray(body.messages)) throw new Error("Invalid messages");
     
-    messages = body.messages.map((m: ClientMessage) => {
-      let textContent = m.content;
-      if (!textContent && Array.isArray(m.parts)) {
-        textContent = m.parts
-          .filter((p) => p.type === "text")
-          .map((p) => p.text || "")
-          .join("");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    messages = body.messages.map((m: any) => {
+      // Keep tool messages and messages with content exactly as-is
+      if (m.role === "tool" || m.content !== undefined) {
+        return m;
       }
-      return {
-        role: m.role,
-        content: textContent || "",
-      };
+      // Map user/assistant parts to content string
+      if (Array.isArray(m.parts)) {
+        const textContent = m.parts
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .filter((p: any) => p.type === "text")
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .map((p: any) => p.text || "")
+          .join("");
+        return {
+          role: m.role,
+          content: textContent || "",
+        };
+      }
+      return m;
     });
   } catch (error) {
     console.error("Parse body error:", error);
