@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { CommandMenu } from "@/components/CommandMenu";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { ScrollFloor3D } from "@/components/ScrollFloor3D";
 import { cn } from "@/lib/utils";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -73,6 +74,7 @@ export default function RootLayout({
         {children}
         <CommandMenu />
         <ScrollToTop />
+        <ScrollFloor3D />
         <Analytics />
         <SpeedInsights />
       </body>

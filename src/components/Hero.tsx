@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
-import { BrutalistCanvas3D } from "@/components/BrutalistCanvas3D";
+import { WireframeMonolith } from "@/components/WireframeMonolith";
 
 export function Hero() {
   const containerRef = useRef<HTMLElement>(null);
@@ -16,7 +16,7 @@ export function Hero() {
 
   return (
     <section ref={containerRef} id="hero" className="relative min-h-screen pt-24 px-6 md:px-16 flex flex-col justify-between max-w-[1440px] mx-auto border-b border-border overflow-hidden">
-      <BrutalistCanvas3D />
+      <WireframeMonolith />
       
       {/* Massive Typography & Photo Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-0 mt-12 lg:mt-24">
