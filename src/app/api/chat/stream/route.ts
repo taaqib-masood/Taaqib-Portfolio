@@ -83,14 +83,18 @@ export async function POST(req: Request) {
     );
   }
 
-  // --- Stream with OpenRouter ---
+  // --- Stream with OpenRouter (GPT-4o-mini for 100% reliable tool-calling) ---
   const openrouter = createOpenAI({
     baseURL: 'https://openrouter.ai/api/v1',
     apiKey: process.env.OPENROUTER_API_KEY,
+    headers: {
+      "HTTP-Referer": "https://taaqib-masood.github.io",
+      "X-Title": "Taaqib Masood Portfolio",
+    },
   });
 
   const result = streamText({
-    model: openrouter("meta-llama/llama-3.3-70b-instruct"),
+    model: openrouter("openai/gpt-4o-mini"),
     system: SYSTEM_PROMPT,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK v6 accepts model messages
     messages: messages as any,

@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
+import { BrutalistCanvas3D } from "@/components/BrutalistCanvas3D";
 
 export function Hero() {
   const containerRef = useRef<HTMLElement>(null);
@@ -13,8 +14,6 @@ export function Hero() {
     offset: ["start start", "end start"]
   });
 
-  const clipPath = useTransform(scrollYProgress, [0, 0.15], ["inset(100% 0% 0% 0%)", "inset(0% 0% 0% 0%)"]);
-  const scale = useTransform(scrollYProgress, [0, 0.15], [1.2, 1]);
   const filter = useTransform(scrollYProgress, [0, 0.5, 1], ["grayscale(100%)", "grayscale(100%)", "grayscale(0%)"]);
 
   const handleAgentClick = () => {
@@ -23,7 +22,8 @@ export function Hero() {
   };
 
   return (
-    <section ref={containerRef} id="hero" className="relative min-h-screen pt-24 px-6 md:px-16 flex flex-col justify-between max-w-[1440px] mx-auto border-b border-border">
+    <section ref={containerRef} id="hero" className="relative min-h-screen pt-24 px-6 md:px-16 flex flex-col justify-between max-w-[1440px] mx-auto border-b border-border overflow-hidden">
+      <BrutalistCanvas3D />
       
       {/* Massive Typography & Photo Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-0 mt-12 lg:mt-24">
@@ -42,24 +42,21 @@ export function Hero() {
 
         <div className="lg:col-span-5 flex justify-start lg:justify-end items-end w-full">
           <motion.div 
-            style={{ clipPath }}
-            className="relative w-full aspect-square md:aspect-[4/5] border border-border bg-surface-container overflow-hidden"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, ease: [0.83, 0, 0.17, 1] }}
+            className="relative w-full aspect-[4/5] border border-border bg-surface-container overflow-hidden"
           >
-            {/* User must place their photo at public/taaqib-photo.jpg */}
-            <motion.div style={{ scale, filter, width: "100%", height: "100%" }} className="relative origin-bottom">
+            <motion.div style={{ filter, width: "100%", height: "100%" }} className="relative origin-bottom">
               <Image
                 src="/taaqib-photo.jpg"
                 alt="Taaqib Masood"
                 fill
-                className="object-cover"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
+                priority
+                sizes="(max-width: 768px) 100vw, 45vw"
+                className="object-cover object-top"
               />
             </motion.div>
-            <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold uppercase tracking-widest text-outline -z-10">
-              Replace with /taaqib-photo.jpg
-            </div>
           </motion.div>
         </div>
       </div>

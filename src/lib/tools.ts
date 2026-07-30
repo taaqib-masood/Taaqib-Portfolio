@@ -40,11 +40,17 @@ export const tools = {
         ),
     }),
     // @ts-expect-error - AI SDK v6 / Zod v4 TS inference mismatch
-    execute: async (params: { slug: string | null }): Promise<string> => {
-      if (!params || !params.slug) {
+    execute: async (params: { slug?: string; project?: string; project_name?: string; name?: string }): Promise<string> => {
+      const rawSlug = params?.slug || params?.project || params?.project_name || params?.name;
+      if (!rawSlug) {
         return JSON.stringify({ error: "Missing slug parameter", availableSlugs: projects.map((p) => p.slug) });
       }
-      const project = projects.find((p) => p.slug === params.slug);
+      const query = rawSlug.toLowerCase().trim();
+      const project = projects.find((p) => 
+        p.slug.toLowerCase() === query ||
+        p.title.toLowerCase().includes(query) ||
+        query.includes(p.slug.toLowerCase())
+      );
       if (!project) {
         return JSON.stringify({
           error: "Project not found",
