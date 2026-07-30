@@ -71,12 +71,32 @@ export async function POST(req: Request) {
   }
 
   // --- Parse body ---
+  interface ClientMessage {
+    role: string;
+    content?: string;
+    parts?: Array<{ type: string; text?: string }>;
+  }
+
   let messages: Array<{ role: string; content: string }>;
   try {
-    const body = (await req.json()) as { messages: Array<{ role: string; content: string }> };
-    messages = body.messages;
-    if (!Array.isArray(messages)) throw new Error("Invalid messages");
-  } catch {
+    const body = (await req.json()) as { messages: ClientMessage[] };
+    if (!Array.isArray(body.messages)) throw new Error("Invalid messages");
+    
+    messages = body.messages.map((m: ClientMessage) => {
+      let textContent = m.content;
+      if (!textContent && Array.isArray(m.parts)) {
+        textContent = m.parts
+          .filter((p) => p.type === "text")
+          .map((p) => p.text || "")
+          .join("");
+      }
+      return {
+        role: m.role,
+        content: textContent || "",
+      };
+    });
+  } catch (error) {
+    console.error("Parse body error:", error);
     return new Response(
       JSON.stringify({ error: "Invalid request body" }),
       { status: 400, headers: { "Content-Type": "application/json" } }
