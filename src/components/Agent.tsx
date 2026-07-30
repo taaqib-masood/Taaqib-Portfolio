@@ -63,8 +63,8 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
     transport,
     onError: (err: Error) => {
       const msg =
-        err.message?.includes("GROQ_API_KEY")
-          ? "GROQ_API_KEY is not configured. Add it to .env.local to enable the agent."
+        err.message?.includes("OPENROUTER_API_KEY")
+          ? "OPENROUTER_API_KEY is not configured. Add it to .env.local to enable the agent."
           : "Something went wrong. Please try again.";
       setApiError(msg);
     },
@@ -149,7 +149,7 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
             <ul className="space-y-4 text-[14px] leading-[1.5] text-surface/60">
               <li className="flex items-start gap-3">
                 <span className="w-1.5 h-1.5 bg-surface mt-1.5 flex-shrink-0" />
-                <span>Runs on <strong className="text-surface">Groq LLaMA 3.3-70b</strong> via the Vercel AI SDK.</span>
+                <span>Runs on <strong className="text-surface">LLaMA 3.3-70b</strong> via OpenRouter + Vercel AI SDK.</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="w-1.5 h-1.5 bg-surface mt-1.5 flex-shrink-0" />

@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { groq } from "@ai-sdk/groq";
+import { createOpenAI } from "@ai-sdk/openai";
 
 export const maxDuration = 30; // max duration for edge
 
@@ -12,8 +12,13 @@ export async function POST(req: Request) {
   try {
     const { prDiff, jiraAc } = await req.json();
 
+    const openrouter = createOpenAI({
+      baseURL: 'https://openrouter.ai/api/v1',
+      apiKey: process.env.OPENROUTER_API_KEY,
+    });
+
     const result = streamText({
-      model: groq("llama-3.3-70b-versatile"),
+      model: openrouter("meta-llama/llama-3.3-70b-instruct"),
       system: SYSTEM_PROMPT,
       messages: [
         {

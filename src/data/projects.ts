@@ -22,7 +22,7 @@ export const projects: Project[] = [
       "Express.js",
       "LiveKit",
       "Deepgram Nova-2",
-      "Groq llama-3.3-70b",
+      "LLaMA 3.3-70b (OpenRouter)",
       "MediaPipe",
       "JWT",
       "MongoDB Atlas",

@@ -57,7 +57,7 @@ export function McpTeaser() {
             <motion.div 
               animate={{ rotate: -360 }}
               transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-              className="absolute w-[100px] h-[100px] border border-[#ffffff] rounded-none rotate-45"
+              className="absolute w-[100px] h-[100px] border border-[#000000] rounded-none rotate-45"
             />
             <div className="absolute w-[20px] h-[20px] bg-[#2e5bff]" />
          </div>

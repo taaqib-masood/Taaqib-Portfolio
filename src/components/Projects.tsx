@@ -214,7 +214,7 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
                       return (
                         <li key={i} className="text-[14px] leading-[1.5] flex items-start gap-3 relative group/tooltip">
                           <span className="w-1.5 h-1.5 bg-foreground mt-1.5 flex-shrink-0" />
-                          <span className={tooltip ? "border-b border-dotted border-black cursor-help" : ""}>
+                          <span className={tooltip ? "border-b border-dotted border-white cursor-help" : ""}>
                             {metric}
                           </span>
                           {tooltip && (

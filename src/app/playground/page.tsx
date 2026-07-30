@@ -96,7 +96,7 @@ export default function PlaygroundPage() {
         </div>
         <div className="flex items-center gap-2 text-violet-400 font-heading font-bold">
           <Sparkles className="h-5 w-5" />
-          Groq LLM Playground
+          OpenRouter LLM Playground
         </div>
       </header>
 
@@ -153,7 +153,7 @@ export default function PlaygroundPage() {
             </div>
 
             <div className="mt-auto pt-4 text-xs text-slate-500 border-t border-slate-800">
-              Model: <span className="text-violet-400">llama-3.3-70b-versatile</span>
+              Model: <span className="text-violet-400">llama-3.3-70b-instruct</span>
             </div>
           </div>
         </aside>
