@@ -70,7 +70,9 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
   const isLoading = status === "streaming" || status === "submitted";
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messages && messages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
   useEffect(() => {
