@@ -1,20 +1,13 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import { BrutalistCanvas3D } from "@/components/BrutalistCanvas3D";
 
 export function Hero() {
   const containerRef = useRef<HTMLElement>(null);
-  
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"]
-  });
-
-  const filter = useTransform(scrollYProgress, [0, 0.5, 1], ["grayscale(100%)", "grayscale(100%)", "grayscale(0%)"]);
 
   const handleAgentClick = () => {
     const agentEl = document.getElementById("agent");
@@ -47,7 +40,7 @@ export function Hero() {
             transition={{ duration: 0.6, ease: [0.83, 0, 0.17, 1] }}
             className="relative w-full aspect-[4/5] border border-border bg-surface-container overflow-hidden"
           >
-            <motion.div style={{ filter, width: "100%", height: "100%" }} className="relative origin-bottom">
+            <div style={{ width: "100%", height: "100%" }} className="relative">
               <Image
                 src="/taaqib-photo.jpg"
                 alt="Taaqib Masood"
@@ -56,7 +49,7 @@ export function Hero() {
                 sizes="(max-width: 768px) 100vw, 45vw"
                 className="object-cover object-top"
               />
-            </motion.div>
+            </div>
           </motion.div>
         </div>
       </div>
