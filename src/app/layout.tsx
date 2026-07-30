@@ -19,14 +19,20 @@ const outfit = Outfit({
   variable: "--font-outfit",
 });
 
+const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_URL}`
+  : "https://taaqib-portfolio.vercel.app";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://taaqib-masood.github.io"),
+  metadataBase: new URL(siteUrl),
   title: "Taaqib Masood | AI Engineer",
   description: "AI engineer building systems where the model isn't the demo, it's the infrastructure. LLM Agents, RAG, MCP, Full-Stack.",
   openGraph: {
     title: "Taaqib Masood | AI Engineer",
     description: "AI engineer building systems where the model isn't the demo, it's the infrastructure.",
-    url: "https://taaqib-masood.github.io",
+    url: siteUrl,
     siteName: "Taaqib Masood",
     locale: "en_US",
     type: "website",
