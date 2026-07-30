@@ -62,11 +62,8 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
   const { messages, sendMessage, status, stop } = useChat({
     transport,
     onError: (err: Error) => {
-      const msg =
-        err.message?.includes("OPENROUTER_API_KEY")
-          ? "OPENROUTER_API_KEY is not configured. Add it to .env.local to enable the agent."
-          : "Something went wrong. Please try again.";
-      setApiError(msg);
+      console.error("Agent error details:", err);
+      setApiError("Terminal connection failed. If in production, make sure to add OPENROUTER_API_KEY to your Vercel Environment Variables and REDEPLOY the project.");
     },
   });
 
