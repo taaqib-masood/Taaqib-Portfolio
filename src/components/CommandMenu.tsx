@@ -51,7 +51,7 @@ export function CommandMenu() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 z-40 flex items-center justify-center gap-2 border border-border bg-surface px-4 py-3 text-[12px] font-semibold uppercase tracking-widest text-foreground transition-colors hover:bg-primary hover:text-on-primary hover:border-primary md:hidden"
+        className="fixed bottom-[92px] right-4 sm:bottom-16 sm:right-6 z-40 flex items-center justify-center gap-2 border border-border bg-surface px-3 py-2 sm:px-4 sm:py-3 text-[11px] sm:text-[12px] font-semibold uppercase tracking-widest text-foreground transition-colors hover:bg-primary hover:text-on-primary hover:border-primary md:hidden shadow-lg"
         aria-label="Open command menu"
       >
         <CommandIcon className="h-4 w-4" />

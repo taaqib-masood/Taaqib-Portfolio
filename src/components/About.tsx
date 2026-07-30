@@ -13,7 +13,7 @@ export function About() {
     target: containerRef,
     offset: ["start end", "start start"]
   });
-  const y = useTransform(scrollYProgress, [0, 1], ["50%", "0%"]); // Use 50% to prevent massive white gaps, still gives the fast slide-up effect
+  const y = useTransform(scrollYProgress, [0, 1], ["15%", "0%"]);
 
   const numProjects = projects.length;
   // 6 spoken languages (English, Hindi, Urdu, Tamil, Malayalam, Arabic)

@@ -65,7 +65,7 @@ export default function RootLayout({
       </head>
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased text-foreground overflow-x-hidden",
+          "min-h-screen bg-background font-sans antialiased text-foreground overflow-x-hidden pb-[88px] sm:pb-[56px]",
           inter.variable,
           outfit.variable
         )}
