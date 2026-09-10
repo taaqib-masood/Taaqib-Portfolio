@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
+import { createGroq } from "@ai-sdk/groq";
 
 export const maxDuration = 30; // max duration for edge
 
@@ -12,17 +12,12 @@ export async function POST(req: Request) {
   try {
     const { prDiff, jiraAc } = await req.json();
 
-    const openrouter = createOpenAI({
-      baseURL: 'https://openrouter.ai/api/v1',
-      apiKey: process.env.OPENROUTER_API_KEY,
-      headers: {
-        "HTTP-Referer": "https://taaqib-masood.github.io",
-        "X-Title": "Taaqib Masood Portfolio",
-      },
+    const groq = createGroq({
+      apiKey: process.env.GROQ_API_KEY,
     });
 
     const result = streamText({
-      model: openrouter("openai/gpt-4o-mini"),
+      model: groq(process.env.GROQ_MODEL || "openai/gpt-oss-20b"),
       system: SYSTEM_PROMPT,
       messages: [
         {

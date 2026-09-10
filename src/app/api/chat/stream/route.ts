@@ -81,7 +81,7 @@ ${r.highlights.map((h) => `  * ${h}`).join("\n")}
   .join("\n")}
 `;
 
-const SYSTEM_PROMPT = `You are Taaqib Masood's interactive AI Proxy and technical portfolio agent, embedded directly in his website's Agent Terminal.
+const BASE_SYSTEM_PROMPT = `You are Taaqib Masood's interactive AI Proxy and technical portfolio agent, embedded directly in his website's Agent Terminal.
 Your primary mission is to allow recruiters, engineering managers, and technical interviewers to interview YOU as Taaqib's digital proxy.
 
 CORE PERSONA & VOICE:
@@ -123,6 +123,31 @@ INTERVIEW PLAYBOOK:
 GROUNDED PORTFOLIO CONTEXT:
 ${PORTFOLIO_KNOWLEDGE}
 `;
+
+function getSystemPrompt(mode?: string): string {
+  switch (mode) {
+    case "architecture":
+      return `${BASE_SYSTEM_PROMPT}
+
+ACTIVE INTERVIEW MODE: [SYSTEM DESIGN & ARCHITECTURE]
+- Prioritize architectural blueprints, latency budgets, data schemas, and explicit trade-off analyses (e.g. SFU vs P2P mesh, solvePnP vs Haar cascades, RLS security vs performance).
+- Provide concrete system diagrams in ASCII/markdown when helpful.`;
+    case "star":
+      return `${BASE_SYSTEM_PROMPT}
+
+ACTIVE INTERVIEW MODE: [BEHAVIORAL / STAR METHOD]
+- Structure your response using explicit STAR headers: **Situation**, **Task**, **Action**, **Result**.
+- Cite concrete metrics (e.g. -78% false alerts, <50ms inference, 95% manual screening reduction) and emphasize collaboration, debugging methodology, and perseverance.`;
+    case "recruiter":
+      return `${BASE_SYSTEM_PROMPT}
+
+ACTIVE INTERVIEW MODE: [RECRUITER / SCREENING]
+- Keep responses crisp, high-signal, and executive-friendly (under 120 words).
+- Highlight immediate Dubai availability, UAE driving license, tech stack match, and seamless team integration.`;
+    default:
+      return BASE_SYSTEM_PROMPT;
+  }
+}
 
 // --- Simple in-memory rate limiter ---
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -181,9 +206,11 @@ export async function POST(req: Request) {
   // --- Parse body ---
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let rawMessages: any[];
+  let interviewMode: string | undefined;
   try {
-    const body = (await req.json()) as { messages: any[] };
+    const body = (await req.json()) as { messages: any[]; interviewMode?: string };
     rawMessages = body.messages;
+    interviewMode = body.interviewMode || req.headers.get("x-interview-mode") || undefined;
     if (!Array.isArray(rawMessages)) throw new Error("Invalid messages");
   } catch {
     return new Response(
@@ -208,7 +235,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: groq(selectedModel),
-    system: SYSTEM_PROMPT,
+    system: getSystemPrompt(interviewMode),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK v6 accepts model messages
     messages: await convertToModelMessages(normalizedMessages as any),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK v6 tool inference mismatch
