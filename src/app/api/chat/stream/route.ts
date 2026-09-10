@@ -204,11 +204,11 @@ export async function POST(req: Request) {
   }
 
   // --- Parse body ---
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let rawMessages: any[];
+  type RawMessage = { role: string; content?: string; parts?: { type: string; text: string }[] };
+  let rawMessages: RawMessage[];
   let interviewMode: string | undefined;
   try {
-    const body = (await req.json()) as { messages: any[]; interviewMode?: string };
+    const body = (await req.json()) as { messages: RawMessage[]; interviewMode?: string };
     rawMessages = body.messages;
     interviewMode = body.interviewMode || req.headers.get("x-interview-mode") || undefined;
     if (!Array.isArray(rawMessages)) throw new Error("Invalid messages");

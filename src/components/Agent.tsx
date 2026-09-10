@@ -76,12 +76,6 @@ const INTERVIEW_MODES: ModeOption[] = [
   },
 ];
 
-const SUGGESTED_PROMPTS = [
-  "Tell me about Reva AI — WhatsApp Receptionist",
-  "What did you build at LTTS?",
-  "Walk me through your resume / background",
-  "Tell me about a tough engineering challenge",
-];
 
 const TOOL_LABELS: Record<string, string> = {
   get_project: "get_project",

@@ -55,7 +55,7 @@ export const tools = {
       const query = rawSlug.toLowerCase().trim().replace(/[-_]/g, " ");
 
       // 1. Direct match or alias match against featured projects
-      let project = projects.find((p) => {
+      const project = projects.find((p) => {
         const slugNorm = p.slug.toLowerCase().replace(/[-_]/g, " ");
         const titleNorm = p.title.toLowerCase();
         if (slugNorm === query || titleNorm === query) return true;
