@@ -11,10 +11,10 @@ import { ParallaxNumber } from "@/components/ParallaxNumber";
 import { VerticalLine } from "@/components/VerticalLine";
 
 const SUGGESTED_PROMPTS = [
+  "Tell me about Reva AI — WhatsApp Receptionist",
   "What did you build at LTTS?",
-  "Explain your MCP pipeline",
-  "Which project uses edge AI?",
-  "What's your tech stack?",
+  "Walk me through your resume / background",
+  "Tell me about a tough engineering challenge",
 ];
 
 const TOOL_LABELS: Record<string, string> = {
