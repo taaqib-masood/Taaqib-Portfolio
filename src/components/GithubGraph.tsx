@@ -139,6 +139,12 @@ export function GithubGraph() {
             blockSize={14}
             blockMargin={6}
             fontSize={12}
+            year="last"
+            hideColorLegend={false}
+            hideMonthLabels={false}
+            labels={{
+              totalCount: "{{count}} contributions in the last year",
+            }}
           />
         </div>
       </div>
