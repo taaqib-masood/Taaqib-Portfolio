@@ -129,34 +129,6 @@ export const githubRepos: GithubRepoInfo[] = [
       "Custom physics-based Framer Motion cubic-bezier transitions",
       "Dynamic Google Translate RTL Arabic switcher with zero visual layout shift"
     ]
-  },
-  {
-    name: "graphify",
-    title: "Graphify — Codebase Knowledge Graph",
-    description: "Turns any codebase (code, docs, SQL schemas, configs, PDFs) into a queryable knowledge graph. A /graphify skill for Claude Code, Cursor, Codex, and Gemini CLI using local deterministic AST parsing — no vector store required.",
-    language: "Python",
-    url: "https://github.com/Graphify-Labs/graphify",
-    category: "Developer Tools & AI",
-    highlights: [
-      "Deterministic AST parsing via tree-sitter — every graph edge is explained, not hallucinated",
-      "GraphRAG with Leiden community detection for cross-file semantic clustering",
-      "MCP (Model Context Protocol) server for AI agent tool integration",
-      "Works as a skill across Claude Code, Cursor, Codex, and Gemini CLI"
-    ]
-  },
-  {
-    name: "ponytail",
-    title: "Ponytail — Lazy Senior Dev AI Rules",
-    description: "Makes your AI agent think like the laziest senior dev in the room. A set of battle-tested agent rules enforcing YAGNI, minimum diff, deletion over addition, and root-cause bug fixing.",
-    language: "JavaScript",
-    url: "https://github.com/DietrichGebert/ponytail",
-    category: "Developer Tools & AI",
-    highlights: [
-      "Enforces YAGNI ladder: does it need to be built? does stdlib/platform already do it? only then write code",
-      "Shortest working diff wins — boring over clever, fewest files possible",
-      "Bug fix = root cause not symptom: grep all callers, fix the shared function once",
-      "Compatible with Claude Code, Cursor, Codex, and Gemini CLI as agent rules/skills"
-    ]
   }
 ];
 

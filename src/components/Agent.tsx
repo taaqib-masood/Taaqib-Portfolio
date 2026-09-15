@@ -132,11 +132,11 @@ function getContextualFollowUps(text: string, currentMode: InterviewMode): strin
       "How would you scale this across 100 repositories?",
     ];
   }
-  if (lower.includes("github") || lower.includes("graphify") || lower.includes("ponytail")) {
+  if (lower.includes("github") || lower.includes("repo") || lower.includes("open-source")) {
     return [
-      "Tell me about Graphify and AST knowledge graphs",
-      "How does Ponytail enforce lazy-senior-dev YAGNI rules?",
       "What ML models power your stock market forecasting repo?",
+      "How did you build Reva AI's WhatsApp state machine?",
+      "Walk me through your predictive maintenance architecture",
     ];
   }
   if (currentMode === "recruiter") {

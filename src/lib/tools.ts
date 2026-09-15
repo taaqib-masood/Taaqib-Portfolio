@@ -27,8 +27,6 @@ const GITHUB_FALLBACK = {
     { name: "garageIQ-landing-page", title: "GarageIQ Workshop Platform", stars: 2, language: "CSS" },
     { name: "majestic-constructions", title: "Majestic Constructions Portal", stars: 0, language: "TypeScript" },
     { name: "Taaqib-Portfolio", title: "Swiss Brutalist Portfolio with Agent Terminal", stars: 0, language: "TypeScript" },
-    { name: "graphify", title: "Graphify — Codebase Knowledge Graph (Graphify-Labs)", stars: 0, language: "Python", url: "https://github.com/Graphify-Labs/graphify" },
-    { name: "ponytail", title: "Ponytail — Lazy Senior Dev AI Rules (DietrichGebert)", stars: 0, language: "JavaScript", url: "https://github.com/DietrichGebert/ponytail" },
   ],
 };
 
@@ -38,12 +36,12 @@ const GITHUB_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 export const tools = {
   get_project: tool({
     description:
-      "Fetch detailed information about any of Taaqib's portfolio or GitHub projects. Accepts any slug, alias, or title, including 'reva-ai', 'smart-hospital-agent', 'ltts-proctoring-portal', 'mcp-code-review-pipeline', 'stock-forecasting-risk', 'salon-booking-saas', 'predictive-maintenance', 'atlas-ai', 'garageiq', 'graphify', 'ponytail', etc.",
+      "Fetch detailed information about any of Taaqib's portfolio or GitHub projects. Accepts any slug, alias, or title, including 'reva-ai', 'smart-hospital-agent', 'ltts-proctoring-portal', 'mcp-code-review-pipeline', 'stock-forecasting-risk', 'salon-booking-saas', 'predictive-maintenance', 'atlas-ai', 'garageiq', etc.",
     parameters: z.object({
       slug: z
         .string()
         .describe(
-          "Project slug, alias, or title (e.g. 'reva-ai', 'smart-hospital-agent', 'ltts', 'mcp', 'stock', 'salon', 'predictive-maintenance', 'atlas', 'graphify', 'ponytail')"
+          "Project slug, alias, or title (e.g. 'reva-ai', 'smart-hospital-agent', 'ltts', 'mcp', 'stock', 'salon', 'predictive-maintenance', 'atlas')"
         ),
     }),
     // @ts-expect-error - AI SDK v6 / Zod v4 TS inference mismatch
