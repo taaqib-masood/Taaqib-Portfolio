@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport, type UIMessage } from "ai";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
@@ -9,6 +9,7 @@ import remarkGfm from "remark-gfm";
 import { Send, Wrench, Copy, Check, Sparkles, Terminal, Layers, Award, UserCheck } from "lucide-react";
 import { ParallaxNumber } from "@/components/ParallaxNumber";
 import { VerticalLine } from "@/components/VerticalLine";
+import { getToolTelemetry, measureRequest, type AgentMetrics } from "@/lib/agent-telemetry";
 
 export type InterviewMode = "general" | "architecture" | "star" | "recruiter";
 
@@ -94,20 +95,6 @@ function getTextFromParts(parts: AnyPart[] | undefined, content: string | undefi
     .join("");
 }
 
-function getToolsFromParts(parts: AnyPart[] | undefined): string[] {
-  if (!parts) return [];
-  const names = new Set<string>();
-  for (const part of parts) {
-    if (
-      (part.type === "tool-invocation" || part.type === "tool-call") &&
-      typeof part.toolInvocation?.toolName === "string"
-    ) {
-      names.add(part.toolInvocation.toolName as string);
-    }
-  }
-  return Array.from(names);
-}
-
 // Heuristic to generate contextual follow-ups after an assistant message
 function getContextualFollowUps(text: string, currentMode: InterviewMode): string[] {
   const lower = text.toLowerCase();
@@ -153,14 +140,14 @@ function getContextualFollowUps(text: string, currentMode: InterviewMode): strin
   ];
 }
 
-export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
+export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string | null; onMetrics?: (metrics: AgentMetrics) => void }) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [inputValue, setInputValue] = useState("");
   const [apiError, setApiError] = useState<string | null>(null);
   const [activeMode, setActiveMode] = useState<InterviewMode>("general");
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [streamStartTime, setStreamStartTime] = useState<number | null>(null);
+  const requestTiming = useRef<{ start: number; firstText: number | null; end: number | null; previousId?: string }>({ start: 0, firstText: null, end: null });
   const [elapsedMs, setElapsedMs] = useState<number | null>(null);
 
   const transport = useMemo(
@@ -174,7 +161,7 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
     [activeMode]
   );
 
-  const { messages, sendMessage, status, stop } = useChat({
+  const { messages, sendMessage, status, stop } = useChat<UIMessage<{ outputTokens?: number }>>({
     transport,
     onError: (err: Error) => {
       console.error("Agent error details:", err);
@@ -185,23 +172,25 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
   const isLoading = status === "streaming" || status === "submitted";
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (isLoading) {
-      if (!streamStartTime) {
-        setStreamStartTime(Date.now());
-      }
-      interval = setInterval(() => {
-        if (streamStartTime) {
-          setElapsedMs(Date.now() - streamStartTime);
-        }
-      }, 50);
-    } else {
-      setStreamStartTime(null);
+    const timing = requestTiming.current;
+    if (!timing.start) return;
+    const latest = messages.at(-1);
+    const response = latest?.role === "assistant" && latest.id !== timing.previousId ? latest : undefined;
+    if (timing.firstText === null && response?.parts.some(p => p.type === "text" && p.text.length > 0)) {
+      timing.firstText = performance.now();
     }
-    return () => {
-      if (interval) clearInterval(interval);
+    const update = () => {
+      const now = performance.now();
+      if (!isLoading && timing.end === null) timing.end = now;
+      const measurement = measureRequest(timing.start, timing.firstText, timing.end ?? now, !isLoading ? response?.metadata?.outputTokens : undefined);
+      setElapsedMs(measurement.elapsedMs);
+      onMetrics?.({ ...measurement, state: status === "error" ? "error" : isLoading ? (timing.firstText === null ? "waiting" : "streaming") : response?.metadata ? "complete" : "stopped" });
     };
-  }, [isLoading, streamStartTime]);
+    update();
+    if (!isLoading) return;
+    const interval = setInterval(update, 100);
+    return () => clearInterval(interval);
+  }, [messages, status, isLoading, onMetrics]);
 
   useEffect(() => {
     if (messages && messages.length > 0) {
@@ -228,14 +217,16 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
       const trimmed = text.trim();
       if (!trimmed || isLoading) return;
       setApiError(null);
-      setStreamStartTime(Date.now());
+      requestTiming.current = { start: performance.now(), firstText: null, end: null, previousId: messages.at(-1)?.id };
+      setElapsedMs(0);
+      onMetrics?.({ state: "waiting", firstTextMs: null, elapsedMs: 0, tokensPerSecond: null });
       sendMessage({
         role: "user",
         parts: [{ type: "text", text: trimmed }],
       });
       setInputValue("");
     },
-    [isLoading, sendMessage]
+    [isLoading, sendMessage, messages, onMetrics]
   );
 
   const handleFormSubmit = (e: React.FormEvent) => {
@@ -298,7 +289,7 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
         </div>
         <div className="lg:col-span-8 p-6 md:p-8 bg-surface/5 flex flex-col justify-center">
           <p className="text-[15px] md:text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-surface/70">
-            Technical Interview Proxy. Interview Taaqib Masood on system architecture, code challenges, STAR stories, and recruiter fit with sub-250ms streaming.
+            Technical Interview Proxy. Interview Taaqib Masood on system architecture, code challenges, STAR stories, and recruiter fit with live streaming and measured browser latency.
           </p>
         </div>
       </div>
@@ -365,13 +356,13 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
                 <li className="flex items-start gap-2.5">
                   <span className="w-1.5 h-1.5 bg-emerald-400 mt-1.5 flex-shrink-0" />
                   <span>
-                    Inference: <strong className="text-surface">Groq LPU™ Engine</strong> (sub-250ms TTFT)
+                    Inference: <strong className="text-surface">Groq LPU™ Engine</strong> (latency measured per request)
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <span className="w-1.5 h-1.5 bg-emerald-400 mt-1.5 flex-shrink-0" />
                   <span>
-                    Context: <strong className="text-surface">Zero-Latency Grounded</strong> (all 6 projects & 10 repos)
+                    Context: <strong className="text-surface">In-Prompt Portfolio Context</strong> (all 6 projects & 10 repos)
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
@@ -456,9 +447,10 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
 
                 const msgAny = msg as { parts?: AnyPart[]; content?: string; id: string; role: string };
                 const textContent = getTextFromParts(msgAny.parts, msgAny.content);
-                if (!textContent && msg.role === "assistant") return null;
-
-                const toolsUsed = msg.role === "assistant" ? getToolsFromParts(msgAny.parts) : [];
+                const toolsUsed = msg.role === "assistant"
+                  ? getToolTelemetry(msg.parts, isLoading && msg.id === messages.at(-1)?.id)
+                  : [];
+                if (!textContent && toolsUsed.length === 0 && msg.role === "assistant") return null;
                 const isAssistant = msg.role === "assistant";
 
                 return (
@@ -507,20 +499,16 @@ export function Agent({ prefillMessage }: { prefillMessage?: string | null }) {
                             )}
                           </div>
                           {toolsUsed.length > 0 && (
-                            <div className="mt-3 pt-3 border-t border-surface/15 flex flex-wrap items-center gap-2">
-                              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-surface/50">
-                                Tools:
-                              </span>
-                              {toolsUsed.map((t) => (
-                                <span
-                                  key={t}
-                                  className="flex items-center gap-1.5 border border-surface/20 bg-surface/10 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-surface/80"
-                                >
-                                  <Wrench className="h-2.5 w-2.5" />
-                                  {TOOL_LABELS[t] ?? t}
-                                </span>
+                            <ul aria-label="Tool activity" className="mt-3 pt-3 border-t border-surface/15 space-y-2 font-mono text-[11px]">
+                              {toolsUsed.map((tool) => (
+                                <li key={tool.id} className={`flex flex-wrap items-center gap-x-3 gap-y-1 ${tool.state === "failed" ? "text-red-400" : "text-surface/80"}`}>
+                                  <span>▸ {tool.name}()</span>
+                                  <span className="uppercase tracking-wider">
+                                    {tool.state === "complete" ? "✓ " : tool.state === "failed" ? "× " : "· "}{tool.state}
+                                  </span>
+                                </li>
                               ))}
-                            </div>
+                            </ul>
                           )}
                         </>
                       ) : (
