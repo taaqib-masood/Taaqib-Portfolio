@@ -1,16 +1,35 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { Resend } from "resend";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
-export const runtime = 'edge';
+export const runtime = "edge";
 
-const resend = new Resend(process.env.RESEND_API_KEY || "dummy_key_to_prevent_crash");
+const contactSchema = z.object({
+  name: z.string().trim().min(1).max(100),
+  email: z.string().trim().email().max(200),
+  message: z.string().trim().min(1).max(5_000),
+});
 
 export async function POST(req: Request) {
   try {
-    const { name, email, message } = await req.json();
+    const body = await req.json().catch(() => null);
+    const parsed = contactSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid submission. Check name, email, and message (max 5000 chars)." },
+        { status: 400 }
+      );
+    }
+    const { name, email, message } = parsed.data;
 
-    if (!name || !email || !message) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    // --- Rate limit: 5 submissions / hour / IP (prevents email bombing via Resend) ---
+    const { allowed } = rateLimit(`contact:${getClientIp(req)}`, 5, 60 * 60 * 1000);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Too many messages. Please try again later." },
+        { status: 429 }
+      );
     }
 
     if (!process.env.RESEND_API_KEY) {
@@ -21,6 +40,7 @@ export async function POST(req: Request) {
       );
     }
 
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const { data, error } = await resend.emails.send({
       from: "Contact Form <onboarding@resend.dev>",
       to: "taaqib.masood@icloud.com",

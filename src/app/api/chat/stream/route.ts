@@ -1,6 +1,7 @@
 import { createGroq } from "@ai-sdk/groq";
 import { stepCountIs, streamText, convertToModelMessages } from "ai";
 import { tools } from "@/lib/tools";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { projects, githubRepos } from "@/data/projects";
 import {
   aboutParagraphs,
@@ -149,27 +150,12 @@ ACTIVE INTERVIEW MODE: [RECRUITER / SCREENING]
   }
 }
 
-// --- Simple in-memory rate limiter ---
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+// --- Rate limiting: shared bounded limiter (30 msgs / hour / IP) ---
 const MAX_REQUESTS = 30;
-const WINDOW_MS = 60 * 60 * 1000; // 1 hour
-
-function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return { allowed: true, remaining: MAX_REQUESTS - 1 };
-  }
-
-  if (entry.count >= MAX_REQUESTS) {
-    return { allowed: false, remaining: 0 };
-  }
-
-  entry.count++;
-  return { allowed: true, remaining: MAX_REQUESTS - entry.count };
-}
+const WINDOW_MS = 60 * 60 * 1000;
+// History caps — giant pasted histories would burn tokens per request.
+const MAX_CHAT_MESSAGES = 30;
+const MAX_MESSAGE_CHARS = 8_000;
 
 export async function POST(req: Request) {
   // --- API key guard ---
@@ -184,12 +170,9 @@ export async function POST(req: Request) {
   }
 
   // --- Rate limiter ---
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
-    req.headers.get("x-real-ip") ??
-    "anonymous";
+  const ip = getClientIp(req);
 
-  const { allowed, remaining } = checkRateLimit(ip);
+  const { allowed, remaining } = rateLimit(`chat:${ip}`, MAX_REQUESTS, WINDOW_MS);
   if (!allowed) {
     return new Response(
       JSON.stringify({ error: "Rate limit exceeded. Max 30 messages per hour." }),
@@ -212,6 +195,9 @@ export async function POST(req: Request) {
     rawMessages = body.messages;
     interviewMode = body.interviewMode || req.headers.get("x-interview-mode") || undefined;
     if (!Array.isArray(rawMessages)) throw new Error("Invalid messages");
+    if (rawMessages.length === 0 || rawMessages.length > MAX_CHAT_MESSAGES) {
+      throw new Error("Too many messages");
+    }
   } catch {
     return new Response(
       JSON.stringify({ error: "Invalid request body" }),
@@ -219,12 +205,22 @@ export async function POST(req: Request) {
     );
   }
 
-  // Ensure each message conforms to UI message format with parts for convertToModelMessages
+  // Ensure each message conforms to UI message format with parts for convertToModelMessages,
+  // clamping per-message text so oversized histories can't inflate token spend.
   const normalizedMessages = rawMessages.map((m) => {
-    if (m.parts && Array.isArray(m.parts)) return m;
+    if (m.parts && Array.isArray(m.parts)) {
+      return {
+        ...m,
+        parts: m.parts.map((p) =>
+          p.type === "text" && typeof p.text === "string"
+            ? { ...p, text: p.text.slice(0, MAX_MESSAGE_CHARS) }
+            : p
+        ),
+      };
+    }
     return {
       ...m,
-      parts: [{ type: "text", text: m.content || "" }],
+      parts: [{ type: "text", text: (m.content || "").slice(0, MAX_MESSAGE_CHARS) }],
     };
   });
 
@@ -238,13 +234,14 @@ export async function POST(req: Request) {
     system: getSystemPrompt(interviewMode),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK v6 accepts model messages
     messages: await convertToModelMessages(normalizedMessages as any),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK v6 tool inference mismatch
-    tools: tools as any,
+    tools,
     stopWhen: stepCountIs(4), // allow tool-call steps if needed, but in-context knowledge answers immediately
   });
 
   // AI SDK v6: toUIMessageStreamResponse() streams SSE data
   return result.toUIMessageStreamResponse({
+    messageMetadata: ({ part }) => part.type === "finish"
+      ? { outputTokens: part.totalUsage.outputTokens } : undefined,
     headers: {
       "X-RateLimit-Remaining": String(remaining),
     },

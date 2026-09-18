@@ -37,14 +37,13 @@ export const tools = {
   get_project: tool({
     description:
       "Fetch detailed information about any of Taaqib's portfolio or GitHub projects. Accepts any slug, alias, or title, including 'reva-ai', 'smart-hospital-agent', 'ltts-proctoring-portal', 'mcp-code-review-pipeline', 'stock-forecasting-risk', 'salon-booking-saas', 'predictive-maintenance', 'atlas-ai', 'garageiq', etc.",
-    parameters: z.object({
+    inputSchema: z.object({
       slug: z
         .string()
         .describe(
           "Project slug, alias, or title (e.g. 'reva-ai', 'smart-hospital-agent', 'ltts', 'mcp', 'stock', 'salon', 'predictive-maintenance', 'atlas')"
         ),
     }),
-    // @ts-expect-error - AI SDK v6 / Zod v4 TS inference mismatch
     execute: async (params: { slug?: string; project?: string; project_name?: string; name?: string }): Promise<string> => {
       const rawSlug = params?.slug || params?.project || params?.project_name || params?.name;
       if (!rawSlug) {
@@ -122,7 +121,7 @@ export const tools = {
   get_resume_section: tool({
     description:
       "Fetch a specific section of Taaqib's resume.",
-    parameters: z.object({
+    inputSchema: z.object({
       section: z
         .enum([
           "about",
@@ -135,7 +134,6 @@ export const tools = {
         ])
         .describe("The resume section to fetch"),
     }),
-    // @ts-expect-error - AI SDK v6 / Zod v4 TS inference mismatch
     execute: async (params: {
       section:
         | "about"
@@ -165,8 +163,7 @@ export const tools = {
 
   get_github_stats: tool({
     description: "Fetch Taaqib's live GitHub statistics.",
-    parameters: z.object({}),
-    // @ts-expect-error - AI SDK v6 / Zod v4 TS inference mismatch
+    inputSchema: z.object({}),
     execute: async (): Promise<string> => {
       // Check in-memory cache first for sub-1ms response
       if (cachedGithubData && Date.now() - cachedGithubData.timestamp < GITHUB_CACHE_TTL) {
@@ -233,10 +230,9 @@ export const tools = {
 
   get_live_demo: tool({
     description: "Get the live demo URL for a project that has one deployed.",
-    parameters: z.object({
+    inputSchema: z.object({
       slug: z.string().describe("Project slug, alias, or title (e.g. 'stocks', 'stock-forecasting-risk')"),
     }),
-    // @ts-expect-error - AI SDK v6 / Zod v4 TS inference mismatch
     execute: async (params: { slug: string | null }): Promise<string> => {
       if (!params || !params.slug) return JSON.stringify({ error: "Missing slug parameter" });
       const query = params.slug.toLowerCase().trim().replace(/[-_]/g, " ");

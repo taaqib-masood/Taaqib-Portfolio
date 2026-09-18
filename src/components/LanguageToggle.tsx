@@ -20,11 +20,11 @@ export function LanguageToggle() {
     const nextLang = lang === "EN" ? "AR" : "EN";
     
     if (nextLang === "AR") {
-      document.cookie = `googtrans=/en/ar; path=/; domain=${window.location.hostname}`;
-      document.cookie = `googtrans=/en/ar; path=/`;
+      document.cookie = `googtrans=/en/ar; path=/; domain=${window.location.hostname}; Secure; SameSite=Lax`;
+      document.cookie = `googtrans=/en/ar; path=/; Secure; SameSite=Lax`;
     } else {
-      document.cookie = `googtrans=/en/en; path=/; domain=${window.location.hostname}`;
-      document.cookie = `googtrans=/en/en; path=/`;
+      document.cookie = `googtrans=/en/en; path=/; domain=${window.location.hostname}; Secure; SameSite=Lax`;
+      document.cookie = `googtrans=/en/en; path=/; Secure; SameSite=Lax`;
     }
     window.location.reload();
   };

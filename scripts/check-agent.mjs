@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import { getToolTelemetry, measureRequest } from '../src/lib/agent-telemetry.ts';
+
+const part = (state, extra = {}) => ({ type: 'tool-get_project', toolCallId: 'a', state, input: { slug: 'reva' }, ...extra });
+assert.equal(getToolTelemetry([part('input-streaming')], true)[0].state, 'receiving input');
+assert.equal(getToolTelemetry([part('input-available')], true)[0].state, 'running');
+assert.equal(getToolTelemetry([part('input-available')], false)[0].state, 'interrupted');
+assert.equal(getToolTelemetry([part('output-available', { output: 'ok' })], false)[0].state, 'complete');
+assert.equal(getToolTelemetry([part('output-available', { output: '{"error":"not found"}' })], false)[0].state, 'failed');
+assert.equal(getToolTelemetry([part('output-error', { errorText: 'timeout' })], false)[0].state, 'failed');
+assert.equal(getToolTelemetry([part('output-denied')], false)[0].state, 'failed');
+assert.equal(getToolTelemetry([part('approval-requested')], true)[0].state, 'approval required');
+assert.equal(getToolTelemetry([{ ...part('input-available'), type: 'dynamic-tool', toolName: 'lookup' }], true)[0].name, 'lookup');
+assert.equal(getToolTelemetry([part('input-available'), part('input-available', { toolCallId: 'b' })], true).length, 2);
+assert.deepEqual(getToolTelemetry([{ type: 'text', text: 'hello' }], true), []);
+assert.deepEqual(measureRequest(100, null, 100), { firstTextMs: null, elapsedMs: 0, tokensPerSecond: null });
+assert.deepEqual(measureRequest(100, 350, 2100, 100), { firstTextMs: 250, elapsedMs: 2000, tokensPerSecond: 50 });
+assert.equal(measureRequest(100, null, 200, NaN).tokensPerSecond, null);
+assert.equal(measureRequest(100, null, 200, -1).tokensPerSecond, null);
+console.log('PASS: tool states, repeated calls, dynamic tools, interruption and measured request latency/throughput');

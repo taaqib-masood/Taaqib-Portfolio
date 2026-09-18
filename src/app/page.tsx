@@ -15,10 +15,12 @@ import { StatusBar } from "@/components/StatusBar";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { ScrollHairline } from "@/components/ScrollHairline";
 import { Toaster } from "@/components/ui/sonner";
+import type { AgentMetrics } from "@/lib/agent-telemetry";
 
 export default function Home() {
   const [agentPrefill, setAgentPrefill] = useState<string | null>(null);
   const [activeSkill, setActiveSkill] = useState<string | null>(null);
+  const [agentMetrics, setAgentMetrics] = useState<AgentMetrics | null>(null);
 
   const handleAskAgentAboutProject = useCallback((title: string) => {
     setAgentPrefill(`Tell me about the "${title}" project.`);
@@ -52,7 +54,7 @@ export default function Home() {
       <LanguageToggle />
       <Hero />
       <About />
-      <Agent prefillMessage={agentPrefill} />
+      <Agent prefillMessage={agentPrefill} onMetrics={setAgentMetrics} />
       <Projects onAskAgent={handleAskAgentAboutProject} activeSkill={activeSkill} />
       <McpTeaser />
       <Skills activeSkill={activeSkill} onSkillSelect={setActiveSkill} />
@@ -69,7 +71,7 @@ export default function Home() {
           <p>Built with Next.js & Framer Motion</p>
         </div>
       </footer>
-      <StatusBar />
+      <StatusBar metrics={agentMetrics} />
       <Toaster position="bottom-right" className="rounded-none border-border" />
     </main>
   );

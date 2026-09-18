@@ -145,15 +145,16 @@ export default function PlaygroundPage() {
               <input
                 type="number"
                 min="1"
-                max="8192"
+                max="1024"
                 value={maxTokens}
                 onChange={(e) => setMaxTokens(parseInt(e.target.value))}
                 className="w-full bg-slate-950/50 border border-slate-800 rounded-lg p-2 text-sm text-slate-300 focus:outline-none focus:ring-1 focus:ring-violet-500 focus:border-violet-500"
               />
+              <p className="text-[10px] text-slate-600">Server caps output at 1024 tokens.</p>
             </div>
 
             <div className="mt-auto pt-4 text-xs text-slate-500 border-t border-slate-800">
-              Model: <span className="text-violet-400">llama-3.3-70b-instruct</span>
+              Model: <span className="text-violet-400">gpt-oss-20b via Groq</span>
             </div>
           </div>
         </aside>
