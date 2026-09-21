@@ -28,6 +28,12 @@ const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
   ? `https://${process.env.VERCEL_URL}`
   : "https://taaqib-portfolio.vercel.app";
 
+// Required by the nonce-based CSP in src/middleware.ts: inline hydration
+// scripts must be rendered per-request so Next can stamp them with the
+// nonce from the CSP request header. Without this, prerendered/cached HTML
+// has no nonces and every inline script is blocked (site never hydrates).
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "Taaqib Masood | AI Engineer",

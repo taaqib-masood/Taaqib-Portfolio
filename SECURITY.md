@@ -27,6 +27,7 @@ Last reviewed: Sep 2026 (Next 15.5.25, React 19.3)
 
 ## Known limits
 
+- Pages are `force-dynamic` by design (set in `src/app/layout.tsx`): the nonce-CSP requires per-request rendering so Next can stamp inline hydration scripts with the request nonce. **Do not remove it** — prerendered/cached HTML has no nonces, every inline script gets blocked, and the site never hydrates (framer-motion `initial={{opacity:0}}` elements stay invisible; observed in prod Sep 2026).
 - Rate limiting is in-memory → per-instance on Vercel (best-effort, not a global quota). Upgrade path: Upstash Redis or Vercel WAF if abuse ever appears.
 - CSP allows `style-src 'unsafe-inline'` (framer-motion + Next inject inline styles) and `data:/blob:` in `img-src` (Next image internals). No `unsafe-inline` in `script-src` in production.
 - Post-deploy check recommended: open DevTools console on `/` and `/playground` and confirm zero CSP violation reports (middleware + static headers verified by `bun scripts/check-headers.mjs`, but a real-browser pass catches anything the allowlist missed, e.g. Google Translate internals).
