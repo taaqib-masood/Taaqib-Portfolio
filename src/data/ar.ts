@@ -350,6 +350,8 @@ export const ar: Record<string, string> = {
   "2026 · CHENNAI → DUBAI · AVAILABLE NOW": "2026 · تشيناي ← دبي · متاح الآن",
   "▶ Replay journey": "▶ أعد عرض الرحلة",
   "DUBAI": "دبي",
+  "AI AGENT · ONLINE": "وكيل الذكاء الاصطناعي · متصل",
+  "What is Taaqib building right now?": "ما الذي يبنيه ثاقب حالياً؟",
   "VELLORE": "فيلور",
   "CHENNAI": "تشيناي",
   "Close": "إغلاق",
