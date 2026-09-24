@@ -25,30 +25,21 @@ export function Hero() {
   };
 
   return (
-    <section ref={containerRef} id="hero" className="relative min-h-screen pt-24 px-6 md:px-16 flex flex-col justify-between max-w-[1440px] mx-auto border-b border-border overflow-hidden">
+    <section ref={containerRef} id="hero" className="relative min-h-screen pt-20 sm:pt-24 px-6 md:px-16 flex flex-col justify-between max-w-[1440px] mx-auto border-b border-border overflow-hidden">
       
       {/* Massive Typography & Photo Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-0 mt-12 lg:mt-24">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.83, 0, 0.17, 1] }}
-          className="lg:col-span-7 flex flex-col justify-center relative z-10 pointer-events-none"
-        >
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-0 mt-6 sm:mt-12 lg:mt-24">
+        {/* CSS entrance, not framer: the name and photo are the LCP, so they must not wait for hydration. */}
+        <div className="lg:col-span-7 flex flex-col justify-center relative z-10 pointer-events-none animate-in fade-in slide-in-from-bottom-5 duration-500 motion-reduce:animate-none">
           <h1 lang="en" className="text-[clamp(36px,10.5vw,180px)] font-black leading-[0.9] tracking-[-0.05em] text-foreground uppercase whitespace-nowrap">
             TAAQIB
             <br />
             MASOOD
           </h1>
-        </motion.div>
+        </div>
 
         <div className="lg:col-span-5 flex justify-start lg:justify-end items-end w-full">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, ease: [0.83, 0, 0.17, 1] }}
-            className="relative w-full aspect-[4/5] border border-border bg-surface-container overflow-hidden"
-          >
+          <div className="relative w-full aspect-[4/5] border border-border bg-surface-container overflow-hidden animate-in fade-in zoom-in-95 duration-700 motion-reduce:animate-none">
             <div style={{ width: "100%", height: "100%" }} className="relative">
               <Image
                 src="/taaqib-photo.jpg"
@@ -59,12 +50,12 @@ export function Hero() {
                 className="object-cover object-top"
               />
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
 
       {/* Structural Data Blocks */}
-      <div className="relative mt-24">
+      <div className="relative mt-10 md:mt-24">
       {/* Globe rises from the data row's top rule (the horizon), left of the photo column. */}
       {supported && (
         <div className="absolute bottom-full start-0 w-full lg:w-[56%] h-[380px]">

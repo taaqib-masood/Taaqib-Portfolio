@@ -28,7 +28,7 @@ export function LanguageToggle() {
       onClick={toggle}
       lang={locale === "ar" ? "en" : "ar"}
       aria-label={locale === "ar" ? "Switch to English" : "التبديل إلى العربية"}
-      className="fixed top-4 end-4 sm:top-6 sm:end-6 z-50 bg-[#000000] text-[#ffffff] border border-[#ffffff] px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest hover:bg-[#ffffff] hover:text-[#000000] transition-colors"
+      className="fixed top-4 end-4 sm:top-6 sm:end-6 z-50 bg-[#000000] text-[#ffffff] border border-[#ffffff] px-3 py-1.5 max-sm:min-h-10 text-[10px] font-bold uppercase tracking-widest hover:bg-[#ffffff] hover:text-[#000000] transition-colors"
     >
       {locale === "ar" ? "[ EN ]" : "[ عربي ]"}
     </button>

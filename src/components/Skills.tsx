@@ -1,11 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { skills } from "@/data/resume";
 import { ParallaxNumber } from "@/components/ParallaxNumber";
 import { VerticalLine } from "@/components/VerticalLine";
 import { TokenText } from "@/components/TokenText";
 import { useT } from "@/components/LocaleProvider";
+
+const SHOWN = 6;
 
 export function Skills({ 
   activeSkill, 
@@ -15,6 +18,7 @@ export function Skills({
   onSkillSelect?: (skill: string | null) => void; 
 }) {
   const t = useT();
+  const [open, setOpen] = useState<Set<string>>(new Set());
   return (
     <section id="skills" className="max-w-[1440px] mx-auto border-b border-border">
       <div className="relative grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
@@ -50,13 +54,15 @@ export function Skills({
                 }}
                 className="flex flex-wrap gap-2"
               >
-                {items.map((skill) => {
+                {items.map((skill, i) => {
                   const isActive = activeSkill === skill;
+                  // Phones: first SHOWN chips, then "+N more" (an active skill always stays visible).
+                  const folded = i >= SHOWN && !open.has(category) && !isActive;
                   return (
                     <button
                       key={skill}
                       onClick={() => onSkillSelect?.(isActive ? null : skill)}
-                      className={`px-3 py-1.5 border border-border text-[12px] font-semibold uppercase tracking-widest transition-colors duration-300 ${
+                      className={`px-3 py-1.5 max-sm:min-h-10 border border-border text-[12px] font-semibold uppercase tracking-widest transition-colors duration-300 ${folded ? "max-md:hidden" : ""} ${
                         isActive 
                           ? "bg-[#2e5bff] text-white border-[#2e5bff]" 
                           : "bg-surface text-foreground hover:bg-foreground hover:text-surface"
@@ -66,6 +72,14 @@ export function Skills({
                     </button>
                   );
                 })}
+                {items.length > SHOWN && !open.has(category) && (
+                  <button
+                    onClick={() => setOpen(new Set(open).add(category))}
+                    className="md:hidden px-3 min-h-10 border border-dashed border-border text-[12px] font-semibold uppercase tracking-widest text-outline"
+                  >
+                    +{items.length - SHOWN} {t("more")}
+                  </button>
+                )}
               </motion.div>
             </motion.div>
           ))}

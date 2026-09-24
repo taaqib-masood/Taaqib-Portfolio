@@ -28,7 +28,7 @@ export function StatusBar({ metrics }: { metrics?: AgentMetrics | null }) {
     <div id="status-bar" className="fixed bottom-0 left-0 w-full z-40 bg-[#000000] border-t border-[#ffffff] flex flex-col sm:flex-row items-center justify-between text-[#ffffff] text-[10px] font-bold uppercase tracking-widest">
       
       {/* Left side */}
-      <div className={`${metrics ? "hidden md:flex" : "flex"} w-full sm:w-auto items-center justify-center sm:justify-start px-4 py-3 sm:py-0 border-b sm:border-b-0 sm:border-r border-[#ffffff] sm:h-12`}>
+      <div className={`${metrics ? "hidden md:flex" : "hidden sm:flex"} w-full sm:w-auto items-center justify-center sm:justify-start px-4 py-3 sm:py-0 border-b sm:border-b-0 sm:border-r border-[#ffffff] sm:h-12`}>
         <span>{t("LOC: DXB · TIME:")} {time || "--:--"}</span>
       </div>
       

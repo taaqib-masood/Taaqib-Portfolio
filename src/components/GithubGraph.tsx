@@ -156,7 +156,7 @@ export function GithubGraph() {
           <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={handleAskAgentAboutGithub}
-              className="inline-flex items-center gap-2 px-3 py-1.5 border border-primary/50 bg-primary/10 hover:bg-primary hover:text-on-primary text-primary transition-all text-[11px] font-mono font-bold tracking-wider uppercase cursor-pointer"
+              className="inline-flex items-center gap-2 px-3 py-1.5 max-sm:min-h-10 border border-primary/50 bg-primary/10 hover:bg-primary hover:text-on-primary text-primary transition-all text-[11px] font-mono font-bold tracking-wider uppercase cursor-pointer"
             >
               <Terminal className="h-3 w-3" />
               {t("Ask AI Agent")}
@@ -238,7 +238,7 @@ export function GithubGraph() {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1 text-[11px] font-mono uppercase tracking-wider transition-all border ${
+              className={`px-3 py-1 max-sm:min-h-10 text-[11px] font-mono uppercase tracking-wider transition-all border ${
                 selectedCategory === cat
                   ? "bg-foreground text-surface border-foreground font-bold shadow-sm"
                   : "bg-surface text-outline hover:text-foreground border-border hover:border-foreground/50"

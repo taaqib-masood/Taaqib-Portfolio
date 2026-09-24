@@ -59,6 +59,10 @@
     font-family: var(--font-sans), system-ui, sans-serif;
     scroll-behavior: smooth;
   }
+  /* Anchor jumps land below the phone top bar instead of under it. */
+  @media (max-width: 639px) {
+    html { scroll-padding-top: 72px; }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
