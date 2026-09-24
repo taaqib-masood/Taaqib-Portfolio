@@ -5,6 +5,7 @@ import { skills } from "@/data/resume";
 import { ParallaxNumber } from "@/components/ParallaxNumber";
 import { VerticalLine } from "@/components/VerticalLine";
 import { TokenText } from "@/components/TokenText";
+import { useT } from "@/components/LocaleProvider";
 
 export function Skills({ 
   activeSkill, 
@@ -13,6 +14,7 @@ export function Skills({
   activeSkill?: string | null; 
   onSkillSelect?: (skill: string | null) => void; 
 }) {
+  const t = useT();
   return (
     <section id="skills" className="max-w-[1440px] mx-auto border-b border-border">
       <div className="relative grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
@@ -39,7 +41,7 @@ export function Skills({
                 }}
                 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-6 border-b border-border pb-4"
               >
-                {category}
+                {t(category)}
               </motion.h3>
               <motion.div 
                 variants={{

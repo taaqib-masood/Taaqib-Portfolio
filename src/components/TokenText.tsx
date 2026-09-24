@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useInView, useReducedMotion } from "framer-motion";
+import { useT } from "@/components/LocaleProvider";
 
 /** Streams text in character by character behind a cobalt caret, like model output. */
-export function TokenText({ text, delay = 0, speed = 38 }: { text: string; delay?: number; speed?: number }) {
+export function TokenText({ text: source, delay = 0, speed = 38 }: { text: string; delay?: number; speed?: number }) {
+  const text = useT()(source);
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true });
   const reduced = useReducedMotion();

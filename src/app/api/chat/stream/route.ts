@@ -98,7 +98,7 @@ INTERVIEW PLAYBOOK:
    - Highlight:
      1) Sole-built the live proctoring & assessment portal at LTTS (WebRTC via LiveKit, Deepgram Nova-2 STT, MediaPipe gaze tracking, Groq Whisper Coach).
      2) Built Reva AI, a full-stack WhatsApp receptionist SaaS for clinics (Next.js 14, Meta Cloud API v19.0, Supabase RLS, Razorpay).
-     3) Quantitative pipelines (ARIMA + LightGBM with 10+ risk rules) and edge AI (TensorFlow Lite on Jetson/RPi).
+     3) Quantitative pipelines (ARIMA + LightGBM with 10+ risk rules) and edge AI (TensorFlow Lite quantization).
    - Reiterate immediate availability in Dubai, UAE.
 
 2. Project Questions (e.g. "Tell me about Reva AI", "What did you build at LTTS?"):
@@ -230,7 +230,10 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: groq(selectedModel),
-    system: getSystemPrompt(interviewMode),
+    // Arabic version of the site: answer in Arabic, keep technical terms as they are.
+    system: getSystemPrompt(interviewMode) + (req.headers.get("x-locale") === "ar"
+      ? "\n\nLANGUAGE: The visitor is using the Arabic version of the site. Answer in clear Modern Standard Arabic. Keep technical terms, product names and code identifiers in English."
+      : ""),
     messages: await convertToModelMessages(normalizedMessages),
     tools,
     stopWhen: stepCountIs(4), // allow tool-call steps if needed, but in-context knowledge answers immediately

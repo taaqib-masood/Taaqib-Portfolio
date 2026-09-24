@@ -2,8 +2,10 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { useT } from "@/components/LocaleProvider";
 
 export function Marquee() {
+  const t = useT();
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -21,10 +23,10 @@ export function Marquee() {
         style={{ x }}
         className="flex whitespace-nowrap text-[12px] font-bold uppercase tracking-[0.2em] text-foreground"
       >
-        <span className="px-4">AI ENGINEER · LLM AGENTS · RAG · MCP · DUBAI ·</span>
-        <span className="px-4">AI ENGINEER · LLM AGENTS · RAG · MCP · DUBAI ·</span>
-        <span className="px-4">AI ENGINEER · LLM AGENTS · RAG · MCP · DUBAI ·</span>
-        <span className="px-4">AI ENGINEER · LLM AGENTS · RAG · MCP · DUBAI ·</span>
+        <span className="px-4">{t("AI ENGINEER · LLM AGENTS · RAG · MCP · DUBAI ·")}</span>
+        <span className="px-4">{t("AI ENGINEER · LLM AGENTS · RAG · MCP · DUBAI ·")}</span>
+        <span className="px-4">{t("AI ENGINEER · LLM AGENTS · RAG · MCP · DUBAI ·")}</span>
+        <span className="px-4">{t("AI ENGINEER · LLM AGENTS · RAG · MCP · DUBAI ·")}</span>
       </motion.div>
     </div>
   );

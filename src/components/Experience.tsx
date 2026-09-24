@@ -6,11 +6,13 @@ import { experience, education, certifications, spokenLanguages } from "@/data/r
 import { ParallaxNumber } from "@/components/ParallaxNumber";
 import { VerticalLine } from "@/components/VerticalLine";
 import { TokenText } from "@/components/TokenText";
+import { useLocale, useT } from "@/components/LocaleProvider";
 
 type Exp = (typeof experience)[number];
 
 /** Pinned timeline: vertical scroll drives the bullets sideways. Desktop + motion-allowed only. */
 function PinnedTimeline({ exp }: { exp: Exp }) {
+  const t = useT();
   const ref = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const [shift, setShift] = useState(0);
@@ -21,18 +23,20 @@ function PinnedTimeline({ exp }: { exp: Exp }) {
     return () => window.removeEventListener("resize", measure);
   }, []);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
-  const x = useTransform(scrollYProgress, [0, 1], [0, -shift]);
+  // Right-to-left (Arabic): the overflow sits on the left, so the track slides the other way.
+  const direction = useLocale() === "ar" ? 1 : -1;
+  const x = useTransform(scrollYProgress, [0, 1], [0, direction * shift]);
 
   return (
     <div ref={ref} className="hidden md:block motion-reduce:!hidden relative border-b border-border" style={{ height: `${exp.bullets.length * 45}vh` }}>
       <div className="sticky top-0 h-screen flex flex-col overflow-hidden">
         <div className="grid grid-cols-12 border-b border-border">
           <div className="col-span-8 p-8 border-r border-border">
-            <h3 className="text-[24px] font-bold uppercase tracking-[-0.01em] leading-[1.2]">{exp.role}</h3>
-            <p className="text-[16px] font-semibold text-outline uppercase tracking-[0.02em] mt-2">{exp.company}</p>
+            <h3 className="text-[24px] font-bold uppercase tracking-[-0.01em] leading-[1.2]">{t(exp.role)}</h3>
+            <p className="text-[16px] font-semibold text-outline uppercase tracking-[0.02em] mt-2">{t(exp.company)}</p>
           </div>
           <div className="col-span-4 p-8 pt-20 flex flex-col justify-between gap-4 text-[12px] uppercase font-semibold tracking-widest text-outline">
-            <div className="flex justify-between"><span>{exp.period}</span><span>{exp.location}</span></div>
+            <div className="flex justify-between"><span>{t(exp.period)}</span><span>{t(exp.location)}</span></div>
             <div className="h-[2px] bg-outline-variant">
               <motion.div className="h-full bg-primary origin-left" style={{ scaleX: scrollYProgress }} />
             </div>
@@ -45,7 +49,7 @@ function PinnedTimeline({ exp }: { exp: Exp }) {
                 <span aria-hidden="true" className="text-[96px] font-black leading-none tracking-[-0.05em] opacity-40" style={{ WebkitTextStroke: "1px currentColor", WebkitTextFillColor: "transparent" }}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <p className="text-[16px] leading-[1.6]">{bullet}</p>
+                <p className="text-[16px] leading-[1.6]">{t(bullet)}</p>
               </li>
             ))}
           </motion.ol>
@@ -56,6 +60,7 @@ function PinnedTimeline({ exp }: { exp: Exp }) {
 }
 
 export function Experience() {
+  const t = useT();
   return (
     <section id="experience" className="max-w-[1440px] mx-auto border-b border-border">
       
@@ -79,11 +84,11 @@ export function Experience() {
             className="grid grid-cols-1 lg:grid-cols-12 border-b border-border"
           >
             <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 relative">
-              <h3 className="text-[18px] md:text-[24px] font-bold uppercase tracking-[-0.01em] leading-[1.2] mb-2">{exp.role}</h3>
-              <p className="text-[16px] font-semibold text-outline uppercase tracking-[0.02em] mb-4">{exp.company}</p>
+              <h3 className="text-[18px] md:text-[24px] font-bold uppercase tracking-[-0.01em] leading-[1.2] mb-2">{t(exp.role)}</h3>
+              <p className="text-[16px] font-semibold text-outline uppercase tracking-[0.02em] mb-4">{t(exp.company)}</p>
               <div className="flex justify-between text-[12px] uppercase font-semibold tracking-widest text-outline">
-                <span>{exp.period}</span>
-                <span>{exp.location}</span>
+                <span>{t(exp.period)}</span>
+                <span>{t(exp.location)}</span>
               </div>
               <VerticalLine />
             </div>
@@ -92,7 +97,7 @@ export function Experience() {
                 {exp.bullets.map((bullet, i) => (
                   <li key={i} className="flex items-start gap-4 text-[16px] leading-[1.6]">
                     <span className="w-2 h-2 bg-foreground mt-2 flex-shrink-0" />
-                    <span>{bullet}</span>
+                    <span>{t(bullet)}</span>
                   </li>
                 ))}
               </ul>
@@ -118,12 +123,12 @@ export function Experience() {
             className="grid grid-cols-1 lg:grid-cols-12 border-b border-border"
           >
             <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 relative">
-              <h3 className="text-[18px] md:text-[24px] font-bold uppercase tracking-[-0.01em] leading-[1.2] mb-2">{edu.institution}</h3>
+              <h3 className="text-[18px] md:text-[24px] font-bold uppercase tracking-[-0.01em] leading-[1.2] mb-2">{t(edu.institution)}</h3>
               <VerticalLine />
             </div>
             <div className="lg:col-span-8 p-6 md:p-8">
-              <p className="text-[16px] font-semibold uppercase tracking-[0.02em] mb-2">{edu.degree}</p>
-              <p className="text-[14px] leading-[1.5] text-outline">{edu.detail}</p>
+              <p className="text-[16px] font-semibold uppercase tracking-[0.02em] mb-2">{t(edu.degree)}</p>
+              <p className="text-[14px] leading-[1.5] text-outline">{t(edu.detail)}</p>
             </div>
           </motion.div>
         ))}
@@ -137,11 +142,11 @@ export function Experience() {
           viewport={{ once: true }}
           className="p-6 md:p-8 border-b md:border-b-0 relative"
         >
-          <h3 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-6 border-b border-border pb-4">Certifications</h3>
+          <h3 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-6 border-b border-border pb-4">{t("Certifications")}</h3>
           <ul className="space-y-4">
             {certifications.map((cert, i) => (
               <li key={i} className="text-[14px] leading-[1.5] uppercase font-semibold">
-                {cert}
+                {t(cert)}
               </li>
             ))}
           </ul>
@@ -153,9 +158,9 @@ export function Experience() {
           viewport={{ once: true }}
           className="p-6 md:p-8"
         >
-          <h3 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-6 border-b border-border pb-4">Languages</h3>
+          <h3 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-6 border-b border-border pb-4">{t("Languages")}</h3>
           <p className="text-[16px] leading-[1.6]">
-            {spokenLanguages}
+            {t(spokenLanguages)}
           </p>
         </motion.div>
       </div>

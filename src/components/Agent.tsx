@@ -12,6 +12,7 @@ import { VerticalLine } from "@/components/VerticalLine";
 import { TokenText } from "@/components/TokenText";
 import { AgentTrace } from "@/components/AgentTrace";
 import { getToolTelemetry, measureRequest, type AgentMetrics } from "@/lib/agent-telemetry";
+import { useLocale, useT } from "@/components/LocaleProvider";
 
 export type InterviewMode = "general" | "architecture" | "star" | "recruiter";
 
@@ -143,6 +144,8 @@ function getContextualFollowUps(text: string, currentMode: InterviewMode): strin
 }
 
 export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string | null; onMetrics?: (metrics: AgentMetrics) => void }) {
+  const t = useT();
+  const locale = useLocale();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [inputValue, setInputValue] = useState("");
@@ -158,9 +161,10 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
         api: "/api/chat/stream",
         headers: () => ({
           "x-interview-mode": activeMode,
+          "x-locale": locale,
         }),
       }),
-    [activeMode]
+    [activeMode, locale]
   );
 
   const { messages, sendMessage, status, stop } = useChat<UIMessage<{ outputTokens?: number }>>({
@@ -281,7 +285,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
           <div className="flex items-center gap-3 mb-2">
             <span className="inline-block w-2.5 h-2.5 bg-emerald-400 animate-pulse" />
             <span className="text-[11px] font-mono uppercase tracking-widest text-emerald-400 font-bold">
-              AI Proxy Ready · Groq LPU™
+              {t("AI Proxy Ready · Groq LPU™")}
             </span>
           </div>
           <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] relative z-10">
@@ -291,7 +295,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
         </div>
         <div className="lg:col-span-8 p-6 md:p-8 bg-surface/5 flex flex-col justify-center">
           <p className="text-[15px] md:text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-surface/70">
-            Technical Interview Proxy. Interview Taaqib Masood on system architecture, code challenges, STAR stories, and recruiter fit with live streaming and measured browser latency.
+            {t("Technical Interview Proxy. Interview Taaqib Masood on system architecture, code challenges, STAR stories, and recruiter fit with live streaming and measured browser latency.")}
           </p>
         </div>
       </div>
@@ -301,7 +305,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-surface/60">
             <Sparkles className="h-3.5 w-3.5 text-surface/80" />
-            <span>Interview Mode:</span>
+            <span>{t("Interview Mode:")}</span>
           </div>
           <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-1.5 w-full md:w-auto">
             {INTERVIEW_MODES.map((mode) => {
@@ -318,7 +322,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
                   }`}
                 >
                   <Icon className="h-3 w-3" />
-                  <span>{mode.label}</span>
+                  <span>{t(mode.label)}</span>
                   <span
                     className={`text-[9px] px-1 py-0.2 border ${
                       isActive ? "border-foreground/30 text-foreground" : "border-surface/20 text-surface/50"
@@ -346,7 +350,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
                 {activeModeConfig.label}
               </h3>
               <p className="text-[13px] leading-[1.5] text-surface/60 mt-1">
-                {activeModeConfig.description}
+                {t(activeModeConfig.description)}
               </p>
             </div>
 
@@ -576,7 +580,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
             <div className="flex-1 border border-surface/20 relative focus-within:border-surface transition-colors">
               <div className="absolute left-4 top-3 flex items-center gap-2">
                 <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-surface/50">
-                  Command Prompt
+                  {t("Command Prompt")}
                 </span>
                 <span className="text-[9px] font-mono px-1.5 py-0.5 border border-surface/20 text-surface/50">
                   {activeMode.toUpperCase()}
@@ -588,7 +592,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask about Reva AI, LTTS proctoring, STAR stories, or system architecture..."
+                placeholder={t("Ask about Reva AI, LTTS proctoring, STAR stories, or system architecture...")}
                 disabled={isLoading}
                 aria-label="Chat input"
                 className="w-full resize-none bg-transparent pt-8 pb-3 px-4 text-[15px] text-surface placeholder-surface/40 focus:outline-none focus:bg-surface/5 transition-colors disabled:opacity-50 font-mono"

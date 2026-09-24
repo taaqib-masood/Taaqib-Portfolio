@@ -101,13 +101,16 @@
   }
 }
 
-/* Hide Google Translate UI */
-.skiptranslate {
-  display: none !important;
+/* Arabic version: Arabic typeface, and no letter-spacing (tracking breaks Arabic letter joining). */
+/* Latin glyphs stay in Inter; Arabic glyphs fall through to IBM Plex Sans Arabic. */
+html[lang="ar"] body {
+  font-family: var(--font-sans), var(--font-arabic), system-ui, sans-serif;
 }
-body {
-  top: 0px !important;
+/* Mono labels would pull Arabic from a system monospace font, which renders disconnected. */
+html[lang="ar"] .font-mono {
+  font-family: var(--font-arabic), ui-monospace, monospace;
 }
-iframe.skiptranslate {
-  display: none !important;
+/* English-tagged text (the name) keeps its tight tracking. */
+html[lang="ar"] *:not(code):not(kbd):not([lang="en"]):not([lang="en"] *) {
+  letter-spacing: 0 !important;
 }

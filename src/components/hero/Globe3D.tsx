@@ -6,6 +6,7 @@ import * as THREE from "three";
 import type { MotionValue } from "framer-motion";
 import { isLand } from "@/lib/land-mask";
 import { getVisitor, subsolarPoint, type Visitor } from "@/lib/visitor-location";
+import { useT } from "@/components/LocaleProvider";
 
 const R = 2;
 const DEG = Math.PI / 180;
@@ -91,6 +92,7 @@ type Shared = {
   labels: (HTMLElement | null)[];
   visitorLabel: HTMLElement | null;
   ticker: HTMLElement | null;
+  journey: string[]; // translated ticker lines
   drag: { active: boolean; lastX: number; lastY: number; rotY: number; rotX: number; vel: number; releasedAt: number };
   replayAt: number;
   hover: boolean;
@@ -184,7 +186,7 @@ function Earth({ progress, animate, shared, selected, visitor }: {
     });
     if (s.ticker) {
       const leg = Math.min(JOURNEY.length - 1, Math.max(0, Math.floor(elapsed / LEG)));
-      s.ticker.textContent = JOURNEY[leg].text;
+      s.ticker.textContent = s.journey[leg] ?? JOURNEY[leg].text;
     }
     if (pulse.current) pulse.current.scale.setScalar(1 + (animate ? (t * 0.8) % 1 : 0) * 3);
 
@@ -242,10 +244,11 @@ function Earth({ progress, animate, shared, selected, visitor }: {
 const dubaiTime = () => new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Dubai", hour: "2-digit", minute: "2-digit" }).format(new Date());
 
 export default function Globe3D({ progress, animate }: { progress: MotionValue<number>; animate: boolean }) {
+  const t = useT();
   const shared = useRef<Shared>({
     labels: [], visitorLabel: null, ticker: null,
     drag: { active: false, lastX: 0, lastY: 0, rotY: 0, rotX: 0, vel: 0, releasedAt: 0 },
-    replayAt: 0.4, hover: false, invalidate: () => {},
+    journey: [], replayAt: 0.4, hover: false, invalidate: () => {},
   });
   const clock = useRef<THREE.Clock | null>(null);
   const [selected, setSelected] = useState<PlaceId | null>(null);
@@ -276,6 +279,10 @@ export default function Globe3D({ progress, animate }: { progress: MotionValue<n
   const onPointerUp = () => { d.active = false; d.releasedAt = performance.now(); shared.current.invalidate(); };
   const replay = () => { shared.current.replayAt = clock.current?.getElapsedTime() ?? 0; setSelected(null); };
   const place = PLACES.find((p) => p.id === selected);
+  shared.current.journey = JOURNEY.map((j) => t(j.text));
+  const arabic = t("DUBAI") !== "DUBAI";
+  const visitorLabel = !visitor ? "" : !arabic ? visitor.label : visitor.sameZone ? "أنت في دبي أيضاً"
+    : visitor.label.replace("YOU", "أنت").replace("SAME TIME", "التوقيت نفسه").replace("DXB", "دبي").replace(/(\d+)H$/, "$1 س");
 
   return (
     <div
@@ -307,35 +314,35 @@ export default function Globe3D({ progress, animate }: { progress: MotionValue<n
           aria-expanded={selected === p.id}
           className={`absolute left-0 top-0 opacity-0 font-mono text-[10px] tracking-[0.14em] whitespace-nowrap px-1 py-0.5 bg-background/80 hover:bg-foreground hover:text-background ${p.id === "dxb" ? "text-primary font-bold text-[11px]" : "text-[#a3a6b6]"} ${selected === p.id ? "bg-primary text-foreground" : ""}`}
         >
-          {p.id === "dxb" ? `DUBAI${time ? ` · ${time}` : ""}` : p.name.split(",")[0].toUpperCase()}
+          {p.id === "dxb" ? `${t("DUBAI")}${time ? ` · ${time}` : ""}` : t(p.name.split(",")[0].toUpperCase())}
         </button>
       ))}
       {visitor && !visitor.sameZone && (
         <span ref={(el) => { shared.current.visitorLabel = el; }} className="absolute left-0 top-0 opacity-0 font-mono text-[10px] tracking-[0.14em] text-foreground whitespace-nowrap bg-background/80 px-1">
-          {visitor.label}
+          {visitorLabel}
         </span>
       )}
 
       {/* Journey ticker + replay, sitting on the horizon line. */}
-      <div className="absolute left-0 bottom-3 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.14em]">
+      <div className="absolute start-0 bottom-3 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.14em]">
         <button onClick={replay} className="border border-border bg-background px-2 py-1 hover:bg-foreground hover:text-background transition-colors">
-          ▶ Replay journey
+          {t("▶ Replay journey")}
         </button>
         <span ref={(el) => { shared.current.ticker = el; }} className="text-on-surface-variant bg-background px-1" aria-live="polite" />
-        {visitor?.sameZone && <span className="text-foreground">· {visitor.label}</span>}
+        {visitor?.sameZone && <span className="text-foreground">· {visitorLabel}</span>}
       </div>
 
       {place && (
-        <div role="dialog" aria-label={place.name} className="absolute right-0 bottom-12 w-[260px] border border-border bg-background">
+        <div role="dialog" aria-label={t(place.name)} className="absolute end-0 bottom-12 w-[260px] border border-border bg-background">
           <div className="flex items-center justify-between border-b border-border px-4 py-2">
-            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary">{place.name}</span>
-            <button onClick={() => setSelected(null)} aria-label="Close" className="font-mono text-[12px] px-1 hover:bg-foreground hover:text-background">×</button>
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary">{t(place.name)}</span>
+            <button onClick={() => setSelected(null)} aria-label={t("Close")} className="font-mono text-[12px] px-1 hover:bg-foreground hover:text-background">×</button>
           </div>
           <ul className="px-4 py-3 space-y-1.5 text-[13px] leading-[1.4]">
-            {place.lines.map((l) => <li key={l}>{l}</li>)}
+            {place.lines.map((l) => <li key={l}>{t(l)}</li>)}
           </ul>
           <a href={place.link.href} className="block border-t border-border px-4 py-2 font-mono text-[10px] uppercase tracking-[0.16em] hover:bg-foreground hover:text-background">
-            {place.link.label} ↓
+            {t(place.link.label)} ↓
           </a>
         </div>
       )}

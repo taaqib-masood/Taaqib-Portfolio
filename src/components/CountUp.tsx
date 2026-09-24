@@ -20,5 +20,6 @@ export function CountUp({ value, suffix = "" }: { value: number; suffix?: string
     return () => controls.stop();
   }, [inView, reduced, value, suffix]);
 
-  return <span ref={ref}>{value}{suffix}</span>;
+  // dir="ltr": keeps "5+" from being mirrored to "+5" in the Arabic version.
+  return <span ref={ref} dir="ltr" className="inline-block">{value}{suffix}</span>;
 }

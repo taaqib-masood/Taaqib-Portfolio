@@ -9,6 +9,7 @@ import { Star, GitFork, Loader2, Calendar, Terminal, Filter, ArrowUpRight } from
 import type { Activity as CalendarActivity } from "react-activity-calendar";
 import { getGithubFeed } from "@/lib/github-feed";
 import type { GithubFeed } from "@/app/api/github/route";
+import { useT } from "@/components/LocaleProvider";
 
 const ActivityCalendar = dynamic(
   () => import("react-activity-calendar").then((mod) => mod.ActivityCalendar),
@@ -70,7 +71,7 @@ const FALLBACK_REPOS: Repo[] = [
     forks_count: null,
     html_url: "https://github.com/taaqib-masood/predictive-maintenance-industrial-machinery",
     language: "Python",
-    description: "NASA CMAPSS turbofan engine degradation forecasting with CNN + LSTM ensemble and INT8 quantization.",
+    description: "NASA CMAPSS turbofan remaining-useful-life prediction: GBM + LSTM + CNN hybrid, quantized to TensorFlow Lite.",
     category: "Quant & ML",
   },
   {
@@ -94,6 +95,7 @@ const FALLBACK_REPOS: Repo[] = [
 ];
 
 export function GithubGraph() {
+  const t = useT();
   const [repos, setRepos] = useState<Repo[]>([]);
   const [loading, setLoading] = useState(true);
   const [hoveredDay, setHoveredDay] = useState<CalendarActivity | null>(null);
@@ -145,10 +147,10 @@ export function GithubGraph() {
         <div className="lg:col-span-8 p-6 md:p-8 bg-surface-container-low flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-outline">
-              Consistent contributions and open-source projects tracking logic layer developments.
+              {t("Consistent contributions and open-source projects tracking logic layer developments.")}
             </p>
             <p className="text-[12px] font-mono text-outline/80 mt-1">
-              Hover any calendar block to inspect real-time daily commit telemetry.
+              {t("Hover any calendar block to inspect real-time daily commit telemetry.")}
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
@@ -157,11 +159,11 @@ export function GithubGraph() {
               className="inline-flex items-center gap-2 px-3 py-1.5 border border-primary/50 bg-primary/10 hover:bg-primary hover:text-on-primary text-primary transition-all text-[11px] font-mono font-bold tracking-wider uppercase cursor-pointer"
             >
               <Terminal className="h-3 w-3" />
-              Ask AI Agent
+              {t("Ask AI Agent")}
             </button>
             <span className="inline-flex items-center gap-2 px-3 py-1.5 border border-border bg-surface text-[11px] font-mono font-bold tracking-wider uppercase text-foreground">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              {contributions ? `${contributions.total.toLocaleString("en-US")} contributions / yr` : "Live feed"}
+              {contributions ? `${contributions.total.toLocaleString("en-US")} ${t("contributions / yr")}` : t("Live feed")}
             </span>
           </div>
         </div>
@@ -186,11 +188,11 @@ export function GithubGraph() {
                   onMouseLeave: () => setHoveredDay(null),
                 })
               }
-              labels={{ totalCount: "{{count}} contributions in the last year" }}
+              labels={{ totalCount: t("{{count}} contributions in the last year") }}
             />
           ) : (
             <a href="https://github.com/taaqib-masood" target="_blank" rel="noopener noreferrer" className="h-[140px] flex items-center font-mono text-[12px] uppercase tracking-widest text-outline hover:text-foreground">
-              Contribution graph unavailable right now · view it on GitHub ↗
+              {t("Contribution graph unavailable right now · view it on GitHub ↗")}
             </a>
           )}
         </div>
@@ -202,26 +204,26 @@ export function GithubGraph() {
           <Calendar className="h-3.5 w-3.5 text-primary" />
           {hoveredDay ? (
             <span className="text-foreground font-semibold flex items-center gap-2">
-              <span className="text-outline">DATE:</span> {hoveredDay.date}
+              <span className="text-outline">{t("DATE:")}</span> {hoveredDay.date}
               <span className="text-outline mx-1">|</span>
-              <span className="text-emerald-500 font-bold">{hoveredDay.count} {hoveredDay.count === 1 ? "contribution" : "contributions"}</span>
+              <span className="text-emerald-500 font-bold">{hoveredDay.count} {hoveredDay.count === 1 ? t("contribution") : t("contributions")}</span>
               <span className="text-outline mx-1">|</span>
               <span className="px-1.5 py-0.5 border border-border bg-surface text-[10px] uppercase">
-                {hoveredDay.level === 0 ? "No activity" : `Intensity Lvl ${hoveredDay.level}`}
+                {hoveredDay.level === 0 ? t("No activity") : `${t("Intensity Lvl")} ${hoveredDay.level}`}
               </span>
             </span>
           ) : (
             <span className="text-outline">
-              <strong className="text-foreground">ANNUAL TELEMETRY:</strong>{" "}
+              <strong className="text-foreground">{t("ANNUAL TELEMETRY:")}</strong>{" "}
               {contributions
-                ? `${contributions.total.toLocaleString("en-US")} contributions across ${activeDays} active days. Hover any block to inspect.`
-                : "Loading live data from GitHub."}
+                ? `${contributions.total.toLocaleString("en-US")} ${t("contributions across")} ${activeDays} ${t("active days. Hover any block to inspect.")}`
+                : t("Loading live data from GitHub.")}
             </span>
           )}
         </div>
         <div className="flex items-center gap-2 text-outline">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          <span>LIVE FROM GITHUB · REFRESHED HOURLY</span>
+          <span>{t("LIVE FROM GITHUB · REFRESHED HOURLY")}</span>
         </div>
       </div>
 
@@ -229,7 +231,7 @@ export function GithubGraph() {
       <div className="border-b border-border p-4 md:px-8 bg-surface flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <Filter className="h-3.5 w-3.5 text-outline" />
-          <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-outline">FILTER REPOSITORIES:</span>
+          <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-outline">{t("FILTER REPOSITORIES:")}</span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {(["ALL", "AI & Agents", "Quant & ML", "Full-Stack"] as const).map((cat) => (
@@ -242,7 +244,7 @@ export function GithubGraph() {
                   : "bg-surface text-outline hover:text-foreground border-border hover:border-foreground/50"
               }`}
             >
-              {cat}
+              {t(cat)}
             </button>
           ))}
         </div>
@@ -279,7 +281,7 @@ export function GithubGraph() {
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-3">
                     <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 border border-border group-hover:border-surface/40 text-outline group-hover:text-surface/80">
-                      {repo.category || "Open Source"}
+                      {t(repo.category || "Open Source")}
                     </span>
                     <ArrowUpRight className="h-3.5 w-3.5 text-outline group-hover:text-surface transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                   </div>
@@ -287,7 +289,7 @@ export function GithubGraph() {
                     {repo.name}
                   </h3>
                   <p className="text-[13px] leading-[1.6] text-outline group-hover:text-surface/70 line-clamp-2 mb-6">
-                    {repo.description || "No description available."}
+                    {repo.description ? t(repo.description) : "No description available."}
                   </p>
                 </div>
                 <div className="flex items-center gap-6 text-[10px] font-bold uppercase tracking-widest text-outline group-hover:text-surface/80">
