@@ -9,7 +9,12 @@ import remarkGfm from "remark-gfm";
 import { Send, Wrench, Copy, Check, Sparkles, Terminal, Layers, Award, UserCheck } from "lucide-react";
 import { ParallaxNumber } from "@/components/ParallaxNumber";
 import { VerticalLine } from "@/components/VerticalLine";
+import { TokenText } from "@/components/TokenText";
+import { AgentTrace } from "@/components/AgentTrace";
 import { getToolTelemetry, measureRequest, type AgentMetrics } from "@/lib/agent-telemetry";
+import { useLocale, useT } from "@/components/LocaleProvider";
+import { contact } from "@/data/resume";
+import { toTranscriptMessages } from "@/lib/transcript";
 
 export type InterviewMode = "general" | "architecture" | "star" | "recruiter";
 
@@ -30,7 +35,7 @@ const INTERVIEW_MODES: ModeOption[] = [
     badge: "HYBRID",
     description: "Full technical overview, projects, and bio as Taaqib's engineering proxy.",
     promptSuggestions: [
-      "Tell me about Reva AI — WhatsApp Receptionist",
+      "Tell me about Reva AI: WhatsApp Receptionist",
       "What did you build at LTTS?",
       "Walk me through your resume / background",
       "What open-source repositories do you maintain?",
@@ -141,6 +146,8 @@ function getContextualFollowUps(text: string, currentMode: InterviewMode): strin
 }
 
 export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string | null; onMetrics?: (metrics: AgentMetrics) => void }) {
+  const t = useT();
+  const locale = useLocale();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [inputValue, setInputValue] = useState("");
@@ -156,20 +163,51 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
         api: "/api/chat/stream",
         headers: () => ({
           "x-interview-mode": activeMode,
+          "x-locale": locale,
         }),
       }),
-    [activeMode]
+    [activeMode, locale]
   );
 
   const { messages, sendMessage, status, stop } = useChat<UIMessage<{ outputTokens?: number }>>({
     transport,
     onError: (err: Error) => {
       console.error("Agent error details:", err);
-      setApiError("Terminal connection interrupted. Check GROQ_API_KEY in environment variables.");
+      setApiError(`${t("The agent is offline for a moment. Try again, or email me at")} ${contact.email}`);
     },
   });
 
   const isLoading = status === "streaming" || status === "submitted";
+
+  // Transcript to Taaqib: sent when the visitor leaves (keepalive survives the unload) or asks
+  // for a follow-up. Only new messages trigger a send, so one visit usually makes one email.
+  const live = useRef({ messages, activeMode, locale });
+  live.current = { messages, activeMode, locale };
+  const sentUpTo = useRef(0);
+  const [followUp, setFollowUp] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [followUpEmail, setFollowUpEmail] = useState("");
+  const sendTranscript = useCallback((email?: string) => {
+    const { messages, activeMode, locale } = live.current;
+    let items = toTranscriptMessages(messages);
+    if (!items.some((m) => m.role === "user") || (!email && messages.length <= sentUpTo.current)) return null;
+    sentUpTo.current = messages.length;
+    const body = () => JSON.stringify({ messages: items, mode: activeMode, locale, ...(email ? { email } : {}) });
+    while (items.length > 2 && body().length > 60_000) items = items.slice(2); // keepalive bodies are capped at 64 KB
+    return fetch("/api/chat/transcript", { method: "POST", keepalive: true, headers: { "Content-Type": "application/json" }, body: body() });
+  }, []);
+  useEffect(() => {
+    const onHide = () => { if (document.visibilityState === "hidden") sendTranscript()?.catch(() => {}); };
+    document.addEventListener("visibilitychange", onHide);
+    window.addEventListener("pagehide", onHide);
+    return () => { document.removeEventListener("visibilitychange", onHide); window.removeEventListener("pagehide", onHide); };
+  }, [sendTranscript]);
+  const requestFollowUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFollowUp("sending");
+    const res = await sendTranscript(followUpEmail.trim())?.catch(() => null);
+    setFollowUp(res?.ok ? "sent" : "error");
+  };
+  const hasAnswer = messages.some((m) => m.role === "assistant" && m.parts.some((p) => p.type === "text" && p.text));
 
   useEffect(() => {
     const timing = requestTiming.current;
@@ -274,22 +312,22 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
     <section id="agent" className="max-w-[1440px] mx-auto border-b border-surface/20 bg-foreground text-surface">
       {/* Header */}
       <div className="relative grid grid-cols-1 lg:grid-cols-12 border-b border-surface/20 overflow-hidden z-0">
-        <ParallaxNumber number="05" />
+        <ParallaxNumber number="02" />
         <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 relative flex flex-col justify-center">
           <div className="flex items-center gap-3 mb-2">
             <span className="inline-block w-2.5 h-2.5 bg-emerald-400 animate-pulse" />
             <span className="text-[11px] font-mono uppercase tracking-widest text-emerald-400 font-bold">
-              AI Proxy Ready · Groq LPU™
+              {t("AI Proxy Ready · Groq LPU™")}
             </span>
           </div>
           <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] relative z-10">
-            Agent Terminal
+            <TokenText text="Agent Terminal" />
           </h2>
           <VerticalLine className="bg-surface/20" />
         </div>
         <div className="lg:col-span-8 p-6 md:p-8 bg-surface/5 flex flex-col justify-center">
           <p className="text-[15px] md:text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-surface/70">
-            Technical Interview Proxy. Interview Taaqib Masood on system architecture, code challenges, STAR stories, and recruiter fit with live streaming and measured browser latency.
+            {t("Interview my AI instead of me. It answers as my proxy, 24/7, from my real CV and projects: system design, code, STAR stories and role fit.")}
           </p>
         </div>
       </div>
@@ -299,7 +337,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-widest text-surface/60">
             <Sparkles className="h-3.5 w-3.5 text-surface/80" />
-            <span>Interview Mode:</span>
+            <span>{t("Interview Mode:")}</span>
           </div>
           <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-1.5 w-full md:w-auto">
             {INTERVIEW_MODES.map((mode) => {
@@ -309,14 +347,14 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
                 <button
                   key={mode.id}
                   onClick={() => setActiveMode(mode.id)}
-                  className={`flex items-center justify-center gap-2 px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider font-semibold border transition-all ${
+                  className={`flex items-center justify-center gap-2 px-3 py-1.5 max-sm:min-h-10 text-[11px] font-mono uppercase tracking-wider font-semibold border transition-all ${
                     isActive
                       ? "bg-surface text-foreground border-surface shadow-[0_0_12px_rgba(255,255,255,0.15)]"
                       : "bg-transparent text-surface/70 border-surface/20 hover:border-surface/50 hover:text-surface"
                   }`}
                 >
                   <Icon className="h-3 w-3" />
-                  <span>{mode.label}</span>
+                  <span>{t(mode.label)}</span>
                   <span
                     className={`text-[9px] px-1 py-0.2 border ${
                       isActive ? "border-foreground/30 text-foreground" : "border-surface/20 text-surface/50"
@@ -333,7 +371,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
 
       <div className="grid grid-cols-1 lg:grid-cols-12">
         {/* Info Panel */}
-        <div className="lg:col-span-4 border-b lg:border-b-0 relative flex flex-col">
+        <div className="lg:col-span-4 order-2 lg:order-1 border-b lg:border-b-0 relative flex flex-col">
           <VerticalLine className="bg-surface/20" />
           <div className="p-6 md:p-8 border-b border-surface/20 bg-foreground flex-1">
             <div className="mb-6">
@@ -344,7 +382,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
                 {activeModeConfig.label}
               </h3>
               <p className="text-[13px] leading-[1.5] text-surface/60 mt-1">
-                {activeModeConfig.description}
+                {t(activeModeConfig.description)}
               </p>
             </div>
 
@@ -400,7 +438,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
         </div>
 
         {/* Chat Window */}
-        <div className="lg:col-span-8 flex flex-col bg-foreground min-h-[550px]">
+        <div className="lg:col-span-8 order-1 lg:order-2 flex flex-col bg-foreground min-h-[550px] border-b border-surface/20 lg:border-b-0">
           {/* Message list */}
           <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6" style={{ minHeight: 450, maxHeight: 650 }}>
             {messages.length === 0 && !apiError && (
@@ -436,8 +474,8 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
             )}
 
             {apiError && (
-              <div className="border border-red-500/40 bg-red-950/30 p-4 text-[13px] font-mono uppercase tracking-wider text-red-400">
-                [SYSTEM ERROR]: {apiError}
+              <div role="alert" className="border border-red-500/40 bg-red-950/30 p-4 text-[13px] font-mono tracking-wider text-red-400">
+                {apiError}
               </div>
             )}
 
@@ -559,12 +597,48 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
             <div ref={messagesEndRef} />
           </div>
 
+          {requestTiming.current.start > 0 && (
+            <AgentTrace
+              timing={requestTiming.current}
+              tools={messages.at(-1)?.role === "assistant" && messages.at(-1)?.id !== requestTiming.current.previousId
+                ? getToolTelemetry(messages.at(-1)!.parts, isLoading)
+                : []}
+              isLoading={isLoading}
+            />
+          )}
+
+          {/* Follow-up: the recruiter leaves an email and Taaqib gets the whole conversation. */}
+          {hasAnswer && !isLoading && (
+            <form onSubmit={requestFollowUp} className="border-t border-surface/20 bg-surface/5 px-6 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+              {followUp === "sent" ? (
+                <p role="status" className="text-[13px] font-mono text-surface">{t("Sent. Taaqib will get this conversation and reply to you.")}</p>
+              ) : (
+                <>
+                  <label htmlFor="follow-up-email" className="text-[12px] font-bold uppercase tracking-widest text-surface/80 sm:shrink-0">{t("Want Taaqib to follow up?")}</label>
+                  <input
+                    id="follow-up-email"
+                    type="email"
+                    required
+                    value={followUpEmail}
+                    onChange={(e) => setFollowUpEmail(e.target.value)}
+                    placeholder={t("your@company.com")}
+                    className="flex-1 min-w-0 min-h-11 border border-surface/20 bg-transparent px-3 text-[14px] text-surface placeholder-surface/40 focus:outline-none focus:border-surface"
+                  />
+                  <button type="submit" disabled={followUp === "sending"} className="min-h-11 px-4 bg-surface text-foreground text-[12px] font-bold uppercase tracking-widest hover:bg-surface/90 disabled:opacity-50">
+                    {t("Send conversation")}
+                  </button>
+                  {followUp === "error" && <p role="alert" className="text-[12px] text-red-400">{t("Could not send. Email me at")} {contact.email}</p>}
+                </>
+              )}
+            </form>
+          )}
+
           {/* Input area */}
           <form onSubmit={handleFormSubmit} className="border-t border-surface/20 bg-foreground p-6 flex items-end gap-4">
             <div className="flex-1 border border-surface/20 relative focus-within:border-surface transition-colors">
               <div className="absolute left-4 top-3 flex items-center gap-2">
                 <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-surface/50">
-                  Command Prompt
+                  {t("Command Prompt")}
                 </span>
                 <span className="text-[9px] font-mono px-1.5 py-0.5 border border-surface/20 text-surface/50">
                   {activeMode.toUpperCase()}
@@ -576,7 +650,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask about Reva AI, LTTS proctoring, STAR stories, or system architecture..."
+                placeholder={t("Ask about Reva AI, LTTS proctoring, STAR stories, or system architecture...")}
                 disabled={isLoading}
                 aria-label="Chat input"
                 className="w-full resize-none bg-transparent pt-8 pb-3 px-4 text-[15px] text-surface placeholder-surface/40 focus:outline-none focus:bg-surface/5 transition-colors disabled:opacity-50 font-mono"
@@ -603,6 +677,9 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
               </button>
             )}
           </form>
+          <p className="border-t border-surface/20 px-6 py-2 text-[11px] text-surface/50">
+            {t("Conversations are shared with Taaqib so he can follow up.")}
+          </p>
         </div>
       </div>
     </section>
