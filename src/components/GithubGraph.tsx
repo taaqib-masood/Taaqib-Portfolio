@@ -3,6 +3,8 @@
 import { useEffect, useState, cloneElement, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
+import { ParallaxNumber } from "@/components/ParallaxNumber";
+import { TokenText } from "@/components/TokenText";
 import { Star, GitFork, Loader2, Calendar, Terminal, Filter, ArrowUpRight } from "lucide-react";
 import type { Activity } from "react-github-calendar";
 
@@ -221,11 +223,12 @@ export function GithubGraph() {
     <section className="max-w-[1440px] mx-auto border-b border-border">
       
       {/* Header */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 border-b border-border">
+      <div className="relative grid grid-cols-1 lg:grid-cols-12 border-b border-border overflow-hidden">
+        <ParallaxNumber number="07" />
         <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-border flex flex-col justify-center">
-          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] flex items-center gap-4">
+          <h2 className="relative z-10 text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] flex items-center gap-4">
             <GithubIcon className="h-8 md:h-12 w-8 md:w-12 text-foreground" />
-            GitHub
+            <TokenText text="GitHub" />
           </h2>
         </div>
         <div className="lg:col-span-8 p-6 md:p-8 bg-surface-container-low flex flex-col md:flex-row md:items-center justify-between gap-4">

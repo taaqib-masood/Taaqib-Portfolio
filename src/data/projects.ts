@@ -182,7 +182,7 @@ export const projects: Project[] = [
     categories: ["AI/LLM"],
     repo: "https://github.com/taaqib-masood",
     demo: null,
-    role: "Built at L&T Technology Services",
+    role: "Built at L&T Technology Services, Feb–Jun 2026",
     image: "/projects/mcp-code-review.jpg",
   },
   {

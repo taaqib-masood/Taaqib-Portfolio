@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { MotionConfig } from "framer-motion";
 import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
 import { Agent } from "@/components/Agent";
@@ -49,6 +50,7 @@ export default function Home() {
   }, []);
 
   return (
+    <MotionConfig reducedMotion="user">
     <main className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-on-primary pb-[48px]">
       <ScrollHairline />
       <LanguageToggle />
@@ -68,11 +70,12 @@ export default function Home() {
         <div className="max-w-[1440px] mx-auto px-6 md:px-16 flex flex-col md:flex-row justify-between items-center gap-4">
           <p>© 2026 Taaqib Masood</p>
           <p className="hidden md:block border border-border px-4 py-2">Model isn&apos;t the demo, it&apos;s the infrastructure.</p>
-          <p>Built with Next.js & Framer Motion</p>
+          <p>Built with Next.js, three.js & Framer Motion</p>
         </div>
       </footer>
       <StatusBar metrics={agentMetrics} />
       <Toaster position="bottom-right" className="rounded-none border-border" />
     </main>
+    </MotionConfig>
   );
 }

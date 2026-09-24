@@ -1,13 +1,20 @@
 "use client";
 
 import { useRef } from "react";
-import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
+import { motion, useScroll } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
-import { WireframeMonolith } from "@/components/WireframeMonolith";
+import { TokenText } from "@/components/TokenText";
+import { useWebGLGate } from "@/lib/use-webgl";
+
+// three.js stays out of the initial bundle; it loads only once the hero mounts on a WebGL device.
+const Monolith3D = dynamic(() => import("@/components/hero/Monolith3D"), { ssr: false });
 
 export function Hero() {
   const containerRef = useRef<HTMLElement>(null);
+  const { supported, animate } = useWebGLGate(containerRef, "(min-width: 768px)");
+  const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end start"] });
 
   const handleAgentClick = () => {
     const agentEl = document.getElementById("agent");
@@ -16,7 +23,7 @@ export function Hero() {
 
   return (
     <section ref={containerRef} id="hero" className="relative min-h-screen pt-24 px-6 md:px-16 flex flex-col justify-between max-w-[1440px] mx-auto border-b border-border overflow-hidden">
-      <WireframeMonolith />
+      {supported && <Monolith3D progress={scrollYProgress} animate={animate} />}
       
       {/* Massive Typography & Photo Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-0 mt-12 lg:mt-24">
@@ -27,9 +34,9 @@ export function Hero() {
           className="lg:col-span-7 flex flex-col justify-center relative z-10"
         >
           <h1 className="text-[clamp(36px,10.5vw,180px)] font-black leading-[0.9] tracking-[-0.05em] text-foreground uppercase whitespace-nowrap">
-            TAAQIB
+            <TokenText text="TAAQIB" delay={150} />
             <br />
-            MASOOD
+            <TokenText text="MASOOD" delay={150 + 6 * 38 + 60} />
           </h1>
         </motion.div>
 

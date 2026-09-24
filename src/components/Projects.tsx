@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { projects, Project } from "@/data/projects";
 import { ParallaxNumber } from "@/components/ParallaxNumber";
 import { VerticalLine } from "@/components/VerticalLine";
+import { TokenText } from "@/components/TokenText";
+import { EmbeddingSection, projectYear } from "@/components/projects/EmbeddingSection";
 import {
   Dialog,
   DialogContent,
@@ -55,9 +57,9 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
       
       {/* Header & Filters */}
       <div className="relative grid grid-cols-1 lg:grid-cols-12 border-b border-border overflow-hidden">
-        <ParallaxNumber number="01" />
+        <ParallaxNumber number="03" />
         <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 relative flex items-center">
-          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] relative z-10">Projects</h2>
+          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] relative z-10"><TokenText text="Projects" /></h2>
           <VerticalLine />
         </div>
         <div className="lg:col-span-8 p-6 md:p-8 flex flex-wrap gap-4 items-center bg-surface">
@@ -77,9 +79,16 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
         </div>
       </div>
 
-      {/* Grid — Isometric 3D Space */}
+      <EmbeddingSection
+        projects={projects}
+        activeSkill={activeSkill ?? null}
+        onOpen={setSelectedProject}
+        onAskAgent={handleAgentClick}
+      />
+
+      {/* Grid: flat so type stays pixel-sharp; depth only on hover */}
       <div style={{ perspective: "1200px" }}>
-      <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4" style={{ transformStyle: "preserve-3d", transform: "rotateX(2deg) rotateZ(-0.5deg)", willChange: "transform" }}>
+      <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4" style={{ transformStyle: "preserve-3d" }}>
         <AnimatePresence mode="popLayout">
           {filteredProjects.map((project, idx) => {
             const isFeature = project.slug === "ltts-proctoring-portal" || project.slug === "mcp-code-review-pipeline";
@@ -123,7 +132,7 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
                   <div className="flex justify-between items-start">
                     <div>
                       <h4 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-4 text-outline group-hover:text-surface/80 transition-colors duration-400">
-                        {project.categories[0]} / {new Date().getFullYear()}
+                        {project.categories[0]}{projectYear(project) ? ` / ${projectYear(project)}` : ""}
                       </h4>
                       <h3 className="text-[24px] md:text-[32px] font-bold tracking-[-0.03em] leading-[1.1] mb-6 uppercase text-foreground group-hover:text-surface group-hover:drop-shadow-md transition-colors duration-400">
                         {project.title}

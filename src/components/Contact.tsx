@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { ParallaxNumber } from "@/components/ParallaxNumber";
+import { TokenText } from "@/components/TokenText";
 import { contact } from "@/data/resume";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -65,9 +67,10 @@ export function Contact() {
     <section id="contact" className="max-w-[1440px] mx-auto border-b border-border relative z-10">
       
       {/* Header */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 border-b border-border">
+      <div className="relative grid grid-cols-1 lg:grid-cols-12 border-b border-border overflow-hidden">
+        <ParallaxNumber number="08" />
         <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-border flex flex-col justify-center">
-          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1]">Contact</h2>
+          <h2 className="relative z-10 text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1]"><TokenText text="Contact" /></h2>
         </div>
         <div className="lg:col-span-8 p-6 md:p-8 bg-surface-container-low flex flex-col justify-center">
           <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-outline">
