@@ -132,11 +132,19 @@ export function Hero() {
             {t("Available for Engineering roles.")}
           </p>
           <div className="flex flex-col gap-3 w-full">
+            {/* The headline CTA: recruiters can interview the AI proxy right now, no scheduling. */}
             <button
               onClick={handleAgentClick}
-              className="group flex items-center justify-between border-2 border-[#ffffff] bg-transparent px-6 py-4 text-[14px] font-bold uppercase tracking-widest text-[#ffffff] transition-all hover:bg-[#ffffff] hover:text-[#000000] w-full"
+              className="group flex items-center justify-between gap-4 border-2 border-[#ffffff] bg-[#ffffff] px-6 py-4 text-start text-[#000000] transition-all hover:bg-primary hover:border-primary hover:text-[#ffffff] w-full"
             >
-              {t("Ask Agent")} <ArrowUpRight className="h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+              <span>
+                <span className="block text-[14px] font-bold uppercase tracking-widest">{t("Interview my AI instead")}</span>
+                <span className="mt-1 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] opacity-70">
+                  <span aria-hidden="true" className="inline-block h-1.5 w-1.5 bg-emerald-500 animate-pulse" />
+                  {t("Live agent · answers as me, 24/7")}
+                </span>
+              </span>
+              <ArrowUpRight className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1 rtl:-scale-x-100" />
             </button>
             <a
               href="/taaqib-masood-cv.pdf"
