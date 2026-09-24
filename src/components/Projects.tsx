@@ -91,7 +91,7 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
       <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4" style={{ transformStyle: "preserve-3d" }}>
         <AnimatePresence mode="popLayout">
           {filteredProjects.map((project, idx) => {
-            const isFeature = project.slug === "ltts-proctoring-portal" || project.slug === "mcp-code-review-pipeline";
+            const isFeature = ["garageiq", "ltts-proctoring-portal", "mcp-code-review-pipeline"].includes(project.slug);
             const matchesSkill = activeSkill ? project.stack.includes(activeSkill) : true;
             const isFaded = activeSkill && !matchesSkill;
             
@@ -107,7 +107,7 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
                 style={{ transformStyle: "preserve-3d", willChange: "transform", transition: "transform 0.5s cubic-bezier(0.83, 0, 0.17, 1)" }}
                 className={`group cursor-pointer relative border-b md:border-r border-border p-6 md:p-8 flex flex-col justify-between min-h-[300px] overflow-hidden hover:translate-z-[40px] hover:[transform:translateZ(40px)_rotateX(0deg)_rotateZ(0deg)] ${
                   isFeature ? "md:col-span-2" : "col-span-1"
-                } ${project.slug === "ltts-proctoring-portal" ? "lg:row-span-2 lg:col-span-2" : ""} ${
+                } ${project.slug === "garageiq" ? "lg:row-span-2 lg:col-span-2" : ""} ${
                   isFaded ? "opacity-20 pointer-events-none" : ""
                 } ${activeSkill && matchesSkill ? "border border-[#2e5bff]" : ""}`}
                 tabIndex={0}
@@ -168,7 +168,7 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
               const agentEl = document.getElementById("agent");
               agentEl?.scrollIntoView({ behavior: "smooth", block: "start" });
             }}
-            className="group cursor-pointer relative border-b md:border-r border-border p-6 md:p-8 flex flex-col justify-between transition-all duration-500 hover:z-10 min-h-[300px] overflow-hidden bg-foreground text-surface col-span-1 md:col-span-2"
+            className="group cursor-pointer relative border-b md:border-r border-border p-6 md:p-8 flex flex-col justify-between transition-all duration-500 hover:z-10 min-h-[300px] overflow-hidden bg-foreground text-surface col-span-1 md:col-span-2 lg:col-span-3"
           >
             <div className="relative z-10 flex flex-col h-full justify-between">
               <div className="flex justify-between items-start">
