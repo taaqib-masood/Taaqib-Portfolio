@@ -5,6 +5,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import type { MotionValue } from "framer-motion";
 import { isLand } from "@/lib/land-mask";
+import { uaeSamples } from "@/lib/uae";
 import { getVisitor, subsolarPoint, type Visitor } from "@/lib/visitor-location";
 import { useT } from "@/components/LocaleProvider";
 
@@ -33,6 +34,16 @@ const LEG = 1.6; // seconds per leg
 
 const toVec = (lat: number, lon: number, r = R) =>
   new THREE.Vector3(r * Math.cos(lat * DEG) * Math.sin(lon * DEG), r * Math.sin(lat * DEG), r * Math.cos(lat * DEG) * Math.cos(lon * DEG));
+
+// Dense cobalt layer over the UAE so Dubai's country stands out from the white dot map.
+function buildUae() {
+  const pos: number[] = [];
+  for (const [lat, lon] of uaeSamples()) { const v = toVec(lat, lon, R * 1.002); pos.push(v.x, v.y, v.z); }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute("aLand", new THREE.Float32BufferAttribute(new Array(pos.length / 3).fill(1), 1));
+  return g;
+}
 
 function buildEarth(samples: number) {
   const pos: number[] = [], land: number[] = [];
@@ -69,7 +80,7 @@ function buildArc(a: THREE.Vector3, b: THREE.Vector3, lift = 0.12) {
 }
 
 const vertex = /* glsl */ `
-uniform float uPixelRatio; uniform float uFade; uniform vec3 uSun;
+uniform float uPixelRatio; uniform float uFade; uniform float uBoost; uniform vec3 uSun;
 attribute float aLand;
 varying float vAlpha;
 void main() {
@@ -78,15 +89,16 @@ void main() {
   float facing = dot(normal, normalize(cameraPosition - world.xyz));
   // Real day/night: points on the night side of the actual terminator are dimmed.
   float day = smoothstep(-0.12, 0.18, dot(normalize(position), uSun));
-  vAlpha = smoothstep(0.0, 0.45, facing) * mix(0.1, 0.46, aLand) * mix(0.35, 1.0, day) * uFade;
+  vAlpha = smoothstep(0.0, 0.45, facing) * mix(0.1, 0.46, aLand) * mix(0.35, 1.0, day) * uFade * uBoost;
   vec4 mv = viewMatrix * world;
   gl_Position = projectionMatrix * mv;
   gl_PointSize = mix(1.2, 1.7, aLand) * uPixelRatio * (8.0 / -mv.z);
 }`;
 // Square points on purpose: the site has zero radius everywhere.
 const fragment = /* glsl */ `
+uniform vec3 uColor;
 varying float vAlpha;
-void main() { gl_FragColor = vec4(1.0, 1.0, 1.0, vAlpha); }`;
+void main() { gl_FragColor = vec4(uColor, vAlpha); }`;
 
 type Shared = {
   labels: (HTMLElement | null)[];
@@ -120,7 +132,12 @@ function Earth({ progress, animate, shared, selected, visitor }: {
   }, [visitor, pts]);
   const visitorPos = useMemo(() => (visitor && !visitor.sameZone ? toVec(visitor.lat, visitor.lon, R * 1.005) : null), [visitor]);
 
-  const uniforms = useMemo(() => ({ uPixelRatio: { value: gl.getPixelRatio() }, uFade: { value: 1 }, uSun: { value: new THREE.Vector3(0, 0, 1) } }), [gl]);
+  const uniforms = useMemo(() => ({ uPixelRatio: { value: gl.getPixelRatio() }, uFade: { value: 1 }, uBoost: { value: 1 }, uSun: { value: new THREE.Vector3(0, 0, 1) }, uColor: { value: new THREE.Color("#ffffff") } }), [gl]);
+  // Same pixel ratio, fade and sun as the earth (shared objects), but cobalt and boosted so it stays lit at night.
+  const uaeUniforms = useMemo(() => ({ ...uniforms, uBoost: { value: 6 }, uColor: { value: new THREE.Color("#2e5bff") } }), [uniforms]);
+  const uae = useMemo(buildUae, []);
+  // The pulse ring lies flat on the surface instead of facing the camera edge-on.
+  const ringTilt = useMemo(() => new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), pts.dxb.clone().normalize()), [pts]);
   const pointer = useRef(new THREE.Vector2());
   const tmp = useMemo(() => new THREE.Vector3(), []);
   const camDir = useMemo(() => new THREE.Vector3(), []);
@@ -143,9 +160,10 @@ function Earth({ progress, animate, shared, selected, visitor }: {
   }, [shared, invalidate]);
   useEffect(() => () => {
     geometry.dispose();
+    uae.dispose();
     legs.forEach((l) => l.geometry.dispose());
     visitorArc?.geometry.dispose();
-  }, [geometry, legs, visitorArc]);
+  }, [geometry, uae, legs, visitorArc]);
   useEffect(() => { invalidate(); }, [selected, animate, invalidate]);
 
   useFrame((state, delta) => {
@@ -188,7 +206,12 @@ function Earth({ progress, animate, shared, selected, visitor }: {
       const leg = Math.min(JOURNEY.length - 1, Math.max(0, Math.floor(elapsed / LEG)));
       s.ticker.textContent = s.journey[leg] ?? JOURNEY[leg].text;
     }
-    if (pulse.current) pulse.current.scale.setScalar(1 + (animate ? (t * 0.8) % 1 : 0) * 3);
+    if (pulse.current) {
+      // Sonar ping: the ring grows and fades out, then restarts.
+      const f = animate ? (t * 0.8) % 1 : 0;
+      pulse.current.scale.setScalar(1 + f * 3);
+      (pulse.current.material as THREE.MeshBasicMaterial).opacity = 0.8 * (1 - f) * (1 - p);
+    }
 
     // Project markers to screen for the DOM labels; hide the ones on the far side.
     camera.getWorldDirection(camDir);
@@ -217,6 +240,9 @@ function Earth({ progress, animate, shared, selected, visitor }: {
           <points geometry={geometry}>
             <shaderMaterial vertexShader={vertex} fragmentShader={fragment} uniforms={uniforms} transparent depthWrite={false} />
           </points>
+          <points geometry={uae}>
+            <shaderMaterial vertexShader={vertex} fragmentShader={fragment} uniforms={uaeUniforms} transparent depthWrite={false} />
+          </points>
           {legs.map((line, i) => <primitive key={i} object={line} />)}
           {visitorArc && <primitive object={visitorArc} />}
           {PLACES.map((pl) => (
@@ -231,9 +257,9 @@ function Earth({ progress, animate, shared, selected, visitor }: {
               <meshBasicMaterial color="#ffffff" />
             </mesh>
           )}
-          <mesh ref={pulse} position={pts.dxb}>
-            <ringGeometry args={[0.07, 0.085, 4, 1]} />
-            <meshBasicMaterial color="#2e5bff" transparent opacity={0.6} side={THREE.DoubleSide} />
+          <mesh ref={pulse} position={pts.dxb} quaternion={ringTilt}>
+            <ringGeometry args={[0.08, 0.1, 4, 1]} />
+            <meshBasicMaterial color="#2e5bff" transparent opacity={0.8} side={THREE.DoubleSide} depthWrite={false} />
           </mesh>
         </group>
       </group>
