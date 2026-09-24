@@ -7,13 +7,15 @@ import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import { TokenText } from "@/components/TokenText";
 import { useWebGLGate } from "@/lib/use-webgl";
+import { useAudience } from "@/lib/audience";
 
 // three.js stays out of the initial bundle; it loads only once the hero mounts on a WebGL device.
-const Monolith3D = dynamic(() => import("@/components/hero/Monolith3D"), { ssr: false });
+const Globe3D = dynamic(() => import("@/components/hero/Globe3D"), { ssr: false });
 
 export function Hero() {
   const containerRef = useRef<HTMLElement>(null);
   const { supported, animate } = useWebGLGate(containerRef, "(min-width: 768px)");
+  const plain = useAudience() === "plain";
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end start"] });
 
   const handleAgentClick = () => {
@@ -23,7 +25,6 @@ export function Hero() {
 
   return (
     <section ref={containerRef} id="hero" className="relative min-h-screen pt-24 px-6 md:px-16 flex flex-col justify-between max-w-[1440px] mx-auto border-b border-border overflow-hidden">
-      {supported && <Monolith3D progress={scrollYProgress} animate={animate} />}
       
       {/* Massive Typography & Photo Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-0 mt-12 lg:mt-24">
@@ -62,7 +63,14 @@ export function Hero() {
       </div>
 
       {/* Structural Data Blocks */}
-      <div className="mt-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-t border-border">
+      <div className="relative mt-24">
+      {/* Globe rises from the data row's top rule (the horizon), left of the photo column. */}
+      {supported && (
+        <div className="absolute bottom-full left-0 w-full lg:w-[56%] h-[380px] pointer-events-none">
+          <Globe3D progress={scrollYProgress} animate={animate} />
+        </div>
+      )}
+      <div className="relative z-10 bg-background grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-t border-border">
         
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -88,7 +96,9 @@ export function Hero() {
         >
           <h3 className="text-[14px] font-bold text-foreground uppercase tracking-[0.05em] mb-4">DEFINITION</h3>
           <p className="text-[16px] md:text-[18px] leading-[1.5] tracking-[-0.01em]">
-            Building systems where the model isn&apos;t the demo, it&apos;s the infrastructure.
+            {plain
+              ? "I build software where AI does real work: booking patients, screening candidates, reviewing code."
+              : "Building systems where the model isn\u2019t the demo, it\u2019s the infrastructure."}
           </p>
         </motion.div>
 
@@ -101,7 +111,9 @@ export function Hero() {
         >
           <h3 className="text-[14px] font-bold text-foreground uppercase tracking-[0.05em] mb-4">FOCUS</h3>
           <p className="text-[16px] md:text-[18px] leading-[1.5] tracking-[-0.01em]">
-            Agentic tool-calling, RAG, MCP, and CV pipelines. Python & TypeScript.
+            {plain
+              ? "Products that save teams hours: automated hiring, clinic booking, trading risk control."
+              : "Agentic tool-calling, RAG, MCP, and CV pipelines. Python & TypeScript."}
           </p>
         </motion.div>
 
@@ -135,6 +147,7 @@ export function Hero() {
           </div>
         </motion.div>
 
+      </div>
       </div>
 
     </section>

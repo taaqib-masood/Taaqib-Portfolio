@@ -9,7 +9,6 @@ export interface Project {
   repo: string;
   demo: string | null;
   role: string;
-  image?: string;
   highlights?: string[];
 }
 
@@ -157,7 +156,7 @@ export const projects: Project[] = [
     ],
     categories: ["AI/LLM", "Full-Stack"],
     repo: "https://github.com/taaqib-masood/garageIQ-landing-page",
-    demo: null,
+    demo: "https://app.garageiq.ae/en",
     role: "Founder & sole engineer, 2026 – present (product repo private)",
   },
   {
@@ -183,9 +182,8 @@ export const projects: Project[] = [
     ],
     categories: ["AI/LLM", "Full-Stack"],
     repo: "https://github.com/taaqib-masood",
-    demo: null,
+    demo: "https://www.loom.com/share/4320e5b3e47940069c2d4f3f0a473708",
     role: "Sole-built end-to-end at L&T Technology Services, Feb–Jun 2026",
-    image: "/projects/ltts-proctoring.jpg",
   },
   {
     slug: "mcp-code-review-pipeline",
@@ -210,7 +208,6 @@ export const projects: Project[] = [
     repo: "https://github.com/taaqib-masood",
     demo: null,
     role: "Built at L&T Technology Services, Feb–Jun 2026",
-    image: "/projects/mcp-code-review.jpg",
   },
   {
     slug: "stock-forecasting-risk",
@@ -243,7 +240,6 @@ export const projects: Project[] = [
     repo: "https://github.com/taaqib-masood/stock-market-forecasting-risk-analytics",
     demo: "https://stocks-proj.netlify.app",
     role: "Personal project, Dec 2025 – present",
-    image: "/projects/stock-forecasting.jpg",
   },
   {
     slug: "salon-booking-saas",
@@ -276,7 +272,6 @@ export const projects: Project[] = [
     repo: "https://github.com/taaqib-masood/salon-booking-saas",
     demo: null,
     role: "Personal project, Feb–May 2026",
-    image: "/projects/salon-booking.jpg",
   },
   {
     slug: "predictive-maintenance",
@@ -303,7 +298,6 @@ export const projects: Project[] = [
     repo: "https://github.com/taaqib-masood/predictive-maintenance-industrial-machinery",
     demo: null,
     role: "Research project, VIT — dataset: NASA CMAPSS Turbofan Engine Dataset",
-    image: "/projects/predictive-maintenance.jpg",
   },
   {
     slug: "smart-hospital-agent",
@@ -344,7 +338,6 @@ export const projects: Project[] = [
     repo: "https://github.com/taaqib-masood/smart-hospital-agent",
     demo: null,
     role: "Personal project / SaaS",
-    image: "/projects/smart-hospital.jpg",
   },
   {
     slug: "atlas-ai",

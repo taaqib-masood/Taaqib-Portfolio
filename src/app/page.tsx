@@ -12,6 +12,9 @@ import { Experience } from "@/components/Experience";
 import { Marquee } from "@/components/Marquee";
 import { StatusBar } from "@/components/StatusBar";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { AudienceToggle } from "@/components/AudienceToggle";
+import { QuickFacts } from "@/components/QuickFacts";
+import { projects } from "@/data/projects";
 import { ScrollHairline } from "@/components/ScrollHairline";
 import { Toaster } from "@/components/ui/sonner";
 import type { AgentMetrics } from "@/lib/agent-telemetry";
@@ -58,12 +61,22 @@ export default function Home() {
     return () => window.removeEventListener("wakeUpAgent", handleWakeUp);
   }, []);
 
+  // Case-study pages link to /?ask=<slug>#agent: prefill the agent with that project.
+  // Only known slugs are accepted, so the URL can't inject arbitrary prompt text.
+  useEffect(() => {
+    const slug = new URLSearchParams(window.location.search).get("ask");
+    const project = projects.find((p) => p.slug === slug);
+    if (project) setAgentPrefill(`Tell me about the "${project.title}" project.`);
+  }, []);
+
   return (
     <MotionConfig reducedMotion="user">
     <main className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-on-primary pb-[48px]">
       <ScrollHairline />
       <LanguageToggle />
+      <AudienceToggle />
       <Hero />
+      <QuickFacts />
       <About />
       <Agent prefillMessage={agentPrefill} onMetrics={setAgentMetrics} />
       <Projects onAskAgent={handleAskAgentAboutProject} activeSkill={activeSkill} />

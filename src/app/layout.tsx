@@ -5,8 +5,8 @@ import "./globals.css";
 import { CommandMenu } from "@/components/CommandMenu";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { ScrollFloor3D } from "@/components/ScrollFloor3D";
-import { Crosshair } from "@/components/Crosshair";
 import { cn } from "@/lib/utils";
+import { siteUrl } from "@/lib/site-url";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -16,11 +16,6 @@ const inter = Inter({
   display: "swap",
 });
 
-const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
-  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-  : process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "https://taaqib-portfolio.vercel.app";
 
 // Required by the nonce-based CSP in src/middleware.ts: inline hydration
 // scripts must be rendered per-request so Next can stamp them with the
@@ -74,7 +69,6 @@ export default function RootLayout({
         <CommandMenu />
         <ScrollToTop />
         <ScrollFloor3D />
-        <Crosshair />
         <Analytics />
         <SpeedInsights />
       </body>
