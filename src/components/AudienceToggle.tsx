@@ -18,7 +18,7 @@ export function AudienceToggle() {
           key={mode}
           onClick={() => setAudience(mode)}
           aria-pressed={audience === mode}
-          className={`px-3 py-1.5 transition-colors ${audience === mode ? "bg-[#ffffff] text-[#000000]" : "text-[#ffffff] hover:bg-[#ffffff]/15"}`}
+          className={`px-3 py-1.5 max-sm:min-h-10 transition-colors ${audience === mode ? "bg-[#ffffff] text-[#000000]" : "text-[#ffffff] hover:bg-[#ffffff]/15"}`}
         >
           {t(mode === "tech" ? "Technical" : "Plain English")}
         </button>

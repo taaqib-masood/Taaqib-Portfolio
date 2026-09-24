@@ -34,6 +34,11 @@ export async function POST(req: Request) {
     }
 
     if (!process.env.RESEND_API_KEY) {
+      // In production a missing key must fail loudly: a fake "sent" would silently drop a recruiter's message.
+      if (process.env.NODE_ENV === "production") {
+        console.error("[Contact] RESEND_API_KEY is not set; message not delivered");
+        return NextResponse.json({ error: "Could not send your message. Please email directly." }, { status: 503 });
+      }
       // Never log the sender's PII; lengths are enough to confirm the mock path works.
       console.log(`[Contact Form Mock] received message (${message.length} chars)`);
       return NextResponse.json(

@@ -79,9 +79,9 @@ function buildArc(a: THREE.Vector3, b: THREE.Vector3, lift = 0.12) {
   return new THREE.BufferGeometry().setFromPoints(pts);
 }
 
-// A few towers around Dubai, heights loosely after the real skyline (Burj Khalifa tallest).
+// A few low towers around Dubai.
 const SKYLINE: [dLat: number, dLon: number, h: number][] = [
-  [0, 0, 0.24], [0.8, 0.7, 0.11], [-0.7, 0.9, 0.08], [1.1, -0.6, 0.14], [-1.0, -0.8, 0.06], [0.3, 1.5, 0.09], [1.7, 0.2, 0.07],
+  [0.8, 0.7, 0.11], [-0.7, 0.9, 0.08], [1.1, -0.6, 0.14], [-1.0, -0.8, 0.06], [0.3, 1.5, 0.09], [1.7, 0.2, 0.07],
 ];
 
 // Light beam: bright at the ground, fading to nothing at the top (uv.y runs up the box's sides).
@@ -166,6 +166,7 @@ function Earth({ progress, animate, shared, selected, visitor }: {
     const up = base.clone().normalize();
     return { pos: base.clone().add(up.clone().multiplyScalar(h / 2)), quat: new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), up), h };
   }), []);
+  const beamTilt = useMemo(() => new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), pts.dxb.clone().normalize()), [pts]);
   const beamPos = useMemo(() => pts.dxb.clone().add(pts.dxb.clone().normalize().multiplyScalar(0.4)), [pts]);
   // Packet routes: each journey leg, plus the visitor's arc when there is one.
   const routes = useMemo(() => [...legs, ...(visitorArc ? [visitorArc] : [])].map((l) => l.geometry.getAttribute("position") as THREE.BufferAttribute), [legs, visitorArc]);
@@ -340,7 +341,7 @@ function Earth({ progress, animate, shared, selected, visitor }: {
               <meshBasicMaterial color="#ffffff" />
             </mesh>
           ))}
-          <mesh position={beamPos} quaternion={towers[0].quat}>
+          <mesh position={beamPos} quaternion={beamTilt}>
             <boxGeometry args={[0.01, 0.8, 0.01]} />
             <shaderMaterial vertexShader={beamVertex} fragmentShader={beamFragment} uniforms={beamUniforms} transparent depthWrite={false} blending={THREE.AdditiveBlending} />
           </mesh>

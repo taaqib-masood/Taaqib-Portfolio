@@ -111,7 +111,7 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
                 key={project.slug}
                 onClick={() => { if (!isFaded) setSelectedProject(project); }}
                 style={{ transformStyle: "preserve-3d", willChange: "transform", transition: "transform 0.5s cubic-bezier(0.83, 0, 0.17, 1)" }}
-                className={`group cursor-pointer relative border-b md:border-r border-border p-6 md:p-8 flex flex-col justify-between min-h-[300px] overflow-hidden hover:translate-z-[40px] hover:[transform:translateZ(40px)_rotateX(0deg)_rotateZ(0deg)] ${
+                className={`group cursor-pointer relative border-b md:border-r border-border p-6 md:p-8 flex flex-col justify-between gap-6 md:min-h-[300px] overflow-hidden hover:translate-z-[40px] hover:[transform:translateZ(40px)_rotateX(0deg)_rotateZ(0deg)] ${
                   isFeature ? "md:col-span-2" : "col-span-1"
                 } ${project.slug === "garageiq" ? "lg:row-span-2 lg:col-span-2" : ""} ${
                   isFaded ? "opacity-20 pointer-events-none" : ""

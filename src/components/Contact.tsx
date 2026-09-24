@@ -9,6 +9,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { Mail, Phone, MapPin, ExternalLink, Loader2 } from "lucide-react";
 import { useT } from "@/components/LocaleProvider";
 
@@ -58,7 +59,7 @@ export function Contact() {
       reset();
     } catch {
       toast.error(t("Failed to send message."), {
-        description: t("Please try again later or contact me directly via email."),
+        description: `${t("Please try again later or contact me directly via email.")} ${contact.email}`,
       });
     } finally {
       setIsSubmitting(false);
@@ -67,7 +68,7 @@ export function Contact() {
 
   return (
     <section id="contact" className="max-w-[1440px] mx-auto border-b border-border relative z-10">
-      
+      <Toaster position="bottom-right" className="rounded-none border-border" />
       {/* Header */}
       <div className="relative grid grid-cols-1 lg:grid-cols-12 border-b border-border overflow-hidden">
         <ParallaxNumber number="08" />
@@ -97,7 +98,7 @@ export function Contact() {
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-outline mb-1">{t("Email")}</p>
-                  <a href={`mailto:${contact.email}`} className="text-[16px] font-medium hover:text-outline transition-colors">{contact.email}</a>
+                  <a href={`mailto:${contact.email}`} className="inline-block py-2 text-[16px] font-medium hover:text-outline transition-colors">{contact.email}</a>
                 </div>
               </li>
               <li className="flex items-start gap-4">
@@ -106,7 +107,7 @@ export function Contact() {
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-outline mb-1">{t("Phone")}</p>
-                  <a href={`tel:${contact.phone}`} className="text-[16px] font-medium hover:text-outline transition-colors">{contact.phone}</a>
+                  <a href={`tel:${contact.phone}`} className="inline-block py-2 text-[16px] font-medium hover:text-outline transition-colors">{contact.phone}</a>
                 </div>
               </li>
               <li className="flex items-start gap-4">

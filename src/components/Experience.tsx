@@ -59,8 +59,12 @@ function PinnedTimeline({ exp }: { exp: Exp }) {
   );
 }
 
+// Phones get the first few bullets per role; the rest are one tap away (the page is long on a phone).
+const SHOWN = 3;
+
 export function Experience() {
   const t = useT();
+  const [open, setOpen] = useState<Set<number>>(new Set());
   return (
     <section id="experience" className="max-w-[1440px] mx-auto border-b border-border">
       
@@ -95,12 +99,20 @@ export function Experience() {
             <div className="lg:col-span-8 p-6 md:p-8 flex flex-col justify-center">
               <ul className="space-y-4">
                 {exp.bullets.map((bullet, i) => (
-                  <li key={i} className="flex items-start gap-4 text-[16px] leading-[1.6]">
+                  <li key={i} className={`items-start gap-4 text-[16px] leading-[1.6] flex ${i >= SHOWN && !open.has(idx) ? "max-md:hidden" : ""}`}>
                     <span className="w-2 h-2 bg-foreground mt-2 flex-shrink-0" />
                     <span>{t(bullet)}</span>
                   </li>
                 ))}
               </ul>
+              {exp.bullets.length > SHOWN && !open.has(idx) && (
+                <button
+                  onClick={() => setOpen(new Set(open).add(idx))}
+                  className="md:hidden mt-6 self-start border border-border px-4 min-h-11 text-[12px] font-bold uppercase tracking-widest hover:bg-foreground hover:text-background transition-colors"
+                >
+                  {t("Show all")} ({exp.bullets.length})
+                </button>
+              )}
             </div>
           </motion.div>
         ))}

@@ -13,6 +13,8 @@ import { TokenText } from "@/components/TokenText";
 import { AgentTrace } from "@/components/AgentTrace";
 import { getToolTelemetry, measureRequest, type AgentMetrics } from "@/lib/agent-telemetry";
 import { useLocale, useT } from "@/components/LocaleProvider";
+import { contact } from "@/data/resume";
+import { toTranscriptMessages } from "@/lib/transcript";
 
 export type InterviewMode = "general" | "architecture" | "star" | "recruiter";
 
@@ -171,11 +173,41 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
     transport,
     onError: (err: Error) => {
       console.error("Agent error details:", err);
-      setApiError("Terminal connection interrupted. Check GROQ_API_KEY in environment variables.");
+      setApiError(`${t("The agent is offline for a moment. Try again, or email me at")} ${contact.email}`);
     },
   });
 
   const isLoading = status === "streaming" || status === "submitted";
+
+  // Transcript to Taaqib: sent when the visitor leaves (keepalive survives the unload) or asks
+  // for a follow-up. Only new messages trigger a send, so one visit usually makes one email.
+  const live = useRef({ messages, activeMode, locale });
+  live.current = { messages, activeMode, locale };
+  const sentUpTo = useRef(0);
+  const [followUp, setFollowUp] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [followUpEmail, setFollowUpEmail] = useState("");
+  const sendTranscript = useCallback((email?: string) => {
+    const { messages, activeMode, locale } = live.current;
+    let items = toTranscriptMessages(messages);
+    if (!items.some((m) => m.role === "user") || (!email && messages.length <= sentUpTo.current)) return null;
+    sentUpTo.current = messages.length;
+    const body = () => JSON.stringify({ messages: items, mode: activeMode, locale, ...(email ? { email } : {}) });
+    while (items.length > 2 && body().length > 60_000) items = items.slice(2); // keepalive bodies are capped at 64 KB
+    return fetch("/api/chat/transcript", { method: "POST", keepalive: true, headers: { "Content-Type": "application/json" }, body: body() });
+  }, []);
+  useEffect(() => {
+    const onHide = () => { if (document.visibilityState === "hidden") sendTranscript()?.catch(() => {}); };
+    document.addEventListener("visibilitychange", onHide);
+    window.addEventListener("pagehide", onHide);
+    return () => { document.removeEventListener("visibilitychange", onHide); window.removeEventListener("pagehide", onHide); };
+  }, [sendTranscript]);
+  const requestFollowUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFollowUp("sending");
+    const res = await sendTranscript(followUpEmail.trim())?.catch(() => null);
+    setFollowUp(res?.ok ? "sent" : "error");
+  };
+  const hasAnswer = messages.some((m) => m.role === "assistant" && m.parts.some((p) => p.type === "text" && p.text));
 
   useEffect(() => {
     const timing = requestTiming.current;
@@ -315,7 +347,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
                 <button
                   key={mode.id}
                   onClick={() => setActiveMode(mode.id)}
-                  className={`flex items-center justify-center gap-2 px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider font-semibold border transition-all ${
+                  className={`flex items-center justify-center gap-2 px-3 py-1.5 max-sm:min-h-10 text-[11px] font-mono uppercase tracking-wider font-semibold border transition-all ${
                     isActive
                       ? "bg-surface text-foreground border-surface shadow-[0_0_12px_rgba(255,255,255,0.15)]"
                       : "bg-transparent text-surface/70 border-surface/20 hover:border-surface/50 hover:text-surface"
@@ -339,7 +371,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
 
       <div className="grid grid-cols-1 lg:grid-cols-12">
         {/* Info Panel */}
-        <div className="lg:col-span-4 border-b lg:border-b-0 relative flex flex-col">
+        <div className="lg:col-span-4 order-2 lg:order-1 border-b lg:border-b-0 relative flex flex-col">
           <VerticalLine className="bg-surface/20" />
           <div className="p-6 md:p-8 border-b border-surface/20 bg-foreground flex-1">
             <div className="mb-6">
@@ -406,7 +438,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
         </div>
 
         {/* Chat Window */}
-        <div className="lg:col-span-8 flex flex-col bg-foreground min-h-[550px]">
+        <div className="lg:col-span-8 order-1 lg:order-2 flex flex-col bg-foreground min-h-[550px] border-b border-surface/20 lg:border-b-0">
           {/* Message list */}
           <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6" style={{ minHeight: 450, maxHeight: 650 }}>
             {messages.length === 0 && !apiError && (
@@ -442,8 +474,8 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
             )}
 
             {apiError && (
-              <div className="border border-red-500/40 bg-red-950/30 p-4 text-[13px] font-mono uppercase tracking-wider text-red-400">
-                [SYSTEM ERROR]: {apiError}
+              <div role="alert" className="border border-red-500/40 bg-red-950/30 p-4 text-[13px] font-mono tracking-wider text-red-400">
+                {apiError}
               </div>
             )}
 
@@ -575,6 +607,32 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
             />
           )}
 
+          {/* Follow-up: the recruiter leaves an email and Taaqib gets the whole conversation. */}
+          {hasAnswer && !isLoading && (
+            <form onSubmit={requestFollowUp} className="border-t border-surface/20 bg-surface/5 px-6 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+              {followUp === "sent" ? (
+                <p role="status" className="text-[13px] font-mono text-surface">{t("Sent. Taaqib will get this conversation and reply to you.")}</p>
+              ) : (
+                <>
+                  <label htmlFor="follow-up-email" className="text-[12px] font-bold uppercase tracking-widest text-surface/80 sm:shrink-0">{t("Want Taaqib to follow up?")}</label>
+                  <input
+                    id="follow-up-email"
+                    type="email"
+                    required
+                    value={followUpEmail}
+                    onChange={(e) => setFollowUpEmail(e.target.value)}
+                    placeholder={t("your@company.com")}
+                    className="flex-1 min-w-0 min-h-11 border border-surface/20 bg-transparent px-3 text-[14px] text-surface placeholder-surface/40 focus:outline-none focus:border-surface"
+                  />
+                  <button type="submit" disabled={followUp === "sending"} className="min-h-11 px-4 bg-surface text-foreground text-[12px] font-bold uppercase tracking-widest hover:bg-surface/90 disabled:opacity-50">
+                    {t("Send conversation")}
+                  </button>
+                  {followUp === "error" && <p role="alert" className="text-[12px] text-red-400">{t("Could not send. Email me at")} {contact.email}</p>}
+                </>
+              )}
+            </form>
+          )}
+
           {/* Input area */}
           <form onSubmit={handleFormSubmit} className="border-t border-surface/20 bg-foreground p-6 flex items-end gap-4">
             <div className="flex-1 border border-surface/20 relative focus-within:border-surface transition-colors">
@@ -619,6 +677,9 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
               </button>
             )}
           </form>
+          <p className="border-t border-surface/20 px-6 py-2 text-[11px] text-surface/50">
+            {t("Conversations are shared with Taaqib so he can follow up.")}
+          </p>
         </div>
       </div>
     </section>
