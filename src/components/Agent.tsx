@@ -9,6 +9,8 @@ import remarkGfm from "remark-gfm";
 import { Send, Wrench, Copy, Check, Sparkles, Terminal, Layers, Award, UserCheck } from "lucide-react";
 import { ParallaxNumber } from "@/components/ParallaxNumber";
 import { VerticalLine } from "@/components/VerticalLine";
+import { TokenText } from "@/components/TokenText";
+import { AgentTrace } from "@/components/AgentTrace";
 import { getToolTelemetry, measureRequest, type AgentMetrics } from "@/lib/agent-telemetry";
 
 export type InterviewMode = "general" | "architecture" | "star" | "recruiter";
@@ -274,7 +276,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
     <section id="agent" className="max-w-[1440px] mx-auto border-b border-surface/20 bg-foreground text-surface">
       {/* Header */}
       <div className="relative grid grid-cols-1 lg:grid-cols-12 border-b border-surface/20 overflow-hidden z-0">
-        <ParallaxNumber number="05" />
+        <ParallaxNumber number="02" />
         <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 relative flex flex-col justify-center">
           <div className="flex items-center gap-3 mb-2">
             <span className="inline-block w-2.5 h-2.5 bg-emerald-400 animate-pulse" />
@@ -283,7 +285,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
             </span>
           </div>
           <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] relative z-10">
-            Agent Terminal
+            <TokenText text="Agent Terminal" />
           </h2>
           <VerticalLine className="bg-surface/20" />
         </div>
@@ -558,6 +560,16 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
 
             <div ref={messagesEndRef} />
           </div>
+
+          {requestTiming.current.start > 0 && (
+            <AgentTrace
+              timing={requestTiming.current}
+              tools={messages.at(-1)?.role === "assistant" && messages.at(-1)?.id !== requestTiming.current.previousId
+                ? getToolTelemetry(messages.at(-1)!.parts, isLoading)
+                : []}
+              isLoading={isLoading}
+            />
+          )}
 
           {/* Input area */}
           <form onSubmit={handleFormSubmit} className="border-t border-surface/20 bg-foreground p-6 flex items-end gap-4">

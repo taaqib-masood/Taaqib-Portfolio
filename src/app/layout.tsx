@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
-import Script from "next/script";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
 import { CommandMenu } from "@/components/CommandMenu";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { ScrollFloor3D } from "@/components/ScrollFloor3D";
+import { Crosshair } from "@/components/Crosshair";
 import { cn } from "@/lib/utils";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -13,12 +13,6 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
-  display: "swap",
-});
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  variable: "--font-outfit",
   display: "swap",
 });
 
@@ -73,30 +67,14 @@ export default function RootLayout({
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased text-foreground overflow-x-hidden pb-[88px] sm:pb-[56px]",
-          inter.variable,
-          outfit.variable
+          inter.variable
         )}
       >
-        <Script
-          id="google-translate-init"
-          strategy="lazyOnload"
-          dangerouslySetInnerHTML={{
-            __html: `
-              function googleTranslateElementInit() {
-                new google.translate.TranslateElement({pageLanguage: 'en', includedLanguages: 'ar,en', autoDisplay: false}, 'google_translate_element');
-              }
-            `,
-          }}
-        />
-        <Script
-          id="google-translate-script"
-          strategy="lazyOnload"
-          src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-        />
         {children}
         <CommandMenu />
         <ScrollToTop />
         <ScrollFloor3D />
+        <Crosshair />
         <Analytics />
         <SpeedInsights />
       </body>

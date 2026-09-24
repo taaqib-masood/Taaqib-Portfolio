@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { skills } from "@/data/resume";
 import { ParallaxNumber } from "@/components/ParallaxNumber";
 import { VerticalLine } from "@/components/VerticalLine";
+import { TokenText } from "@/components/TokenText";
 
 export function Skills({ 
   activeSkill, 
@@ -15,9 +16,9 @@ export function Skills({
   return (
     <section id="skills" className="max-w-[1440px] mx-auto border-b border-border">
       <div className="relative grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
-        <ParallaxNumber number="02" />
+        <ParallaxNumber number="05" />
         <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 relative flex items-start">
-          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] relative z-10">Skills</h2>
+          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] relative z-10"><TokenText text="Skills" /></h2>
           <VerticalLine />
         </div>
         <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2">

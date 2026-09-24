@@ -105,7 +105,8 @@ INTERVIEW PLAYBOOK:
    - For Reva AI (WhatsApp Receptionist / smart-hospital-agent): Explain the WhatsApp booking state-machine (idle -> greeting -> collect_name -> show_doctors -> confirm_slot -> booked), Meta Cloud API webhooks, Supabase RLS multi-tenancy across 13 tables, Razorpay deposit links, and AI no-show prediction.
    - For LTTS Proctoring Portal: Explain why LiveKit was chosen over WebRTC mesh, Deepgram Nova-2 <200ms transcription, MediaPipe solvePnP head-pose gaze tracking (<50ms, 90% accuracy), Groq Whisper Coach, and eliminating 95% of manual screening.
    - For MCP Code Review: Explain Model Context Protocol, Claude 3.5 cross-referencing PR diffs against Jira AC, and catching RCE (eval()), 4 SQL injections, and MD5 hashing in <10s.
-   - For GitHub Projects & Open-Source: You know all 8 personal repositories maintained by Taaqib on GitHub (smart-hospital-agent / Reva AI, stock-market-forecasting-risk-analytics, predictive-maintenance-industrial-machinery, salon-booking-saas, atlas-ai, garageIQ-landing-page, majestic-constructions, Taaqib-Portfolio). If asked what open-source repositories Taaqib maintains, list ONLY these 8 personal projects. You do NOT maintain Graphify or Ponytail (those are external third-party tools/methodologies created by other developers).
+   - For GitHub Projects & Open-Source: Taaqib's public GitHub repositories are: smart-hospital-agent (Reva AI), stock-market-forecasting-risk-analytics (Boro), predictive-maintenance-industrial-machinery, salon-booking-saas, atlas-ai (AI tool directory), garageIQ-landing-page (GarageIQ marketing site) and Taaqib-Portfolio. GarageIQ's product code, the LTTS portal and the MCP code reviewer live in private repositories: describe them, but never offer a public repo link for them. If asked what open-source repositories Taaqib maintains, list ONLY these public ones.
+   - For GarageIQ: explain the dual-LLM design (Gemini 2.0 Flash for live search intent, a 6-model Groq fleet for batch review enrichment routed by daily token budget), PostGIS geo search plus pgvector in one Postgres, and admin-pinned tags that survive nightly re-enrichment. It is pre-launch: never claim live users or revenue. You do NOT maintain Graphify or Ponytail (those are external third-party tools/methodologies created by other developers).
 
 3. Behavioral & Problem-Solving Questions (e.g. "Tell me about a time something broke", "Describe a hard bug"):
    - Use the STAR framework: Situation -> Task -> Action -> Result with real metrics.
@@ -205,24 +206,21 @@ export async function POST(req: Request) {
     );
   }
 
-  // Ensure each message conforms to UI message format with parts for convertToModelMessages,
-  // clamping per-message text so oversized histories can't inflate token spend.
-  const normalizedMessages = rawMessages.map((m) => {
-    if (m.parts && Array.isArray(m.parts)) {
-      return {
-        ...m,
-        parts: m.parts.map((p) =>
-          p.type === "text" && typeof p.text === "string"
-            ? { ...p, text: p.text.slice(0, MAX_MESSAGE_CHARS) }
-            : p
-        ),
-      };
-    }
-    return {
-      ...m,
-      parts: [{ type: "text", text: (m.content || "").slice(0, MAX_MESSAGE_CHARS) }],
-    };
-  });
+  // Only user/assistant text reaches the model: a client-supplied "system" role or forged
+  // tool/file parts would let a caller rewrite the agent's instructions or fake tool results.
+  // Each message is clamped so oversized histories can't inflate token spend.
+  const normalizedMessages = rawMessages
+    .filter((m) => m && (m.role === "user" || m.role === "assistant"))
+    .map((m) => {
+      const text = Array.isArray(m.parts)
+        ? m.parts.filter((p) => p?.type === "text" && typeof p.text === "string").map((p) => p.text).join("\n")
+        : typeof m.content === "string" ? m.content : "";
+      return { id: crypto.randomUUID(), role: m.role as "user" | "assistant", parts: [{ type: "text" as const, text: text.slice(0, MAX_MESSAGE_CHARS) }] };
+    })
+    .filter((m) => m.parts[0].text.trim().length > 0);
+  if (normalizedMessages.length === 0 || normalizedMessages.at(-1)!.role !== "user") {
+    return new Response(JSON.stringify({ error: "Invalid messages" }), { status: 400, headers: { "Content-Type": "application/json" } });
+  }
 
   // --- Stream with ultra-low latency Groq model ---
   // Preferred fast active model: openai/gpt-oss-20b (instant TTFT, no OTPM limits on Groq free tier)
@@ -232,8 +230,7 @@ export async function POST(req: Request) {
   const result = streamText({
     model: groq(selectedModel),
     system: getSystemPrompt(interviewMode),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- AI SDK v6 accepts model messages
-    messages: await convertToModelMessages(normalizedMessages as any),
+    messages: await convertToModelMessages(normalizedMessages),
     tools,
     stopWhen: stepCountIs(4), // allow tool-call steps if needed, but in-context knowledge answers immediately
   });

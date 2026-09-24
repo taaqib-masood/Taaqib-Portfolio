@@ -1,21 +1,31 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import dynamic from "next/dynamic";
+import { MotionConfig } from "framer-motion";
 import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
-import { Agent } from "@/components/Agent";
 import { Projects } from "@/components/Projects";
 import { McpTeaser } from "@/components/McpTeaser";
 import { Skills } from "@/components/Skills";
 import { Experience } from "@/components/Experience";
-import { GithubGraph } from "@/components/GithubGraph";
-import { Contact } from "@/components/Contact";
 import { Marquee } from "@/components/Marquee";
 import { StatusBar } from "@/components/StatusBar";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { ScrollHairline } from "@/components/ScrollHairline";
 import { Toaster } from "@/components/ui/sonner";
 import type { AgentMetrics } from "@/lib/agent-telemetry";
+
+// Below-the-fold sections ship in their own chunks so the hero's JS parses first.
+// Client-only on purpose: server-rendered next/dynamic chunks are emitted as <script> tags
+// without the CSP nonce and get blocked; runtime-loaded chunks are trusted via 'strict-dynamic'.
+// The placeholder keeps each section's id and height so anchors land and nothing jumps.
+const placeholder = (id: string, minH: string) => function SectionPlaceholder() {
+  return <section id={id} aria-busy="true" className={`max-w-[1440px] mx-auto border-b border-border ${minH}`} />;
+};
+const Agent = dynamic(() => import("@/components/Agent").then((m) => m.Agent), { ssr: false, loading: placeholder("agent", "min-h-[900px]") });
+const GithubGraph = dynamic(() => import("@/components/GithubGraph").then((m) => m.GithubGraph), { ssr: false, loading: placeholder("github", "min-h-[700px]") });
+const Contact = dynamic(() => import("@/components/Contact").then((m) => m.Contact), { ssr: false, loading: placeholder("contact", "min-h-[600px]") });
 
 export default function Home() {
   const [agentPrefill, setAgentPrefill] = useState<string | null>(null);
@@ -49,6 +59,7 @@ export default function Home() {
   }, []);
 
   return (
+    <MotionConfig reducedMotion="user">
     <main className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-on-primary pb-[48px]">
       <ScrollHairline />
       <LanguageToggle />
@@ -68,11 +79,12 @@ export default function Home() {
         <div className="max-w-[1440px] mx-auto px-6 md:px-16 flex flex-col md:flex-row justify-between items-center gap-4">
           <p>© 2026 Taaqib Masood</p>
           <p className="hidden md:block border border-border px-4 py-2">Model isn&apos;t the demo, it&apos;s the infrastructure.</p>
-          <p>Built with Next.js & Framer Motion</p>
+          <p>Built with Next.js, three.js & Framer Motion</p>
         </div>
       </footer>
       <StatusBar metrics={agentMetrics} />
       <Toaster position="bottom-right" className="rounded-none border-border" />
     </main>
+    </MotionConfig>
   );
 }

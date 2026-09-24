@@ -5,13 +5,13 @@ export const aboutParagraphs = [
 
 export const skills = {
   "Languages": ["TypeScript", "JavaScript (ES6+)", "Python", "SQL", "HTML5", "CSS3"],
-  "Frontend": ["Angular 18/19 (standalone components, RxJS)", "React", "Vite", "Angular Material", "Tailwind CSS (RTL)"],
-  "Backend": ["Node.js", "Express.js", "REST APIs", "JWT auth", "bcrypt", "Multer", "BullMQ"],
-  "Databases": ["MongoDB / Mongoose ODM", "MongoDB Atlas", "PostgreSQL (Supabase)", "Redis"],
-  "AI / LLMs": ["Anthropic Claude", "Groq (LLaMA 3.1 / 3.3)", "prompt engineering", "function-calling agents", "RAG", "MCP tooling", "MediaPipe", "LiveKit (WebRTC)", "Deepgram Nova-2"],
-  "ML & Data": ["LightGBM", "ARIMA", "LSTM", "scikit-learn", "SHAP", "FinBERT", "MLflow", "Pandas", "NumPy"],
-  "Cloud & DevOps": ["Docker", "Kubernetes", "Terraform", "Nginx", "Render", "Vercel", "Cloudinary", "GitHub Actions (CI/CD)", "Azure (Cosmos DB, App Service, Blob Storage, OpenAI)"],
-  "Tools": ["Git / GitHub", "Postman", "VS Code", "Cursor", "Stripe", "Supabase", "Zerodha Kite Connect", "Telegram Bot API"]
+  "Frontend": ["Next.js (App Router)", "React", "Angular 18/19 (standalone components, RxJS)", "Tailwind CSS (RTL)", "Framer Motion", "three.js / React Three Fiber", "Zustand", "TanStack Query", "Vite"],
+  "Backend": ["Node.js", "NestJS", "Express.js", "REST APIs", "Socket.io", "JWT auth", "Better Auth", "BullMQ", "Celery"],
+  "Databases": ["PostgreSQL (Supabase)", "PostGIS", "pgvector", "Prisma", "MongoDB / Mongoose ODM", "Redis", "SQLite"],
+  "AI / LLMs": ["Anthropic Claude", "Groq (LLaMA 3.1 / 3.3, GPT-OSS, Qwen3)", "Gemini 2.0 Flash", "Vercel AI SDK", "function-calling agents", "RAG", "MCP tooling", "MediaPipe", "LiveKit (WebRTC)", "Deepgram Nova-2"],
+  "ML & Data": ["LightGBM", "ARIMA", "LSTM", "scikit-learn", "SHAP", "FinBERT", "MLflow", "TensorFlow Lite", "Pandas", "NumPy"],
+  "Cloud & DevOps": ["Docker", "Kubernetes", "Terraform", "Nginx", "Vercel", "Render", "Cloudinary", "GitHub Actions (CI/CD)", "Azure (Cosmos DB, App Service, Blob Storage, OpenAI)"],
+  "Testing & Tools": ["Playwright", "Jest", "Supertest", "Git / GitHub", "Postman", "Apify", "Stripe", "Razorpay", "Meta WhatsApp Cloud API", "Zerodha Kite Connect", "Telegram Bot API"]
 };
 
 export const experience = [
