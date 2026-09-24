@@ -53,12 +53,12 @@ try {
   // Wait for either a rendered assistant answer or the real error surface.
   await page.waitForFunction(() => {
     const agent = document.querySelector('#agent');
-    return agent?.querySelector('.prose')?.textContent?.trim() || agent?.textContent?.includes('[SYSTEM ERROR]:');
+    return agent?.querySelector('.prose')?.textContent?.trim() || agent?.querySelector('[role=alert]');
   }, { timeout: 60000 });
   await page.getByRole('button', { name: 'Send message', exact: true }).waitFor({ timeout: 60000 });
   await delay(500);
   const reply = (await page.locator('#agent .prose').allTextContents()).join('\n').trim();
-  const systemError = await page.locator('#agent').getByText('[SYSTEM ERROR]:', { exact: false }).allTextContents();
+  const systemError = await page.locator('#agent [role=alert]').allTextContents();
   await page.locator('#agent').screenshot({ path: '/tmp/portfolio-chat-e2e.png' });
   console.log(JSON.stringify({ responses, reply, systemError, errors }, null, 2));
   assert.ok(reply, 'No assistant reply rendered');

@@ -58,7 +58,7 @@ export function Contact() {
       reset();
     } catch {
       toast.error(t("Failed to send message."), {
-        description: t("Please try again later or contact me directly via email."),
+        description: `${t("Please try again later or contact me directly via email.")} ${contact.email}`,
       });
     } finally {
       setIsSubmitting(false);

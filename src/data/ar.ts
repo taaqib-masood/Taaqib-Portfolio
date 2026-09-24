@@ -301,6 +301,7 @@ export const ar: Record<string, string> = {
   "Message sent successfully!": "تم إرسال الرسالة بنجاح!",
   "I will get back to you as soon as possible.": "سأرد عليك في أقرب وقت ممكن.",
   "Failed to send message.": "تعذّر إرسال الرسالة.",
+  "The agent is offline for a moment. Try again, or email me at": "الوكيل غير متاح للحظات. حاول مرة أخرى، أو راسلني على",
   "Please try again later or contact me directly via email.": "يرجى المحاولة لاحقاً أو التواصل معي مباشرة عبر البريد.",
   "Name must be at least 2 characters.": "يجب ألا يقل الاسم عن حرفين.",
   "Invalid email address.": "عنوان بريد غير صالح.",

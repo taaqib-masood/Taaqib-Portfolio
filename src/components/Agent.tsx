@@ -13,6 +13,7 @@ import { TokenText } from "@/components/TokenText";
 import { AgentTrace } from "@/components/AgentTrace";
 import { getToolTelemetry, measureRequest, type AgentMetrics } from "@/lib/agent-telemetry";
 import { useLocale, useT } from "@/components/LocaleProvider";
+import { contact } from "@/data/resume";
 
 export type InterviewMode = "general" | "architecture" | "star" | "recruiter";
 
@@ -171,7 +172,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
     transport,
     onError: (err: Error) => {
       console.error("Agent error details:", err);
-      setApiError("Terminal connection interrupted. Check GROQ_API_KEY in environment variables.");
+      setApiError(`${t("The agent is offline for a moment. Try again, or email me at")} ${contact.email}`);
     },
   });
 
@@ -442,8 +443,8 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
             )}
 
             {apiError && (
-              <div className="border border-red-500/40 bg-red-950/30 p-4 text-[13px] font-mono uppercase tracking-wider text-red-400">
-                [SYSTEM ERROR]: {apiError}
+              <div role="alert" className="border border-red-500/40 bg-red-950/30 p-4 text-[13px] font-mono tracking-wider text-red-400">
+                {apiError}
               </div>
             )}
 

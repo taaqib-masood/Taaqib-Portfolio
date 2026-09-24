@@ -146,13 +146,6 @@ export function Hero() {
               </span>
               <ArrowUpRight className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1 rtl:-scale-x-100" />
             </button>
-            <a
-              href="/taaqib-masood-cv.pdf"
-              download
-              className="group flex items-center justify-between border-2 border-[#ffffff] bg-transparent px-6 py-4 text-[14px] font-bold uppercase tracking-widest text-[#ffffff] transition-all hover:bg-[#ffffff] hover:text-[#000000] w-full"
-            >
-              {t("Download CV")} <ArrowUpRight className="h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-            </a>
           </div>
         </motion.div>
 
