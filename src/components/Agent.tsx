@@ -295,7 +295,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
         </div>
         <div className="lg:col-span-8 p-6 md:p-8 bg-surface/5 flex flex-col justify-center">
           <p className="text-[15px] md:text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-surface/70">
-            {t("Technical Interview Proxy. Interview Taaqib Masood on system architecture, code challenges, STAR stories, and recruiter fit with live streaming and measured browser latency.")}
+            {t("Interview my AI instead of me. It answers as my proxy, 24/7, from my real CV and projects: system design, code, STAR stories and role fit.")}
           </p>
         </div>
       </div>

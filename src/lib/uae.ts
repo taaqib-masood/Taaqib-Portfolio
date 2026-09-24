@@ -1,5 +1,5 @@
 // The UAE, traced coarsely clockwise from the Saudi/Qatar corner along the Gulf coast, round the
-// east coast and back along the Oman and Saudi borders. Lit in cobalt on the globe so Dubai's
+// east coast and back along the Oman and Saudi borders. Drawn as a dense, bright dot layer so Dubai's
 // country reads at a glance. ponytail: ~15 vertices, ±0.2° accuracy; islands are ignored.
 const OUTLINE: [lat: number, lon: number][] = [
   [24.25, 51.6], [24.1, 52.7], [24.2, 53.6], [24.45, 54.4], [25.0, 54.95], [25.25, 55.3],

@@ -79,6 +79,24 @@ function buildArc(a: THREE.Vector3, b: THREE.Vector3, lift = 0.12) {
   return new THREE.BufferGeometry().setFromPoints(pts);
 }
 
+// A few towers around Dubai, heights loosely after the real skyline (Burj Khalifa tallest).
+const SKYLINE: [dLat: number, dLon: number, h: number][] = [
+  [0, 0, 0.24], [0.8, 0.7, 0.11], [-0.7, 0.9, 0.08], [1.1, -0.6, 0.14], [-1.0, -0.8, 0.06], [0.3, 1.5, 0.09], [1.7, 0.2, 0.07],
+];
+
+// Light beam: bright at the ground, fading to nothing at the top (uv.y runs up the box's sides).
+const beamVertex = /* glsl */ `
+varying float vH;
+void main() { vH = uv.y; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
+const beamFragment = /* glsl */ `
+uniform float uFade;
+varying float vH;
+void main() { gl_FragColor = vec4(1.0, 1.0, 1.0, (1.0 - vH) * 0.6 * uFade); }`;
+
+// Satellite orbit: tilted ring around the globe; clicking the satellite wakes the AI agent.
+const ORBIT_R = R * 1.32;
+const ORBIT_TILT = new THREE.Euler(0.5, 0, 0.35);
+
 const vertex = /* glsl */ `
 uniform float uPixelRatio; uniform float uFade; uniform float uBoost; uniform vec3 uSun;
 attribute float aLand;
@@ -92,7 +110,7 @@ void main() {
   vAlpha = smoothstep(0.0, 0.45, facing) * mix(0.1, 0.46, aLand) * mix(0.35, 1.0, day) * uFade * uBoost;
   vec4 mv = viewMatrix * world;
   gl_Position = projectionMatrix * mv;
-  gl_PointSize = mix(1.2, 1.7, aLand) * uPixelRatio * (8.0 / -mv.z);
+  gl_PointSize = min(mix(1.2, 1.7, aLand) * uPixelRatio * (8.0 / -mv.z), 7.0 * uPixelRatio); // capped for the scroll dive
 }`;
 // Square points on purpose: the site has zero radius everywhere.
 const fragment = /* glsl */ `
@@ -103,6 +121,7 @@ void main() { gl_FragColor = vec4(uColor, vAlpha); }`;
 type Shared = {
   labels: (HTMLElement | null)[];
   visitorLabel: HTMLElement | null;
+  satLabel: HTMLElement | null;
   ticker: HTMLElement | null;
   journey: string[]; // translated ticker lines
   drag: { active: boolean; lastX: number; lastY: number; rotY: number; rotX: number; vel: number; releasedAt: number };
@@ -117,6 +136,8 @@ function Earth({ progress, animate, shared, selected, visitor }: {
   const outer = useRef<THREE.Group>(null);
   const inner = useRef<THREE.Group>(null);
   const pulse = useRef<THREE.Mesh>(null);
+  const packets = useRef<(THREE.Mesh | null)[]>([]);
+  const sat = useRef<THREE.Mesh>(null);
   const { gl, camera, size, invalidate } = useThree();
   const geometry = useMemo(() => buildEarth(36000), []);
   const pts = useMemo(() => Object.fromEntries(PLACES.map((p) => [p.id, toVec(p.lat, p.lon, R * 1.005)])) as Record<PlaceId, THREE.Vector3>, []);
@@ -133,11 +154,24 @@ function Earth({ progress, animate, shared, selected, visitor }: {
   const visitorPos = useMemo(() => (visitor && !visitor.sameZone ? toVec(visitor.lat, visitor.lon, R * 1.005) : null), [visitor]);
 
   const uniforms = useMemo(() => ({ uPixelRatio: { value: gl.getPixelRatio() }, uFade: { value: 1 }, uBoost: { value: 1 }, uSun: { value: new THREE.Vector3(0, 0, 1) }, uColor: { value: new THREE.Color("#ffffff") } }), [gl]);
-  // Same pixel ratio, fade and sun as the earth (shared objects), but cobalt and boosted so it stays lit at night.
-  const uaeUniforms = useMemo(() => ({ ...uniforms, uBoost: { value: 6 }, uColor: { value: new THREE.Color("#2e5bff") } }), [uniforms]);
+  // Same pixel ratio, fade and sun as the earth (shared objects), but denser and boosted so the UAE stays lit at night.
+  const uaeUniforms = useMemo(() => ({ ...uniforms, uBoost: { value: 6 } }), [uniforms]);
+  const beamUniforms = useMemo(() => ({ uFade: uniforms.uFade }), [uniforms]);
   const uae = useMemo(buildUae, []);
   // The pulse ring lies flat on the surface instead of facing the camera edge-on.
   const ringTilt = useMemo(() => new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), pts.dxb.clone().normalize()), [pts]);
+  // Towers and beam stand along the local "up" (surface normal); boxes are shifted so their base sits on the ground.
+  const towers = useMemo(() => SKYLINE.map(([a, o, h]) => {
+    const base = toVec(DUBAI.lat + a, DUBAI.lon + o, R * 1.003);
+    const up = base.clone().normalize();
+    return { pos: base.clone().add(up.clone().multiplyScalar(h / 2)), quat: new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), up), h };
+  }), []);
+  const beamPos = useMemo(() => pts.dxb.clone().add(pts.dxb.clone().normalize().multiplyScalar(0.4)), [pts]);
+  // Packet routes: each journey leg, plus the visitor's arc when there is one.
+  const routes = useMemo(() => [...legs, ...(visitorArc ? [visitorArc] : [])].map((l) => l.geometry.getAttribute("position") as THREE.BufferAttribute), [legs, visitorArc]);
+  const camBase = useMemo(() => new THREE.Vector3(0, 1.0, 5.4), []);
+  const lookBase = useMemo(() => new THREE.Vector3(0, 1.0, 0), []);
+  const look = useMemo(() => new THREE.Vector3(), []);
   const pointer = useRef(new THREE.Vector2());
   const tmp = useMemo(() => new THREE.Vector3(), []);
   const camDir = useMemo(() => new THREE.Vector3(), []);
@@ -191,10 +225,18 @@ function Earth({ progress, animate, shared, selected, visitor }: {
     const still = s.hover || s.drag.active || selected;
     if (animate && !still) swayT.current += delta;
     const parallax = still ? 0 : 1;
-    g.rotation.y = Math.sin(swayT.current * 0.12) * 10 * DEG + pointer.current.x * 3 * DEG * parallax + s.drag.rotY + focusY.current + p * 0.6;
+    g.rotation.y = Math.sin(swayT.current * 0.12) * 10 * DEG + pointer.current.x * 3 * DEG * parallax + s.drag.rotY + focusY.current;
     g.rotation.x = pointer.current.y * 2 * DEG * parallax + s.drag.rotX;
-    g.position.y = -p * 1.2;
-    uniforms.uFade.value = 1 - p * 0.8;
+    uniforms.uFade.value = 1 - Math.max(0, p - 0.35) * 1.5;
+
+    // Scroll dive: as the hero scrolls away the camera flies down onto Dubai (skipped under reduced motion).
+    const dive = animate ? THREE.MathUtils.smoothstep(p, 0.02, 0.6) : 0;
+    inner.current.updateWorldMatrix(true, false);
+    tmp.copy(pts.dxb).applyMatrix4(inner.current.matrixWorld);
+    look.copy(lookBase).lerp(tmp, dive);
+    camera.position.copy(camBase).lerp(tmp.clone().multiplyScalar(1.28), dive);
+    camera.lookAt(look);
+    camera.updateMatrixWorld();
 
     // Journey legs draw one after another; the ticker narrates the current leg.
     const elapsed = animate ? state.clock.elapsedTime - s.replayAt : Infinity;
@@ -213,6 +255,22 @@ function Earth({ progress, animate, shared, selected, visitor }: {
       (pulse.current.material as THREE.MeshBasicMaterial).opacity = 0.8 * (1 - f) * (1 - p);
     }
 
+    // Data packets ride each finished arc, like requests heading to Dubai.
+    routes.forEach((attr, i) => {
+      const m = packets.current[i];
+      if (!m) return;
+      const drawn = i >= legs.length || elapsed >= (i + 1) * LEG;
+      m.visible = animate && drawn;
+      if (!m.visible) return;
+      const k = Math.floor((((t * 0.45 + i * 0.37) % 1) * ARC_STEPS));
+      m.position.fromBufferAttribute(attr, k);
+    });
+    if (sat.current) {
+      const a = animate ? t * 0.25 : 1.2;
+      sat.current.position.set(Math.cos(a) * ORBIT_R, 0, Math.sin(a) * ORBIT_R).applyEuler(ORBIT_TILT);
+      sat.current.rotation.set(t, t * 0.7, 0);
+    }
+
     // Project markers to screen for the DOM labels; hide the ones on the far side.
     camera.getWorldDirection(camDir);
     const place = (v: THREE.Vector3, el: HTMLElement | null, dx: number, dy: number) => {
@@ -226,6 +284,21 @@ function Earth({ progress, animate, shared, selected, visitor }: {
     };
     PLACES.forEach((pl, i) => place(pts[pl.id], s.labels[i], pl.dx, pl.dy));
     if (visitorPos) place(visitorPos, s.visitorLabel, -70, 14); // below its dot, clear of the DUBAI label
+    if (sat.current && s.satLabel) {
+      // The satellite floats off the surface, so hide it only when the globe's disc covers it.
+      sat.current.getWorldPosition(tmp);
+      const behind = tmp.clone().sub(camera.position).dot(camDir) > camera.position.length() - 0.2
+        && tmp.clone().projectOnPlane(camDir).length() < R;
+      sat.current.visible = !behind;
+      tmp.project(camera);
+      const shown = !behind && p < 0.3 && (1 - tmp.y) / 2 < 0.9; // below the horizon rule it would sit under the data row
+      s.satLabel.style.opacity = shown ? "1" : "0";
+      s.satLabel.style.pointerEvents = shown ? "auto" : "none";
+      const sx = ((tmp.x + 1) / 2) * size.width;
+      // Near the right edge the label flips to the satellite's left so it never runs off the canvas.
+      const lx = sx > size.width * 0.7 ? sx - 12 - s.satLabel.offsetWidth : sx + 12;
+      s.satLabel.style.transform = `translate(${lx}px, ${((1 - tmp.y) / 2) * size.height - 8}px)`;
+    }
   });
 
   return (
@@ -248,7 +321,7 @@ function Earth({ progress, animate, shared, selected, visitor }: {
           {PLACES.map((pl) => (
             <mesh key={pl.id} position={pts[pl.id]}>
               <boxGeometry args={pl.id === "dxb" ? [0.09, 0.09, 0.09] : [0.045, 0.045, 0.045]} />
-              <meshBasicMaterial color={pl.id === "dxb" || pl.id === selected ? "#2e5bff" : "#ffffff"} />
+              <meshBasicMaterial color={pl.id !== "dxb" && pl.id === selected ? "#2e5bff" : "#ffffff"} />
             </mesh>
           ))}
           {visitorPos && (
@@ -259,10 +332,30 @@ function Earth({ progress, animate, shared, selected, visitor }: {
           )}
           <mesh ref={pulse} position={pts.dxb} quaternion={ringTilt}>
             <ringGeometry args={[0.08, 0.1, 4, 1]} />
-            <meshBasicMaterial color="#2e5bff" transparent opacity={0.8} side={THREE.DoubleSide} depthWrite={false} />
+            <meshBasicMaterial color="#ffffff" transparent opacity={0.8} side={THREE.DoubleSide} depthWrite={false} />
           </mesh>
+          {towers.map((tw, i) => (
+            <mesh key={i} position={tw.pos} quaternion={tw.quat}>
+              <boxGeometry args={[0.014, tw.h, 0.014]} />
+              <meshBasicMaterial color="#ffffff" />
+            </mesh>
+          ))}
+          <mesh position={beamPos} quaternion={towers[0].quat}>
+            <boxGeometry args={[0.01, 0.8, 0.01]} />
+            <shaderMaterial vertexShader={beamVertex} fragmentShader={beamFragment} uniforms={beamUniforms} transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+          </mesh>
+          {routes.map((_, i) => (
+            <mesh key={i} ref={(m) => { packets.current[i] = m; }} visible={false}>
+              <boxGeometry args={[0.035, 0.035, 0.035]} />
+              <meshBasicMaterial color={i < legs.length ? "#2e5bff" : "#ffffff"} />
+            </mesh>
+          ))}
         </group>
       </group>
+      <mesh ref={sat}>
+        <boxGeometry args={[0.07, 0.07, 0.07]} />
+        <meshBasicMaterial color="#2e5bff" />
+      </mesh>
     </group>
   );
 }
@@ -272,7 +365,7 @@ const dubaiTime = () => new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Dubai
 export default function Globe3D({ progress, animate }: { progress: MotionValue<number>; animate: boolean }) {
   const t = useT();
   const shared = useRef<Shared>({
-    labels: [], visitorLabel: null, ticker: null,
+    labels: [], visitorLabel: null, satLabel: null, ticker: null,
     drag: { active: false, lastX: 0, lastY: 0, rotY: 0, rotX: 0, vel: 0, releasedAt: 0 },
     journey: [], replayAt: 0.4, hover: false, invalidate: () => {},
   });
@@ -303,6 +396,10 @@ export default function Globe3D({ progress, animate }: { progress: MotionValue<n
     shared.current.invalidate();
   };
   const onPointerUp = () => { d.active = false; d.releasedAt = performance.now(); shared.current.invalidate(); };
+  const wakeAgent = () => {
+    window.dispatchEvent(new CustomEvent("wakeUpAgent", { detail: t("What is Taaqib building right now?") }));
+    document.getElementById("agent")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
   const replay = () => { shared.current.replayAt = clock.current?.getElapsedTime() ?? 0; setSelected(null); };
   const place = PLACES.find((p) => p.id === selected);
   shared.current.journey = JOURNEY.map((j) => t(j.text));
@@ -338,11 +435,18 @@ export default function Globe3D({ progress, animate }: { progress: MotionValue<n
           ref={(el) => { shared.current.labels[i] = el; }}
           onClick={() => setSelected(selected === p.id ? null : p.id)}
           aria-expanded={selected === p.id}
-          className={`absolute left-0 top-0 opacity-0 font-mono text-[10px] tracking-[0.14em] whitespace-nowrap px-1 py-0.5 bg-background/80 hover:bg-foreground hover:text-background ${p.id === "dxb" ? "text-primary font-bold text-[11px]" : "text-[#a3a6b6]"} ${selected === p.id ? "bg-primary text-foreground" : ""}`}
+          className={`absolute left-0 top-0 opacity-0 font-mono text-[10px] tracking-[0.14em] whitespace-nowrap px-1 py-0.5 bg-background/80 hover:bg-foreground hover:text-background ${p.id === "dxb" ? "text-foreground font-bold text-[11px]" : "text-[#a3a6b6]"} ${selected === p.id ? "!bg-foreground !text-background" : ""}`}
         >
           {p.id === "dxb" ? `${t("DUBAI")}${time ? ` · ${time}` : ""}` : t(p.name.split(",")[0].toUpperCase())}
         </button>
       ))}
+      <button
+        ref={(el) => { shared.current.satLabel = el; }}
+        onClick={wakeAgent}
+        className="absolute left-0 top-0 opacity-0 font-mono text-[10px] tracking-[0.14em] whitespace-nowrap px-1 py-0.5 border border-primary bg-background/80 text-foreground hover:bg-primary"
+      >
+        {t("AI AGENT · ONLINE")}
+      </button>
       {visitor && !visitor.sameZone && (
         <span ref={(el) => { shared.current.visitorLabel = el; }} className="absolute left-0 top-0 opacity-0 font-mono text-[10px] tracking-[0.14em] text-foreground whitespace-nowrap bg-background/80 px-1">
           {visitorLabel}
