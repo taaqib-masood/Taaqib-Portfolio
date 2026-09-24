@@ -3,7 +3,10 @@
 import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { caseStudies } from "@/data/case-studies";
+import { useAudience } from "@/lib/audience";
 import type { Project } from "@/data/projects";
 import { useWebGLGate } from "@/lib/use-webgl";
 import { matchesSkill } from "@/lib/embedding";
@@ -17,10 +20,9 @@ export const projectYear = (p: Project) => p.role.match(/20\d\d/g)?.at(-1) ?? nu
  * the camera node to node. Desktop + motion-allowed only; the card grid below stays the
  * accessible list and the only view on mobile / reduced motion.
  */
-export function EmbeddingSection({ projects, activeSkill, onOpen, onAskAgent }: {
+export function EmbeddingSection({ projects, activeSkill, onAskAgent }: {
   projects: Project[];
   activeSkill: string | null;
-  onOpen: (p: Project) => void;
   onAskAgent: (title: string) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -28,6 +30,7 @@ export function EmbeddingSection({ projects, activeSkill, onOpen, onAskAgent }: 
   // Hidden via CSS (not an early return) so server and client markup match.
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
   const [focus, setFocus] = useState(0);
+  const plain = useAudience() === "plain";
   useMotionValueEvent(scrollYProgress, "change", (v) => setFocus(Math.round(v * (projects.length - 1))));
 
   const p = projects[focus];
@@ -68,11 +71,11 @@ export function EmbeddingSection({ projects, activeSkill, onOpen, onAskAgent }: 
             </div>
             <div className="p-6">
               <h3 className="text-[28px] font-bold uppercase tracking-[-0.03em] leading-[1.05]">{p.title}</h3>
-              <p className="mt-4 text-[14px] leading-[1.5] text-on-surface-variant line-clamp-3">{p.blurb}</p>
+              <p className="mt-4 text-[14px] leading-[1.5] text-on-surface-variant line-clamp-3">{(plain && caseStudies[p.slug]?.plain) || p.blurb}</p>
               <p className="mt-4 font-mono text-[12px] uppercase tracking-[0.08em] text-primary">{p.metrics[0]}</p>
             </div>
             <div className="grid grid-cols-2 border-t border-border text-[12px] font-bold uppercase tracking-widest">
-              <button onClick={() => onOpen(p)} className="min-h-12 uppercase border-r border-border hover:bg-foreground hover:text-background transition-colors">Open case</button>
+              <Link href={`/projects/${p.slug}`} className="min-h-12 flex items-center justify-center uppercase border-r border-border hover:bg-foreground hover:text-background transition-colors">Case study</Link>
               <button onClick={() => onAskAgent(p.title)} className="min-h-12 uppercase flex items-center justify-center gap-2 bg-foreground text-background hover:bg-primary hover:text-foreground transition-colors">
                 Ask agent <ArrowUpRight className="h-4 w-4" />
               </button>

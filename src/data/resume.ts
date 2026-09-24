@@ -59,6 +59,7 @@ export const contact = {
   linkedin: "https://www.linkedin.com/in/taaqib-masood",
   github: "https://github.com/taaqib-masood",
   liveDemo: "https://stocks-proj.netlify.app",
-  residency: "Dubai, UAE · Available immediately",
+  residency: "Dubai, UAE · UAE resident, no visa sponsorship needed · Available immediately",
+  workStatus: "UAE resident · no sponsorship needed",
   licenses: "UAE (Dubai) and India driving license"
 };

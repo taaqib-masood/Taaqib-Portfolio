@@ -5,7 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { projects, Project } from "@/data/projects";
 import { ParallaxNumber } from "@/components/ParallaxNumber";
 import { VerticalLine } from "@/components/VerticalLine";
+import Link from "next/link";
 import { TokenText } from "@/components/TokenText";
+import { caseStudies } from "@/data/case-studies";
+import { useAudience } from "@/lib/audience";
 import { EmbeddingSection, projectYear } from "@/components/projects/EmbeddingSection";
 import {
   Dialog,
@@ -35,6 +38,8 @@ function getMetricTooltip(metric: string): string | null {
 export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: string) => void, activeSkill?: string | null }) {
   const [activeFilter, setActiveFilter] = useState("All");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const plain = useAudience() === "plain";
+  const describe = (p: Project) => (plain && caseStudies[p.slug]?.plain) || p.blurb;
 
   const filteredProjects = projects.filter((project) =>
     activeFilter === "All"
@@ -82,7 +87,6 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
       <EmbeddingSection
         projects={projects}
         activeSkill={activeSkill ?? null}
-        onOpen={setSelectedProject}
         onAskAgent={handleAgentClick}
       />
 
@@ -144,7 +148,7 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
                   <div>
                     <div className="h-px w-full bg-border group-hover:bg-surface/20 mb-4 transition-colors duration-400" />
                     <p className="text-[14px] leading-[1.5] mb-4 text-outline group-hover:text-surface line-clamp-2 transition-colors duration-400">
-                      {project.blurb}
+                      {describe(project)}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {project.stack.slice(0, 3).map((tech) => (
@@ -204,7 +208,7 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
                     {selectedProject.title}
                   </DialogTitle>
                   <DialogDescription className="text-[16px] md:text-[18px] leading-[1.5] text-foreground/80 max-w-2xl">
-                    {selectedProject.blurb}
+                    {describe(selectedProject)}
                   </DialogDescription>
                 </DialogHeader>
               </div>
@@ -252,6 +256,12 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
                       <span className="flex items-center gap-2"><Terminal className="h-4 w-4" /> Ask Agent</span>
                       <ArrowUpRight className="h-4 w-4" />
                     </button>
+                    <Link
+                      href={`/projects/${selectedProject.slug}`}
+                      className="w-full flex items-center justify-between border border-border bg-foreground text-surface px-4 py-3 text-[12px] font-semibold uppercase tracking-widest hover:bg-primary hover:text-foreground transition-colors"
+                    >
+                      Full case study <ArrowUpRight className="h-4 w-4" />
+                    </Link>
                     <div className="flex gap-3">
                       {selectedProject.repo && (
                         <a href={selectedProject.repo} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 border border-border bg-surface px-4 py-3 text-[12px] font-semibold uppercase tracking-widest hover:bg-foreground hover:text-surface transition-colors">
