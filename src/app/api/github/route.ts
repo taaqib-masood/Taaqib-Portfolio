@@ -32,7 +32,38 @@ async function repos(): Promise<GithubFeed["repos"]> {
     .map((r) => ({ name: str(r.name), stars: num(r.stargazers_count), forks: num(r.forks_count), language: r.language ? str(r.language) : null, pushedAt: str(r.pushed_at) }));
 }
 
+const LEVELS: Record<string, 0 | 1 | 2 | 3 | 4> = { NONE: 0, FIRST_QUARTILE: 1, SECOND_QUARTILE: 2, THIRD_QUARTILE: 3, FOURTH_QUARTILE: 4 };
+
+// With the owner's token, GitHub's own calendar counts private-repo work too (as bare numbers,
+// never repo names), so the total matches the profile page. Without one, fall back to the public scraper.
+async function contributionsFromGraphql(token: string): Promise<GithubFeed["contributions"]> {
+  const res = await fetch("https://api.github.com/graphql", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: `query($login: String!) { user(login: $login) { contributionsCollection { contributionCalendar {
+        totalContributions weeks { contributionDays { date contributionCount contributionLevel } } } } } }`,
+      variables: { login: USER },
+    }),
+    next: { revalidate },
+    signal: AbortSignal.timeout(4000),
+  });
+  if (!res.ok) throw new Error(`graphql → ${res.status}`);
+  const cal = (await res.json())?.data?.user?.contributionsCollection?.contributionCalendar;
+  if (!cal || !Array.isArray(cal.weeks)) throw new Error("graphql: no calendar");
+  const days = cal.weeks
+    .flatMap((w: { contributionDays?: unknown }) => (Array.isArray(w?.contributionDays) ? w.contributionDays : []))
+    .filter((d: { date?: unknown }) => typeof d?.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d.date))
+    .map((d: { date: string; contributionCount?: unknown; contributionLevel?: unknown }) => ({
+      date: d.date, count: num(d.contributionCount), level: LEVELS[str(d.contributionLevel)] ?? 0,
+    }));
+  return { total: num(cal.totalContributions), days };
+}
+
 async function contributions(): Promise<GithubFeed["contributions"]> {
+  if (process.env.GITHUB_TOKEN) {
+    try { return await contributionsFromGraphql(process.env.GITHUB_TOKEN); } catch { /* fall through to the public source */ }
+  }
   const data = (await getJson(`https://github-contributions-api.jogruber.de/v4/${USER}?y=last`)) as {
     total?: { lastYear?: unknown };
     contributions?: { date?: unknown; count?: unknown; level?: unknown }[];
