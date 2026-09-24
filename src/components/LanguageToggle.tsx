@@ -2,6 +2,21 @@
 
 import { useState, useEffect } from "react";
 
+// Google Translate is only downloaded for visitors who switched to Arabic: English
+// visitors (most traffic) never load the third-party script at all.
+function loadGoogleTranslate() {
+  if (document.getElementById("google-translate-script")) return;
+  const w = window as unknown as { googleTranslateElementInit: () => void; google: { translate: { TranslateElement: new (o: object, id: string) => unknown } } };
+  w.googleTranslateElementInit = () => {
+    new w.google.translate.TranslateElement({ pageLanguage: "en", includedLanguages: "ar,en", autoDisplay: false }, "google_translate_element");
+  };
+  const script = document.createElement("script");
+  script.id = "google-translate-script";
+  script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+  script.async = true;
+  document.body.appendChild(script);
+}
+
 export function LanguageToggle() {
   const [lang, setLang] = useState<"EN" | "AR">("EN");
 
@@ -10,6 +25,7 @@ export function LanguageToggle() {
     if (document.cookie.includes("googtrans=/en/ar")) {
       setLang("AR");
       document.documentElement.dir = "rtl";
+      loadGoogleTranslate();
     } else {
       setLang("EN");
       document.documentElement.dir = "ltr";

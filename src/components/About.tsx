@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { aboutParagraphs } from "@/data/resume";
 import { projects } from "@/data/projects";
@@ -8,6 +8,7 @@ import { ParallaxNumber } from "@/components/ParallaxNumber";
 import { VerticalLine } from "@/components/VerticalLine";
 import { TokenText } from "@/components/TokenText";
 import { CountUp } from "@/components/CountUp";
+import { getGithubFeed } from "@/lib/github-feed";
 
 export function About() {
   const containerRef = useRef<HTMLElement>(null);
@@ -20,7 +21,8 @@ export function About() {
   const numProjects = projects.length;
   // 6 spoken languages (English, Hindi, Urdu, Tamil, Malayalam, Arabic)
   const numLanguages = 6;
-  const contributions = 569;
+  const [contributions, setContributions] = useState<number | null>(null);
+  useEffect(() => { getGithubFeed().then((f) => setContributions(f.contributions?.total ?? null)); }, []);
 
   return (
     <section ref={containerRef} id="about" className="max-w-[1440px] mx-auto border-b border-border overflow-hidden">
@@ -83,8 +85,8 @@ export function About() {
               <span className="text-[10px] font-bold uppercase tracking-widest text-outline">Shipped Projects</span>
             </div>
             <div className="p-6 md:p-8 border-r lg:border-r-0 lg:border-b border-border flex flex-col justify-center">
-              <span className="text-[32px] md:text-[48px] font-bold leading-[1] tracking-[-0.03em] uppercase mb-2"><CountUp value={contributions} /></span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-outline">GitHub Commits/Yr</span>
+              <span className="text-[32px] md:text-[48px] font-bold leading-[1] tracking-[-0.03em] uppercase mb-2">{contributions === null ? "—" : <CountUp value={contributions} />}</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-outline">GitHub Contributions / Yr</span>
             </div>
             <div className="p-6 md:p-8 flex flex-col justify-center">
               <span className="text-[32px] md:text-[48px] font-bold leading-[1] tracking-[-0.03em] uppercase mb-2"><CountUp value={numLanguages} /></span>

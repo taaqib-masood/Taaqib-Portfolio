@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
-import Script from "next/script";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
 import { CommandMenu } from "@/components/CommandMenu";
@@ -14,12 +13,6 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
-  display: "swap",
-});
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  variable: "--font-outfit",
   display: "swap",
 });
 
@@ -74,26 +67,9 @@ export default function RootLayout({
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased text-foreground overflow-x-hidden pb-[88px] sm:pb-[56px]",
-          inter.variable,
-          outfit.variable
+          inter.variable
         )}
       >
-        <Script
-          id="google-translate-init"
-          strategy="lazyOnload"
-          dangerouslySetInnerHTML={{
-            __html: `
-              function googleTranslateElementInit() {
-                new google.translate.TranslateElement({pageLanguage: 'en', includedLanguages: 'ar,en', autoDisplay: false}, 'google_translate_element');
-              }
-            `,
-          }}
-        />
-        <Script
-          id="google-translate-script"
-          strategy="lazyOnload"
-          src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-        />
         {children}
         <CommandMenu />
         <ScrollToTop />

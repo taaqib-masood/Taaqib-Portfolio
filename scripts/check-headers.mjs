@@ -42,7 +42,16 @@ const nonceB = cspB.match(/nonce-([A-Za-z0-9+/=]+)/)?.[1];
 assert.ok(nonceA !== nonceB, "nonce differs per request");
 
 // Allowlist sanity
-assert.ok(cspA.includes("connect-src 'self' https://api.github.com https://va.vercel-scripts.com"), "connect-src allowlist");
+assert.ok(cspA.includes("connect-src 'self' https://va.vercel-scripts.com"), "connect-src allowlist");
+assert.ok(!cspA.includes("api.github.com"), "browser never talks to GitHub directly (served via /api/github)");
+
+// --- 1b. Cross-site API writes are refused before reaching any route ---
+const api = (headers, method = "POST") => middleware(new NextRequest("http://localhost:3000/api/contact", { method, headers: { host: "localhost:3000", ...headers } }));
+assert.equal(api({ "content-type": "text/plain", origin: "https://evil.example", "sec-fetch-site": "cross-site" }).status, 403, "cross-site text/plain POST blocked");
+assert.equal(api({ "content-type": "application/json", origin: "https://evil.example" }).status, 403, "foreign Origin blocked even with JSON");
+assert.equal(api({ "content-type": "text/plain", "sec-fetch-site": "same-origin" }).status, 415, "non-JSON body rejected");
+assert.equal(api({ "content-type": "application/json", origin: "http://localhost:3000", "sec-fetch-site": "same-origin" }).status, 200, "same-origin JSON passes");
+assert.equal(api({}, "GET").status, 200, "GET is never blocked");
 assert.ok(!cspA.includes("script-src 'self' 'unsafe-inline'"), "no unsafe-inline in prod script-src");
 assert.ok(!cspA.includes("'unsafe-eval'"), "no unsafe-eval in prod");
 
@@ -54,5 +63,6 @@ assert.match(get("Strict-Transport-Security"), /max-age=63072000; includeSubDoma
 assert.equal(get("X-Frame-Options"), "DENY", "X-Frame-Options: DENY registered");
 assert.equal(get("X-Content-Type-Options"), "nosniff", "nosniff registered");
 assert.ok(get("Referrer-Policy") && get("Permissions-Policy"), "Referrer-Policy + Permissions-Policy registered");
+assert.equal(get("Cross-Origin-Opener-Policy"), "same-origin", "COOP registered");
 
-console.log("PASS: middleware CSP (per-request nonce, strict-dynamic, frame-ancestors none) + static security headers in routes manifest");
+console.log("PASS: middleware CSP (per-request nonce, strict-dynamic, frame-ancestors none), cross-site API guard, static security headers in routes manifest");
