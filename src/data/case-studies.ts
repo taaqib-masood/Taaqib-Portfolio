@@ -38,7 +38,7 @@ export const caseStudies: Record<string, CaseStudy> = {
     plain: "Automated most of a company's candidate screening: online tests with AI proctoring, plus live video interviews with transcription and an AI-written hiring report.",
     problem: "Screening candidates meant manual CV review, supervised tests and separate interview tools. It was slow, and hard to keep fair and consistent.",
     built: "One platform for the whole flow: bulk CV upload with ATS scoring and candidate-to-JD matching, webcam-proctored tests, and live video interviews with real-time transcription, an AI coach that suggests follow-up questions every 15 seconds, and an auto-generated hiring report.",
-    result: "An estimated 95% of manual screening eliminated. Proctoring reaches 90% gaze and 95% multiple-face detection accuracy at under 50ms, with zero-downtime deploys through GitHub Actions.",
+    result: "Now used internally by LTTS recruiters. An estimated 95% of manual screening eliminated. Proctoring reaches 90% gaze and 95% multiple-face detection accuracy at under 50ms, with zero-downtime deploys through GitHub Actions.",
     architecture: [
       { stage: "Candidate browser", detail: "MediaPipe + face-api.js proctoring, <50ms" },
       { stage: "LiveKit", detail: "WebRTC SFU for live interviews" },
@@ -49,7 +49,8 @@ export const caseStudies: Record<string, CaseStudy> = {
     decisions: [
       "LiveKit's SFU instead of a peer-to-peer mesh, so interviews hold up as participants are added.",
       "Proctoring models run in the candidate's browser, keeping detection under 50ms.",
-      "Dropped false-positive-heavy detectors and kept 8 high-signal violation types, trading coverage for fairness.",
+      "After launch, dropped false-positive-heavy detectors (COCO-SSD, blink-rate, ambient-light) for a 3-strike cooldown with auto-submit at threshold.",
+      "Kept only 8 high-signal violation types, trading coverage for fairness.",
       "The admin copilot's tool calls are prompt-constrained to a scoped registry, which eliminated hallucinated tool calls in production.",
     ],
   },
@@ -73,7 +74,7 @@ export const caseStudies: Record<string, CaseStudy> = {
   "stock-forecasting-risk": {
     plain: "Trades by rules instead of emotion: it screens stocks, sizes every position so no trade risks more than 2% of capital, and keeps an automatic audit trail.",
     problem: "Retail traders size positions by gut feel, don't know their real risk per trade, and spend hours keeping compliance records.",
-    built: "A Python pipeline that forecasts with an ARIMA + LightGBM ensemble on 52 features, including FinBERT news sentiment. It enforces 10+ risk rules, paper-trades with realistic costs, sends SHAP-explained signals to Telegram and generates orders through Zerodha.",
+    built: "A Python pipeline that forecasts with an ARIMA + LightGBM ensemble on 52 features, including FinBERT news sentiment. It enforces 10+ risk rules, paper-trades with realistic costs, sends plain-English Telegram signals with SHAP and Groq reasoning for each one, and generates GTT orders through Zerodha.",
     result: "The backtest on RELIANCE (2019–2024) reached a Sharpe ratio of 0.67 with realistic costs. It runs daily on GitHub Actions with zero manual monitoring.",
     architecture: [
       { stage: "Market + news data", detail: "prices, FinBERT sentiment" },

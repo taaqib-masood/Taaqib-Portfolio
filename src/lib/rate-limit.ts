@@ -1,5 +1,5 @@
 // Shared in-memory rate limiter with bounded memory (evicts stale + oldest entries).
-// NOTE: per-isolate on serverless/edge — best-effort throttle, not a global quota.
+// NOTE: per-isolate on serverless/edge, best-effort throttle, not a global quota.
 
 type Entry = { count: number; resetAt: number };
 

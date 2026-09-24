@@ -85,7 +85,7 @@ export function About() {
               <span className="text-[10px] font-bold uppercase tracking-widest text-outline">Shipped Projects</span>
             </div>
             <div className="p-6 md:p-8 border-r lg:border-r-0 lg:border-b border-border flex flex-col justify-center">
-              <span className="text-[32px] md:text-[48px] font-bold leading-[1] tracking-[-0.03em] uppercase mb-2">{contributions === null ? "—" : <CountUp value={contributions} />}</span>
+              <span className="text-[32px] md:text-[48px] font-bold leading-[1] tracking-[-0.03em] uppercase mb-2">{contributions === null ? "--" : <CountUp value={contributions} />}</span>
               <span className="text-[10px] font-bold uppercase tracking-widest text-outline">GitHub Contributions / Yr</span>
             </div>
             <div className="p-6 md:p-8 flex flex-col justify-center">

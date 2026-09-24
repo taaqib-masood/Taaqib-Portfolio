@@ -4,7 +4,7 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const maxDuration = 30; // max duration for edge
 
-// Input caps — huge diffs would burn the Groq quota in a single request.
+// Input caps: huge diffs would burn the Groq quota in a single request.
 const MAX_DIFF_CHARS = 40_000;
 const MAX_AC_CHARS = 10_000;
 

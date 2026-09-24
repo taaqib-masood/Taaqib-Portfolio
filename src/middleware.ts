@@ -55,7 +55,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Documents only — static assets never need a CSP nonce.
+  // Documents only: static assets never need a CSP nonce.
   matcher: [
     {
       source: "/((?!_next/static|_next/image|favicon.ico|taaqib-photo|taaqib-masood-cv|og-image).*)",

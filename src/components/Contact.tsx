@@ -74,7 +74,7 @@ export function Contact() {
         </div>
         <div className="lg:col-span-8 p-6 md:p-8 bg-surface-container-low flex flex-col justify-center">
           <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-outline">
-            Open to AI Engineering and AI-integrated full-stack roles — based in Dubai, available immediately.
+            Open to AI Engineering and AI-integrated full-stack roles. Based in Dubai, available immediately.
           </p>
         </div>
       </div>

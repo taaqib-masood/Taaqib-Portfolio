@@ -32,7 +32,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.83, 0, 0.17, 1] }}
-          className="lg:col-span-7 flex flex-col justify-center relative z-10"
+          className="lg:col-span-7 flex flex-col justify-center relative z-10 pointer-events-none"
         >
           <h1 className="text-[clamp(36px,10.5vw,180px)] font-black leading-[0.9] tracking-[-0.05em] text-foreground uppercase whitespace-nowrap">
             <TokenText text="TAAQIB" delay={150} />
@@ -66,7 +66,7 @@ export function Hero() {
       <div className="relative mt-24">
       {/* Globe rises from the data row's top rule (the horizon), left of the photo column. */}
       {supported && (
-        <div className="absolute bottom-full left-0 w-full lg:w-[56%] h-[380px] pointer-events-none">
+        <div className="absolute bottom-full left-0 w-full lg:w-[56%] h-[380px]">
           <Globe3D progress={scrollYProgress} animate={animate} />
         </div>
       )}

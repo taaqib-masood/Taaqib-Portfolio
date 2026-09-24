@@ -25,7 +25,7 @@ export interface GithubRepoInfo {
 export const githubRepos: GithubRepoInfo[] = [
   {
     name: "smart-hospital-agent",
-    title: "Reva AI — WhatsApp Receptionist",
+    title: "Reva AI: WhatsApp Receptionist",
     description: "AI WhatsApp receptionist and clinic management dashboard built with Next.js 16, Supabase (PostgreSQL with RLS), Meta Cloud API v19.0, and Razorpay.",
     language: "TypeScript",
     url: "https://github.com/taaqib-masood/smart-hospital-agent",
@@ -39,7 +39,7 @@ export const githubRepos: GithubRepoInfo[] = [
   },
   {
     name: "stock-market-forecasting-risk-analytics",
-    title: "Boro — Trading, Risk & Compliance Platform",
+    title: "Boro: Trading, Risk & Compliance Platform",
     description: "Systematic quant trading pipeline forecasting price movements (ARIMA + LightGBM ensemble, 52 features) with walk-forward validation and 10+ strict risk rules.",
     language: "Python",
     url: "https://github.com/taaqib-masood/stock-market-forecasting-risk-analytics",
@@ -81,7 +81,7 @@ export const githubRepos: GithubRepoInfo[] = [
   },
   {
     name: "atlas-ai",
-    title: "Atlas AI — AI Tool Directory",
+    title: "Atlas AI: AI Tool Directory",
     description: "Production AI tool directory: 91 curated tools across 13 categories, explainable recommendations, favorites, dashboard, and an admin workflow with a full change-history ledger. Zero runtime dependencies.",
     language: "JavaScript",
     url: "https://github.com/taaqib-masood/atlas-ai",
@@ -95,7 +95,7 @@ export const githubRepos: GithubRepoInfo[] = [
   },
   {
     name: "garageIQ-landing-page",
-    title: "GarageIQ — Marketing Site",
+    title: "GarageIQ: Marketing Site",
     description: "Static marketing site for GarageIQ, the UAE garage-intelligence platform (the product itself lives in a private repo). No build step, no dependencies, deployed on Vercel.",
     language: "HTML / CSS",
     url: "https://github.com/taaqib-masood/garageIQ-landing-page",
@@ -107,7 +107,7 @@ export const githubRepos: GithubRepoInfo[] = [
   },
   {
     name: "Taaqib-Portfolio",
-    title: "Taaqib Masood — Swiss Brutalist Engineering Portfolio",
+    title: "Taaqib Masood: Swiss Brutalist Engineering Portfolio",
     description: "Production Next.js portfolio featuring a mechanical Swiss brutalist design system and interactive AI Agent Terminal.",
     language: "TypeScript",
     url: "https://github.com/taaqib-masood/Taaqib-Portfolio",
@@ -124,7 +124,7 @@ export const projects: Project[] = [
   {
     slug: "garageiq",
     aliases: ["garage-iq", "garage iq", "garages", "garage marketplace"],
-    title: "GarageIQ — UAE Garage Intelligence",
+    title: "GarageIQ: UAE Garage Intelligence",
     blurb: "The trust layer for car repair in the UAE: turns tens of thousands of scattered Google Maps reviews into structured garage intelligence (trust, speed and price scores, brand specialisation, best-for tags) behind a natural-language search.",
     stack: [
       "Next.js 14",
@@ -162,7 +162,7 @@ export const projects: Project[] = [
   {
     slug: "ltts-proctoring-portal",
     title: "LTTS Test Management & Live Interview Proctoring Portal",
-    blurb: "Production proctored assessment + recruitment platform — live video interviewing, real-time transcription, AI Whisper Coach, and auto-generated hiring reports.",
+    blurb: "Production proctored assessment + recruitment platform: live video interviewing, real-time transcription, AI Whisper Coach, and auto-generated hiring reports.",
     stack: [
       "Angular 19",
       "Node.js",
@@ -188,7 +188,7 @@ export const projects: Project[] = [
   {
     slug: "mcp-code-review-pipeline",
     title: "MCP AI Code-Review Pipeline",
-    blurb: "Multi-source AI code reviewer on Model Context Protocol — Python connectors for GitHub, GitLab, Jira, Confluence, and Jama feed Claude for cross-referenced reviews that cite exact ticket clauses and spec violations.",
+    blurb: "Multi-source AI code reviewer on Model Context Protocol: Python connectors for GitHub, GitLab, Jira, Confluence, and Jama feed Claude for cross-referenced reviews that cite exact ticket clauses and spec violations.",
     stack: [
       "Python",
       "Model Context Protocol",
@@ -207,13 +207,13 @@ export const projects: Project[] = [
     categories: ["AI/LLM"],
     repo: "https://github.com/taaqib-masood",
     demo: null,
-    role: "Built at L&T Technology Services, Feb–Jun 2026",
+    role: "Built at L&T Technology Services, Apr–Jun 2026",
   },
   {
     slug: "stock-forecasting-risk",
     aliases: ["boro", "stock", "stocks", "trading", "stock-market-forecasting-risk-analytics"],
-    title: "Boro — Trading, Risk & Compliance Platform",
-    blurb: "Automated trading, risk and compliance platform: forecasts prices (ARIMA + LightGBM ensemble, 52 features) and enforcing 10+ walk-forward-validated risk rules — fully automated via GitHub Actions, with FinBERT news sentiment and SHAP-explained Telegram signals.",
+    title: "Boro: Trading, Risk & Compliance Platform",
+    blurb: "Automated trading, risk and compliance platform: forecasts prices (ARIMA + LightGBM ensemble, 52 features) and enforcing 10+ walk-forward-validated risk rules, fully automated via GitHub Actions, with FinBERT news sentiment and SHAP-explained Telegram signals.",
     stack: [
       "Python",
       "ARIMA",
@@ -234,7 +234,8 @@ export const projects: Project[] = [
       "Automatic JSON audit trail for every trade decision",
       "Paper-trade simulator with mark-to-market P&L",
       "End-to-end MLflow experiment tracking",
-      "Zero manual daily monitoring",
+      "Telegram signals in plain English with SHAP + Groq reasoning per signal",
+      "Zerodha GTT order generation, zero manual daily monitoring",
     ],
     categories: ["ML", "AI/LLM"],
     repo: "https://github.com/taaqib-masood/stock-market-forecasting-risk-analytics",
@@ -244,7 +245,7 @@ export const projects: Project[] = [
   {
     slug: "salon-booking-saas",
     title: "Salon Booking SaaS (UAE)",
-    blurb: "Production-grade multi-tenant SaaS for UAE salons — bilingual EN/AR catalogs, real-time slot scheduling, staff commission tracking, loyalty points, and WhatsApp/email notifications, containerized and Kubernetes-orchestrated.",
+    blurb: "Production-grade multi-tenant SaaS for UAE salons: bilingual EN/AR catalogs, real-time slot scheduling, staff commission tracking, loyalty points, and WhatsApp/email notifications, containerized and Kubernetes-orchestrated.",
     stack: [
       "React",
       "Vite",
@@ -276,7 +277,7 @@ export const projects: Project[] = [
   {
     slug: "predictive-maintenance",
     title: "Predictive Maintenance of Industrial Machinery",
-    blurb: "Dynamic AI-based hybrid model integrating GBM, LSTM, and CNN under a smart meta-controller — processes vibration & thermal data in time and frequency domains and dynamically weights predictions by model confidence, optimized for edge deployment.",
+    blurb: "Dynamic AI-based hybrid model integrating GBM, LSTM, and CNN under a smart meta-controller that processes vibration & thermal data in time and frequency domains and dynamically weights predictions by model confidence, optimized for edge deployment.",
     stack: [
       "Python",
       "TensorFlow",
@@ -297,7 +298,7 @@ export const projects: Project[] = [
     categories: ["ML", "Edge"],
     repo: "https://github.com/taaqib-masood/predictive-maintenance-industrial-machinery",
     demo: null,
-    role: "Research project, VIT — dataset: NASA CMAPSS Turbofan Engine Dataset",
+    role: "Research project, VIT. Dataset: NASA CMAPSS Turbofan Engine Dataset",
   },
   {
     slug: "smart-hospital-agent",
@@ -309,8 +310,8 @@ export const projects: Project[] = [
       "reva-whatsapp",
       "hospital-agent"
     ],
-    title: "Reva AI — WhatsApp Receptionist",
-    blurb: "AI-powered WhatsApp bot replacing clinic front desks — autonomously books appointments, sends reminders, collects deposits via Razorpay, and manages patient records 24/7 with a real-time dashboard.",
+    title: "Reva AI: WhatsApp Receptionist",
+    blurb: "AI-powered WhatsApp bot replacing clinic front desks. It autonomously books appointments, sends reminders, collects deposits via Razorpay, and manages patient records 24/7 with a real-time dashboard.",
     stack: [
       "Next.js 16 (App Router)",
       "TypeScript",
@@ -342,7 +343,7 @@ export const projects: Project[] = [
   {
     slug: "atlas-ai",
     aliases: ["atlas", "ai tool directory", "atlas ai"],
-    title: "Atlas AI — AI Tool Directory",
+    title: "Atlas AI: AI Tool Directory",
     blurb: "Production AI tool directory with categorised browsing, search and filters, explainable recommendations, favourites, a personal dashboard, and an admin publishing workflow with a full change-history ledger.",
     stack: ["Node.js 22", "SQLite (node:sqlite)", "Server-side rendering", "scrypt", "Zero dependencies"],
     metrics: [

@@ -32,7 +32,7 @@ const INTERVIEW_MODES: ModeOption[] = [
     badge: "HYBRID",
     description: "Full technical overview, projects, and bio as Taaqib's engineering proxy.",
     promptSuggestions: [
-      "Tell me about Reva AI — WhatsApp Receptionist",
+      "Tell me about Reva AI: WhatsApp Receptionist",
       "What did you build at LTTS?",
       "Walk me through your resume / background",
       "What open-source repositories do you maintain?",

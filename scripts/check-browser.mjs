@@ -61,7 +61,7 @@ try {
   await input.fill('Test API error');
   await page.getByRole('button', { name: 'Send message', exact: true }).click();
   await page.getByText('[SYSTEM ERROR]:', { exact: false }).waitFor();
-  await page.getByTestId('agent-metrics').filter({ hasText: 'error · FIRST TEXT —' }).waitFor();
+  await page.getByTestId('agent-metrics').filter({ hasText: 'error · FIRST TEXT --' }).waitFor();
   assert.ok(!(await page.getByTestId('agent-metrics').innerText()).includes('tok/s'));
   await page.locator('#agent').screenshot({ path: '/tmp/portfolio-agent-desktop.png' });
   assert.deepEqual(errors, [], 'No uncaught browser errors');

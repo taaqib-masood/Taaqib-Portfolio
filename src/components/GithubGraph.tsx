@@ -43,7 +43,7 @@ const FALLBACK_REPOS: Repo[] = [
     forks_count: null,
     html_url: "https://github.com/taaqib-masood/smart-hospital-agent",
     language: "TypeScript",
-    description: "Reva AI — WhatsApp receptionist & clinic management with Next.js 16, Meta Cloud API, and Supabase RLS.",
+    description: "Reva AI: WhatsApp receptionist & clinic management with Next.js 16, Meta Cloud API, and Supabase RLS.",
     category: "AI & Agents",
   },
   {
@@ -61,7 +61,7 @@ const FALLBACK_REPOS: Repo[] = [
     forks_count: null,
     html_url: "https://github.com/taaqib-masood/stock-market-forecasting-risk-analytics",
     language: "Python",
-    description: "Boro — trading, risk & compliance platform: ARIMA + LightGBM ensemble, FinBERT sentiment, 10+ enforced risk rules.",
+    description: "Boro: trading, risk & compliance platform. ARIMA + LightGBM ensemble, FinBERT sentiment, 10+ enforced risk rules.",
     category: "Quant & ML",
   },
   {

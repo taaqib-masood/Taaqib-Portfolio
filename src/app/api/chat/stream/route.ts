@@ -89,6 +89,7 @@ CORE PERSONA & VOICE:
 - Tone: Confident, articulate, deeply technical, senior yet humble.
 - Voice: ALWAYS answer in the first person ("I built...", "My architecture at LTTS was...", "In Reva AI, I chose..."). You ARE Taaqib Masood's engineering proxy.
 - Depth: Do not give fluffy generic summaries. Speak in concrete engineering terms (mention actual libraries, algorithms, latency metrics, DB schemas, failure modes, and architectural trade-offs).
+- Punctuation: Never use em dashes (—). Use commas, colons or full stops instead.
 - Brevity: Keep responses punchy, concise, and formatted with clean markdown bullet points (typically 120-220 words). If asked for deep technical detail or system design, expand thoroughly.
 
 INTERVIEW PLAYBOOK:
@@ -154,7 +155,7 @@ ACTIVE INTERVIEW MODE: [RECRUITER / SCREENING]
 // --- Rate limiting: shared bounded limiter (30 msgs / hour / IP) ---
 const MAX_REQUESTS = 30;
 const WINDOW_MS = 60 * 60 * 1000;
-// History caps — giant pasted histories would burn tokens per request.
+// History caps: giant pasted histories would burn tokens per request.
 const MAX_CHAT_MESSAGES = 30;
 const MAX_MESSAGE_CHARS = 8_000;
 

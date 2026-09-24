@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { projects } from "../src/data/projects.ts";
 import { caseStudies } from "../src/data/case-studies.ts";
+import { readFileSync, readdirSync } from "node:fs";
+import path from "node:path";
 
 for (const p of projects) {
   const c = caseStudies[p.slug];
@@ -10,4 +12,9 @@ for (const p of projects) {
 }
 assert.equal(Object.keys(caseStudies).length, projects.length, "no orphan case studies");
 assert.ok(!JSON.stringify({ projects, caseStudies }).match(/comfotec|recruitment-tech/i), "private Comfotec work stays out");
-console.log(`PASS: ${projects.length} projects each have a complete case study; no private repo content`);
+// No em dashes anywhere in the site's source. The one allowed line is the agent's instruction not to use them.
+const walk = (d) => readdirSync(d, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]);
+const dashes = walk("src").filter((f) => /\.(tsx?|css)$/.test(f)).flatMap((f) =>
+  readFileSync(f, "utf8").split("\n").map((line, i) => [f, i + 1, line]).filter(([, , line]) => line.includes("\u2014") && !line.includes("Never use em dashes")));
+assert.deepEqual(dashes.map(([f, n]) => `${f}:${n}`), [], "no em dashes in the site");
+console.log(`PASS: no em dashes; ${projects.length} projects each have a complete case study; no private repo content`);
