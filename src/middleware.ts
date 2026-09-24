@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 // Strict nonce-based CSP, generated per request (Next.js docs pattern).
 // The nonce in the request headers makes Next.js apply it to its own inline
 // scripts; 'strict-dynamic' propagates trust to runtime-injected scripts
-// (Vercel Analytics, Google Translate widget) without open host allowlists.
+// (Vercel Analytics) without open host allowlists.
 // NOTE: serving with a per-request nonce disables static caching for pages.
 // Browsers can send cross-site "simple" POSTs (text/plain, no preflight) that req.json()
 // still parses. Without this, any third-party page could make its visitors fire contact
@@ -33,11 +33,11 @@ export function middleware(request: NextRequest) {
 
   const csp = [
     `default-src 'self'`,
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://translate.google.com${isDev ? " 'unsafe-eval' 'unsafe-inline'" : ""}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval' 'unsafe-inline'" : ""}`,
     `style-src 'self' 'unsafe-inline'`, // framer-motion + Next inline styles; unavoidable without build-time hashes
     `img-src 'self' data: blob: https://va.vercel-scripts.com`,
     `font-src 'self'`,
-    `connect-src 'self' https://va.vercel-scripts.com https://translate.googleapis.com https://translate.google.com`,
+    `connect-src 'self' https://va.vercel-scripts.com`,
     `frame-ancestors 'none'`,
     `frame-src 'none'`,
     `object-src 'none'`,

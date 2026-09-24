@@ -5,14 +5,15 @@ import dynamic from "next/dynamic";
 import { motion, useScroll } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
-import { TokenText } from "@/components/TokenText";
 import { useWebGLGate } from "@/lib/use-webgl";
 import { useAudience } from "@/lib/audience";
+import { useT } from "@/components/LocaleProvider";
 
 // three.js stays out of the initial bundle; it loads only once the hero mounts on a WebGL device.
 const Globe3D = dynamic(() => import("@/components/hero/Globe3D"), { ssr: false });
 
 export function Hero() {
+  const t = useT();
   const containerRef = useRef<HTMLElement>(null);
   const { supported, animate } = useWebGLGate(containerRef, "(min-width: 768px)");
   const plain = useAudience() === "plain";
@@ -34,10 +35,10 @@ export function Hero() {
           transition={{ duration: 0.5, ease: [0.83, 0, 0.17, 1] }}
           className="lg:col-span-7 flex flex-col justify-center relative z-10 pointer-events-none"
         >
-          <h1 className="text-[clamp(36px,10.5vw,180px)] font-black leading-[0.9] tracking-[-0.05em] text-foreground uppercase whitespace-nowrap">
-            <TokenText text="TAAQIB" delay={150} />
+          <h1 lang="en" className="text-[clamp(36px,10.5vw,180px)] font-black leading-[0.9] tracking-[-0.05em] text-foreground uppercase whitespace-nowrap">
+            TAAQIB
             <br />
-            <TokenText text="MASOOD" delay={150 + 6 * 38 + 60} />
+            MASOOD
           </h1>
         </motion.div>
 
@@ -66,7 +67,7 @@ export function Hero() {
       <div className="relative mt-24">
       {/* Globe rises from the data row's top rule (the horizon), left of the photo column. */}
       {supported && (
-        <div className="absolute bottom-full left-0 w-full lg:w-[56%] h-[380px]">
+        <div className="absolute bottom-full start-0 w-full lg:w-[56%] h-[380px]">
           <Globe3D progress={scrollYProgress} animate={animate} />
         </div>
       )}
@@ -79,11 +80,11 @@ export function Hero() {
           transition={{ duration: 0.5, delay: 0.2, ease: [0.83, 0, 0.17, 1] }}
           className="p-6 md:p-8 border-b md:border-b-0 md:border-r border-border"
         >
-          <h3 className="text-[14px] font-bold text-foreground uppercase tracking-[0.05em] mb-4">POSITION</h3>
+          <h3 className="text-[14px] font-bold text-foreground uppercase tracking-[0.05em] mb-4">{t("POSITION")}</h3>
           <p className="text-[16px] md:text-[18px] leading-[1.5] tracking-[-0.01em]">
-            AI Engineer
+            {t("AI Engineer")}
             <br />
-            Ex-Intern @ L&T
+            {t("Ex-Intern @ L&T")}
           </p>
         </motion.div>
 
@@ -94,11 +95,11 @@ export function Hero() {
           transition={{ duration: 0.5, delay: 0.3, ease: [0.83, 0, 0.17, 1] }}
           className="p-6 md:p-8 border-b md:border-b-0 lg:border-r border-border"
         >
-          <h3 className="text-[14px] font-bold text-foreground uppercase tracking-[0.05em] mb-4">DEFINITION</h3>
+          <h3 className="text-[14px] font-bold text-foreground uppercase tracking-[0.05em] mb-4">{t("DEFINITION")}</h3>
           <p className="text-[16px] md:text-[18px] leading-[1.5] tracking-[-0.01em]">
             {plain
-              ? "I build software where AI does real work: booking patients, screening candidates, reviewing code."
-              : "Building systems where the model isn\u2019t the demo, it\u2019s the infrastructure."}
+              ? t("I build software where AI does real work: booking patients, screening candidates, reviewing code.")
+              : t("Building systems where the model isn\u2019t the demo, it\u2019s the infrastructure.")}
           </p>
         </motion.div>
 
@@ -109,11 +110,11 @@ export function Hero() {
           transition={{ duration: 0.5, delay: 0.4, ease: [0.83, 0, 0.17, 1] }}
           className="p-6 md:p-8 border-b md:border-b-0 md:border-r border-border"
         >
-          <h3 className="text-[14px] font-bold text-foreground uppercase tracking-[0.05em] mb-4">FOCUS</h3>
+          <h3 className="text-[14px] font-bold text-foreground uppercase tracking-[0.05em] mb-4">{t("FOCUS")}</h3>
           <p className="text-[16px] md:text-[18px] leading-[1.5] tracking-[-0.01em]">
             {plain
-              ? "Products that save teams hours: automated hiring, clinic booking, trading risk control."
-              : "Agentic tool-calling, RAG, MCP, and CV pipelines. Python & TypeScript."}
+              ? t("Products that save teams hours: automated hiring, clinic booking, trading risk control.")
+              : t("Agentic tool-calling, RAG, MCP, and CV pipelines. Python & TypeScript.")}
           </p>
         </motion.div>
 
@@ -124,25 +125,25 @@ export function Hero() {
           transition={{ duration: 0.5, delay: 0.5, ease: [0.83, 0, 0.17, 1] }}
           className="p-6 md:p-8 flex flex-col justify-between"
         >
-          <h3 className="text-[14px] font-bold text-foreground uppercase tracking-[0.05em] mb-4">STATUS</h3>
+          <h3 className="text-[14px] font-bold text-foreground uppercase tracking-[0.05em] mb-4">{t("STATUS")}</h3>
           <p className="text-[16px] md:text-[18px] leading-[1.5] tracking-[-0.01em] mb-8">
-            Based in Dubai.
+            {t("Based in Dubai.")}
             <br />
-            Available for Engineering roles.
+            {t("Available for Engineering roles.")}
           </p>
           <div className="flex flex-col gap-3 w-full">
             <button
               onClick={handleAgentClick}
               className="group flex items-center justify-between border-2 border-[#ffffff] bg-transparent px-6 py-4 text-[14px] font-bold uppercase tracking-widest text-[#ffffff] transition-all hover:bg-[#ffffff] hover:text-[#000000] w-full"
             >
-              Ask Agent <ArrowUpRight className="h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+              {t("Ask Agent")} <ArrowUpRight className="h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
             </button>
             <a
               href="/taaqib-masood-cv.pdf"
               download
               className="group flex items-center justify-between border-2 border-[#ffffff] bg-transparent px-6 py-4 text-[14px] font-bold uppercase tracking-widest text-[#ffffff] transition-all hover:bg-[#ffffff] hover:text-[#000000] w-full"
             >
-              Download CV <ArrowUpRight className="h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+              {t("Download CV")} <ArrowUpRight className="h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
             </a>
           </div>
         </motion.div>

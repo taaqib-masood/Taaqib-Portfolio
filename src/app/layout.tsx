@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, IBM_Plex_Sans_Arabic } from "next/font/google";
+import { cookies } from "next/headers";
 import "./globals.css";
 
 import { CommandMenu } from "@/components/CommandMenu";
@@ -7,6 +8,9 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { ScrollFloor3D } from "@/components/ScrollFloor3D";
 import { cn } from "@/lib/utils";
 import { siteUrl } from "@/lib/site-url";
+import { LOCALE_COOKIE, localeFromCookie } from "@/lib/i18n";
+import { LocaleProvider } from "@/components/LocaleProvider";
+import { ar } from "@/data/ar";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -14,6 +18,15 @@ const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
+});
+
+// Arabic face for the Arabic version (Inter has no Arabic glyphs). Only used when lang="ar".
+const plexArabic = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic"],
+  weight: ["400", "500", "700"],
+  variable: "--font-arabic",
+  display: "swap",
+  preload: false,
 });
 
 
@@ -51,23 +64,28 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Language is chosen server-side from a cookie, so Arabic arrives already translated and RTL.
+  const locale = localeFromCookie((await cookies()).get(LOCALE_COOKIE)?.value);
   return (
-    <html lang="en" suppressHydrationWarning dir="ltr">
+    <html lang={locale} suppressHydrationWarning dir={locale === "ar" ? "rtl" : "ltr"}>
       <head></head>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased text-foreground overflow-x-hidden pb-[88px] sm:pb-[56px]",
-          inter.variable
+          inter.variable,
+          plexArabic.variable
         )}
       >
-        {children}
-        <CommandMenu />
-        <ScrollToTop />
+        <LocaleProvider locale={locale} dict={locale === "ar" ? ar : null}>
+          {children}
+          <CommandMenu />
+          <ScrollToTop />
+        </LocaleProvider>
         <ScrollFloor3D />
         <Analytics />
         <SpeedInsights />

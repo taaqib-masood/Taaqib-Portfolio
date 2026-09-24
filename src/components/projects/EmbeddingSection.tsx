@@ -10,6 +10,7 @@ import { useAudience } from "@/lib/audience";
 import type { Project } from "@/data/projects";
 import { useWebGLGate } from "@/lib/use-webgl";
 import { matchesSkill } from "@/lib/embedding";
+import { useT } from "@/components/LocaleProvider";
 
 const EmbeddingSpace = dynamic(() => import("@/components/projects/EmbeddingSpace"), { ssr: false });
 
@@ -25,6 +26,7 @@ export function EmbeddingSection({ projects, activeSkill, onAskAgent }: {
   activeSkill: string | null;
   onAskAgent: (title: string) => void;
 }) {
+  const t = useT();
   const ref = useRef<HTMLDivElement>(null);
   const { supported, reduced, animate } = useWebGLGate(ref, "(min-width: 768px)");
   // Hidden via CSS (not an early return) so server and client markup match.
@@ -50,9 +52,9 @@ export function EmbeddingSection({ projects, activeSkill, onAskAgent }: {
         {supported && !reduced && <EmbeddingSpace projects={projects} activeSkill={activeSkill} progress={scrollYProgress} animate={animate} />}
 
         <div className="absolute top-0 left-0 right-0 flex items-center justify-between pl-8 pr-40 py-4 border-b border-border bg-background/80 font-mono text-[11px] uppercase tracking-[0.16em] text-on-surface-variant">
-          <span>Latent space · {projects.length} nodes · edges = shared stack</span>
+          <span>{t("Latent space")} · {projects.length} {t("nodes")} · {t("edges = shared stack")}</span>
           <span className={activeSkill ? "text-primary" : ""}>
-            {activeSkill ? `Query “${activeSkill}” · ${matchCount}/${projects.length} match` : "Select a skill below to query"}
+            {activeSkill ? `${t("Query")} “${activeSkill}” · ${matchCount}/${projects.length} ${t("match")}` : t("Select a skill below to query")}
           </span>
         </div>
 
@@ -66,25 +68,25 @@ export function EmbeddingSection({ projects, activeSkill, onAskAgent }: {
             className={`absolute right-8 bottom-24 w-[420px] border bg-background ${matchesSkill(p, activeSkill) ? "border-border" : "border-outline-variant opacity-60"}`}
           >
             <div className="flex justify-between px-6 py-4 border-b border-border font-mono text-[11px] uppercase tracking-[0.16em]">
-              <span>Node {String(focus + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}</span>
-              <span className="text-on-surface-variant">{p.categories.join(" · ")}{year ? ` · ${year}` : ""}</span>
+              <span>{t("Node")} {String(focus + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}</span>
+              <span className="text-on-surface-variant">{p.categories.map(t).join(" · ")}{year ? ` · ${year}` : ""}</span>
             </div>
             <div className="p-6">
-              <h3 className="text-[28px] font-bold uppercase tracking-[-0.03em] leading-[1.05]">{p.title}</h3>
-              <p className="mt-4 text-[14px] leading-[1.5] text-on-surface-variant line-clamp-3">{(plain && caseStudies[p.slug]?.plain) || p.blurb}</p>
-              <p className="mt-4 font-mono text-[12px] uppercase tracking-[0.08em] text-primary">{p.metrics[0]}</p>
+              <h3 className="text-[28px] font-bold uppercase tracking-[-0.03em] leading-[1.05]">{t(p.title)}</h3>
+              <p className="mt-4 text-[14px] leading-[1.5] text-on-surface-variant line-clamp-3">{t((plain && caseStudies[p.slug]?.plain) || p.blurb)}</p>
+              <p className="mt-4 font-mono text-[12px] uppercase tracking-[0.08em] text-primary">{t(p.metrics[0])}</p>
             </div>
             <div className="grid grid-cols-2 border-t border-border text-[12px] font-bold uppercase tracking-widest">
-              <Link href={`/projects/${p.slug}`} className="min-h-12 flex items-center justify-center uppercase border-r border-border hover:bg-foreground hover:text-background transition-colors">Case study</Link>
+              <Link href={`/projects/${p.slug}`} className="min-h-12 flex items-center justify-center uppercase border-r border-border hover:bg-foreground hover:text-background transition-colors">{t("Case study")}</Link>
               <button onClick={() => onAskAgent(p.title)} className="min-h-12 uppercase flex items-center justify-center gap-2 bg-foreground text-background hover:bg-primary hover:text-foreground transition-colors">
-                Ask agent <ArrowUpRight className="h-4 w-4" />
+                {t("Ask agent")} <ArrowUpRight className="h-4 w-4" />
               </button>
             </div>
           </motion.div>
         </AnimatePresence>
 
-        <nav aria-label="Project nodes" className="absolute left-8 bottom-40 w-[320px]">
-          <div className="font-mono text-[11px] uppercase tracking-[0.16em] text-on-surface-variant mb-3">Scroll · camera path</div>
+        <nav aria-label="Project nodes" className="absolute start-8 bottom-40 w-[320px]">
+          <div className="font-mono text-[11px] uppercase tracking-[0.16em] text-on-surface-variant mb-3">{t("Scroll · camera path")}</div>
           <div className="h-[2px] bg-outline-variant relative mb-3">
             <motion.div className="absolute inset-y-0 left-0 right-0 bg-primary origin-left" style={{ scaleX: scrollYProgress }} />
           </div>

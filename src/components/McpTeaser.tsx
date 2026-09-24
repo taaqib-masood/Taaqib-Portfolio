@@ -3,6 +3,7 @@
 import { Terminal } from "lucide-react";
 import { ParallaxNumber } from "@/components/ParallaxNumber";
 import { TokenText } from "@/components/TokenText";
+import { useT } from "@/components/LocaleProvider";
 
 // Mirrors the keys of `tools` in src/lib/tools.ts (not imported: that module is server-only).
 const TOOLS = ["get_project", "get_resume_section", "get_github_stats", "get_live_demo"];
@@ -18,6 +19,7 @@ const toolPath = (i: number) => {
 const clientPath = `M ${CLIENT.x + CLIENT.w} ${CLIENT.y + CLIENT.h / 2} L ${SERVER.x} ${SERVER.y + SERVER.h / 2}`;
 
 export function McpTeaser() {
+  const t = useT();
   const handleWakeUp = () => {
     window.dispatchEvent(new CustomEvent("wakeUpAgent", { detail: "Access Neural Web" }));
     document.getElementById("agent")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -38,7 +40,7 @@ export function McpTeaser() {
         </div>
         <div className="lg:col-span-8 p-6 md:p-8 flex items-center">
           <p className="font-mono text-[12px] uppercase tracking-[0.16em] text-[#3a3c4e]">
-            The tools the agent above can call · {TOOLS.length} tools · up to 4 steps per answer
+            {t("The tools the agent above can call")} · {TOOLS.length} {t("tools")} · {t("up to 4 steps per answer")}
           </p>
         </div>
       </div>
@@ -46,21 +48,19 @@ export function McpTeaser() {
       <div className="relative grid grid-cols-1 lg:grid-cols-12">
         <div className="lg:col-span-4 p-6 md:p-8 flex flex-col justify-end gap-8 border-b lg:border-b-0 lg:border-r border-background">
           <p className="text-[16px] md:text-[18px] leading-[1.5] text-[#1a1c1c]">
-            When the agent needs a fact it doesn&apos;t already hold, it fetches it through one of these
-            calls, and the trace under the chat shows each call as it runs. It&apos;s the same pattern as the
-            MCP code-review pipeline, only small enough to watch.
+            {t("When the agent needs a fact it doesn\u2019t already hold, it fetches it through one of these calls, and the trace under the chat shows each call as it runs. It\u2019s the same pattern as the MCP code-review pipeline, only small enough to watch.")}
           </p>
           <button
             onClick={handleWakeUp}
             className="group flex items-center justify-between gap-6 border border-background bg-transparent px-6 min-h-[52px] text-[14px] font-bold uppercase tracking-widest transition-colors hover:bg-background hover:text-foreground w-fit"
           >
-            <span className="flex items-center gap-3"><Terminal className="h-5 w-5" />Wake Up Agent</span>
+            <span className="flex items-center gap-3"><Terminal className="h-5 w-5" />{t("Wake Up Agent")}</span>
           </button>
         </div>
 
         {/* Desktop: animated topology */}
         <div className="hidden md:block lg:col-span-8 p-8">
-          <svg viewBox="0 0 1220 600" className="w-full h-auto" role="img" aria-label={`Agent terminal calls a tool registry with ${TOOLS.length} tools: ${TOOLS.join(", ")}`}>
+          <svg viewBox="0 0 1220 600" className="w-full h-auto" direction="ltr" role="img" aria-label={`Agent terminal calls a tool registry with ${TOOLS.length} tools: ${TOOLS.join(", ")}`}>
             <path d={clientPath} stroke="#000" strokeWidth="1.5" fill="none" />
             {TOOLS.map((_, i) => <path key={i} d={toolPath(i)} stroke="#000" strokeWidth="1" fill="none" />)}
             <g className="motion-reduce:hidden">
@@ -75,12 +75,12 @@ export function McpTeaser() {
             </g>
 
             <rect x={CLIENT.x} y={CLIENT.y} width={CLIENT.w} height={CLIENT.h} fill="#000" />
-            <text x={CLIENT.x + 16} y={CLIENT.y + 28} fill="#a3a6b6" fontSize="12" fontFamily="ui-monospace, monospace" letterSpacing="2">CLIENT</text>
-            <text x={CLIENT.x + 16} y={CLIENT.y + CLIENT.h - 20} fill="#fff" fontSize="20" fontWeight="700">AGENT TERMINAL</text>
+            <text x={CLIENT.x + 16} y={CLIENT.y + 28} fill="#a3a6b6" fontSize="12" fontFamily="ui-monospace, monospace" letterSpacing="2">{t("CLIENT")}</text>
+            <text x={CLIENT.x + 16} y={CLIENT.y + CLIENT.h - 20} fill="#fff" fontSize="20" fontWeight="700">{t("AGENT TERMINAL")}</text>
 
             <rect x={SERVER.x} y={SERVER.y} width={SERVER.w} height={SERVER.h} fill="#2e5bff" />
-            <text x={SERVER.x + 16} y={SERVER.y + 28} fill="#fff" fontSize="12" fontFamily="ui-monospace, monospace" letterSpacing="2">SERVER</text>
-            <text x={SERVER.x + 16} y={SERVER.y + SERVER.h - 44} fill="#fff" fontSize="20" fontWeight="700">TOOL REGISTRY</text>
+            <text x={SERVER.x + 16} y={SERVER.y + 28} fill="#fff" fontSize="12" fontFamily="ui-monospace, monospace" letterSpacing="2">{t("SERVER")}</text>
+            <text x={SERVER.x + 16} y={SERVER.y + SERVER.h - 44} fill="#fff" fontSize="20" fontWeight="700">{t("TOOL REGISTRY")}</text>
             <text x={SERVER.x + 16} y={SERVER.y + SERVER.h - 20} fill="#fff" fontSize="12" fontFamily="ui-monospace, monospace">streamText · /api/chat/stream</text>
 
             {TOOLS.map((t, i) => (
@@ -94,8 +94,8 @@ export function McpTeaser() {
 
         {/* Mobile: the same graph as a list */}
         <ol className="md:hidden p-6 font-mono text-[13px] space-y-2">
-          <li className="bg-background text-foreground px-4 py-3">AGENT TERMINAL</li>
-          <li className="bg-primary text-foreground px-4 py-3">↓ TOOL REGISTRY</li>
+          <li className="bg-background text-foreground px-4 py-3">{t("AGENT TERMINAL")}</li>
+          <li className="bg-primary text-foreground px-4 py-3">↓ {t("TOOL REGISTRY")}</li>
           {TOOLS.map((t) => <li key={t} className="border border-background px-4 py-3">↳ {t}()</li>)}
         </ol>
       </div>

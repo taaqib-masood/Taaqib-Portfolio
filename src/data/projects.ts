@@ -59,10 +59,9 @@ export const githubRepos: GithubRepoInfo[] = [
     url: "https://github.com/taaqib-masood/predictive-maintenance-industrial-machinery",
     category: "ML & Edge AI",
     highlights: [
-      "MAE 15.31 and R² 0.85 outperforming standalone architectures",
+      "MAE 15.31 and RMSE 17.22, outperforming each model on its own",
       "Processes vibration and thermal sensor telemetry across time and frequency domains (FFT)",
-      "75% model footprint reduction via TensorFlow Lite INT8 quantization",
-      "Edge-deployed for real-time inference on Raspberry Pi 4 and NVIDIA Jetson Nano"
+      "Quantized and converted to TensorFlow Lite for low-latency inference on edge devices"
     ]
   },
   {
@@ -290,9 +289,8 @@ export const projects: Project[] = [
     ],
     metrics: [
       "MAE 15.31 (outperforms individual models)",
-      "R² 0.85",
-      "75% model-size reduction via TensorFlow Lite",
-      "Real-time on Raspberry Pi 4 & NVIDIA Jetson Nano",
+      "RMSE 17.22",
+      "Quantized to TensorFlow Lite for edge devices",
       "Handles both gradual degradation & sudden failures",
     ],
     categories: ["ML", "Edge"],

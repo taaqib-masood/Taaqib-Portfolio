@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Command } from "cmdk";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useT } from "@/components/LocaleProvider";
 import { 
   User, 
   Briefcase, 
@@ -19,6 +20,7 @@ const GithubIcon = ({ className }: { className?: string }) => (
 );
 
 export function CommandMenu() {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
@@ -55,7 +57,7 @@ export function CommandMenu() {
         aria-label="Open command menu"
       >
         <CommandIcon className="h-4 w-4" />
-        <span>Menu</span>
+        <span>{t("Menu")}</span>
       </button>
 
       <AnimatePresence>
