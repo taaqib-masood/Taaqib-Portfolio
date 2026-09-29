@@ -154,7 +154,7 @@ export default function PlaygroundPage() {
             </div>
 
             <div className="mt-auto pt-4 text-xs text-slate-500 border-t border-slate-800">
-              Model: <span className="text-violet-400">gpt-oss-20b via Groq</span>
+              Model: <span className="text-violet-400">llama-3.3-70b via Groq</span>
             </div>
           </div>
         </aside>

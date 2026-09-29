@@ -72,7 +72,7 @@ export default function RootLayout({
       <head></head>
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased text-foreground overflow-x-hidden pb-[88px] sm:pb-[56px]",
+          "min-h-screen bg-background font-sans antialiased text-foreground pb-[88px] sm:pb-[56px]",
           inter.variable,
           outfit.variable
         )}
@@ -93,7 +93,9 @@ export default function RootLayout({
           strategy="lazyOnload"
           src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
         />
-        {children}
+        <div className="overflow-x-hidden">
+          {children}
+        </div>
         <CommandMenu />
         <ScrollToTop />
         <ScrollFloor3D />

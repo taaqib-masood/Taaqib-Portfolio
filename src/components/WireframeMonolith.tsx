@@ -1,13 +1,28 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 
 export function WireframeMonolith() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const hasMouse = useRef(false);
+  const rafId = useRef<number>(0);
+
+  // Ambient drift for touch devices (no mousemove)
+  const startDrift = useCallback(() => {
+    let t = 0;
+    const tick = () => {
+      if (hasMouse.current) return; // stop if mouse detected
+      t += 0.008;
+      setTilt({ x: Math.sin(t * 0.7) * 6, y: Math.cos(t) * 6 });
+      rafId.current = requestAnimationFrame(tick);
+    };
+    rafId.current = requestAnimationFrame(tick);
+  }, []);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
+      hasMouse.current = true;
       const cx = window.innerWidth / 2;
       const cy = window.innerHeight / 2;
       const x = ((e.clientY - cy) / cy) * 8;
@@ -15,8 +30,14 @@ export function WireframeMonolith() {
       setTilt({ x, y });
     };
     window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+    // Start drift after short delay — if mouse moves first it'll cancel
+    const timer = setTimeout(startDrift, 500);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      clearTimeout(timer);
+      cancelAnimationFrame(rafId.current);
+    };
+  }, [startDrift]);
 
   const W = 200;
   const H = 300;
@@ -33,7 +54,7 @@ export function WireframeMonolith() {
   return (
     <div
       ref={containerRef}
-      className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center overflow-hidden"
+      className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center"
       aria-hidden="true"
     >
       <style>{`
