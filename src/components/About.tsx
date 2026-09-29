@@ -1,13 +1,18 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { aboutParagraphs } from "@/data/resume";
 import { projects } from "@/data/projects";
 import { ParallaxNumber } from "@/components/ParallaxNumber";
 import { VerticalLine } from "@/components/VerticalLine";
+import { TokenText } from "@/components/TokenText";
+import { CountUp } from "@/components/CountUp";
+import { getGithubFeed } from "@/lib/github-feed";
+import { useT } from "@/components/LocaleProvider";
 
 export function About() {
+  const t = useT();
   const containerRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -18,21 +23,22 @@ export function About() {
   const numProjects = projects.length;
   // 6 spoken languages (English, Hindi, Urdu, Tamil, Malayalam, Arabic)
   const numLanguages = 6;
-  const contributions = 569;
+  const [contributions, setContributions] = useState<number | null>(null);
+  useEffect(() => { getGithubFeed().then((f) => setContributions(f.contributions?.total ?? null)); }, []);
 
   return (
     <section ref={containerRef} id="about" className="max-w-[1440px] mx-auto border-b border-border overflow-hidden">
       <motion.div style={{ y }} className="w-full bg-background relative z-20">
       {/* Header */}
       <div className="relative grid grid-cols-1 lg:grid-cols-12 border-b border-border overflow-hidden">
-        <ParallaxNumber number="04" />
+        <ParallaxNumber number="01" />
         <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 relative flex flex-col justify-center">
-          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] relative z-10">About</h2>
+          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] relative z-10"><TokenText text="About" /></h2>
           <VerticalLine />
         </div>
         <div className="lg:col-span-8 p-6 md:p-8 bg-surface-container-low flex flex-col justify-center">
           <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-outline">
-            AI Engineer · Dubai, UAE
+            {t("AI Engineer · Dubai, UAE")}
           </p>
         </div>
       </div>
@@ -59,7 +65,7 @@ export function About() {
                 }}
                 className="text-[16px] md:text-[18px] leading-[1.6] tracking-[-0.01em] text-foreground max-w-[65ch]"
               >
-                {paragraph}
+                {t(paragraph)}
               </motion.p>
             ))}
           </div>
@@ -73,20 +79,20 @@ export function About() {
         >
           <div className="grid grid-cols-2 lg:grid-cols-1 h-full">
             <div className="p-6 md:p-8 border-r lg:border-r-0 lg:border-b border-border flex flex-col justify-center">
-              <span className="text-[32px] md:text-[48px] font-bold leading-[1] tracking-[-0.03em] uppercase mb-2">5+</span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-outline">Months @ L&T</span>
+              <span className="text-[32px] md:text-[48px] font-bold leading-[1] tracking-[-0.03em] uppercase mb-2"><CountUp value={5} suffix="+" /></span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-outline">{t("Months @ L&T")}</span>
             </div>
             <div className="p-6 md:p-8 border-b lg:border-b border-border flex flex-col justify-center">
-              <span className="text-[32px] md:text-[48px] font-bold leading-[1] tracking-[-0.03em] uppercase mb-2">{numProjects}</span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-outline">Shipped Projects</span>
+              <span className="text-[32px] md:text-[48px] font-bold leading-[1] tracking-[-0.03em] uppercase mb-2"><CountUp value={numProjects} /></span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-outline">{t("Shipped Projects")}</span>
             </div>
             <div className="p-6 md:p-8 border-r lg:border-r-0 lg:border-b border-border flex flex-col justify-center">
-              <span className="text-[32px] md:text-[48px] font-bold leading-[1] tracking-[-0.03em] uppercase mb-2">{contributions}</span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-outline">GitHub Commits/Yr</span>
+              <span className="text-[32px] md:text-[48px] font-bold leading-[1] tracking-[-0.03em] uppercase mb-2">{contributions === null ? "--" : <CountUp value={contributions} />}</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-outline">{t("GitHub Contributions / Yr")}</span>
             </div>
             <div className="p-6 md:p-8 flex flex-col justify-center">
-              <span className="text-[32px] md:text-[48px] font-bold leading-[1] tracking-[-0.03em] uppercase mb-2">{numLanguages}</span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-outline">Languages Spoken</span>
+              <span className="text-[32px] md:text-[48px] font-bold leading-[1] tracking-[-0.03em] uppercase mb-2"><CountUp value={numLanguages} /></span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-outline">{t("Languages Spoken")}</span>
             </div>
           </div>
         </motion.div>

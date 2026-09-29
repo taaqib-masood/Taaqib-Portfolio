@@ -1,66 +1,103 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Terminal, Crosshair } from "lucide-react";
+import { Terminal } from "lucide-react";
+import { ParallaxNumber } from "@/components/ParallaxNumber";
+import { TokenText } from "@/components/TokenText";
+import { useT } from "@/components/LocaleProvider";
+
+// Mirrors the keys of `tools` in src/lib/tools.ts (not imported: that module is server-only).
+const TOOLS = ["get_project", "get_resume_section", "get_github_stats", "get_live_demo"];
+
+const CLIENT = { x: 40, y: 220, w: 220, h: 120 };
+const SERVER = { x: 420, y: 200, w: 240, h: 160 };
+const TOOL_X = 900;
+const toolY = (i: number) => 60 + i * 140;
+const toolPath = (i: number) => {
+  const sx = SERVER.x + SERVER.w, sy = SERVER.y + SERVER.h / 2, ty = toolY(i) + 24;
+  return `M ${sx} ${sy} C ${sx + 120} ${sy}, ${TOOL_X - 120} ${ty}, ${TOOL_X} ${ty}`;
+};
+const clientPath = `M ${CLIENT.x + CLIENT.w} ${CLIENT.y + CLIENT.h / 2} L ${SERVER.x} ${SERVER.y + SERVER.h / 2}`;
 
 export function McpTeaser() {
+  const t = useT();
   const handleWakeUp = () => {
-    // Actually, to pre-fill the agent from outside, we need a global state or to pass an event.
-    // The prompt says "scrolls up to the Agent.tsx section and pre-fills the input with 'Access Neural Web'".
-    // Since page.tsx already has handleAskAgentAboutProject which sets `agentPrefill`,
-    // maybe I should dispatch a custom event, or just let the user type.
-    // Wait, let's just scroll for now, or use a custom event since we don't have the prop passed down.
-    const evt = new CustomEvent("wakeUpAgent", { detail: "Access Neural Web" });
-    window.dispatchEvent(evt);
-    const agentEl = document.getElementById("agent");
-    agentEl?.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.dispatchEvent(new CustomEvent("wakeUpAgent", { detail: "Access Neural Web" }));
+    document.getElementById("agent")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
-    <section className="max-w-[1440px] mx-auto border-b border-border bg-[#ffffff] text-[#000000] overflow-hidden relative min-h-[400px] flex flex-col md:flex-row">
-      {/* Brutalist + Grid Pattern */}
-      <div 
-        className="absolute inset-0 z-0 opacity-20 pointer-events-none"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0v40M0 20h40' stroke='%23ffffff' stroke-width='1' fill='none'/%3E%3C/svg%3E")`,
-          backgroundSize: '40px 40px'
-        }}
+    <section id="mcp-teaser" className="max-w-[1440px] mx-auto border-b border-border bg-foreground text-background relative overflow-hidden">
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none"
+        style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.07) 1px, transparent 1px)", backgroundSize: "40px 40px" }}
       />
-      
-      <div className="relative z-10 p-6 md:p-12 md:w-1/2 flex flex-col justify-center border-b md:border-b-0 md:border-r border-[#333333]">
-        <div className="flex items-center gap-3 mb-6">
-          <Crosshair className="h-6 w-6 text-[#2e5bff]" />
-          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1]">Neural Web</h2>
+
+      <div className="relative grid grid-cols-1 lg:grid-cols-12 border-b border-background overflow-hidden">
+        <ParallaxNumber number="04" />
+        <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-background">
+          <h2 className="relative z-10 text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1]"><TokenText text="Tool Graph" /></h2>
         </div>
-        <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-[#a1a1aa] mb-8">
-          Explore the neural architecture of TAAQIB.MASOOD. This node provides direct access to the central logic core and project synapses.
-        </p>
-        <button
-          onClick={handleWakeUp}
-          className="group flex items-center justify-between border border-[#000000] bg-transparent px-6 py-4 text-[14px] font-bold uppercase tracking-widest transition-colors hover:bg-[#000000] hover:text-[#ffffff] active:bg-[#e2e2e2] w-fit"
-        >
-          <span className="flex items-center gap-3">
-            <Terminal className="h-5 w-5" />
-            Wake Up Agent
-          </span>
-        </button>
+        <div className="lg:col-span-8 p-6 md:p-8 flex items-center">
+          <p className="font-mono text-[12px] uppercase tracking-[0.16em] text-[#3a3c4e]">
+            {t("The tools the agent above can call")} · {TOOLS.length} {t("tools")} · {t("up to 4 steps per answer")}
+          </p>
+        </div>
       </div>
-      
-      <div className="relative z-10 p-6 md:p-12 md:w-1/2 flex flex-col justify-center items-center">
-         {/* Abstract Neural Node Visualization */}
-         <div className="relative w-full h-full min-h-[200px] flex items-center justify-center">
-            <motion.div 
-              animate={{ rotate: 360 }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              className="absolute w-[150px] h-[150px] border border-[#2e5bff] rounded-full"
-            />
-            <motion.div 
-              animate={{ rotate: -360 }}
-              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-              className="absolute w-[100px] h-[100px] border border-[#000000] rounded-none rotate-45"
-            />
-            <div className="absolute w-[20px] h-[20px] bg-[#2e5bff]" />
-         </div>
+
+      <div className="relative grid grid-cols-1 lg:grid-cols-12">
+        <div className="lg:col-span-4 p-6 md:p-8 flex flex-col justify-end gap-8 border-b lg:border-b-0 lg:border-r border-background">
+          <p className="text-[16px] md:text-[18px] leading-[1.5] text-[#1a1c1c]">
+            {t("When the agent needs a fact it doesn\u2019t already hold, it fetches it through one of these calls, and the trace under the chat shows each call as it runs. It\u2019s the same pattern as the MCP code-review pipeline, only small enough to watch.")}
+          </p>
+          <button
+            onClick={handleWakeUp}
+            className="group flex items-center justify-between gap-6 border border-background bg-transparent px-6 min-h-[52px] text-[14px] font-bold uppercase tracking-widest transition-colors hover:bg-background hover:text-foreground w-fit"
+          >
+            <span className="flex items-center gap-3"><Terminal className="h-5 w-5" />{t("Wake Up Agent")}</span>
+          </button>
+        </div>
+
+        {/* Desktop: animated topology */}
+        <div className="hidden md:block lg:col-span-8 p-8">
+          <svg viewBox="0 0 1220 600" className="w-full h-auto" direction="ltr" role="img" aria-label={`Agent terminal calls a tool registry with ${TOOLS.length} tools: ${TOOLS.join(", ")}`}>
+            <path d={clientPath} stroke="#000" strokeWidth="1.5" fill="none" />
+            {TOOLS.map((_, i) => <path key={i} d={toolPath(i)} stroke="#000" strokeWidth="1" fill="none" />)}
+            <g className="motion-reduce:hidden">
+              <rect width="10" height="10" x="-5" y="-5" fill="#2e5bff">
+                <animateMotion dur="1.8s" repeatCount="indefinite" path={clientPath} />
+              </rect>
+              {TOOLS.map((_, i) => (
+                <rect key={i} width="8" height="8" x="-4" y="-4" fill="#2e5bff">
+                  <animateMotion dur={`${2 + i * 0.4}s`} begin={`${i * 0.3}s`} repeatCount="indefinite" path={toolPath(i)} />
+                </rect>
+              ))}
+            </g>
+
+            <rect x={CLIENT.x} y={CLIENT.y} width={CLIENT.w} height={CLIENT.h} fill="#000" />
+            <text x={CLIENT.x + 16} y={CLIENT.y + 28} fill="#a3a6b6" fontSize="12" fontFamily="ui-monospace, monospace" letterSpacing="2">{t("CLIENT")}</text>
+            <text x={CLIENT.x + 16} y={CLIENT.y + CLIENT.h - 20} fill="#fff" fontSize="20" fontWeight="700">{t("AGENT TERMINAL")}</text>
+
+            <rect x={SERVER.x} y={SERVER.y} width={SERVER.w} height={SERVER.h} fill="#2e5bff" />
+            <text x={SERVER.x + 16} y={SERVER.y + 28} fill="#fff" fontSize="12" fontFamily="ui-monospace, monospace" letterSpacing="2">{t("SERVER")}</text>
+            <text x={SERVER.x + 16} y={SERVER.y + SERVER.h - 44} fill="#fff" fontSize="20" fontWeight="700">{t("TOOL REGISTRY")}</text>
+            <text x={SERVER.x + 16} y={SERVER.y + SERVER.h - 20} fill="#fff" fontSize="12" fontFamily="ui-monospace, monospace">streamText · /api/chat/stream</text>
+
+            {TOOLS.map((t, i) => (
+              <g key={t}>
+                <rect x={TOOL_X} y={toolY(i)} width="300" height="48" fill="#fff" stroke="#000" />
+                <text x={TOOL_X + 16} y={toolY(i) + 30} fill="#000" fontSize="14" fontWeight="700" fontFamily="ui-monospace, monospace">{t}()</text>
+              </g>
+            ))}
+          </svg>
+        </div>
+
+        {/* Mobile: the same graph as a list */}
+        <ol className="md:hidden p-6 font-mono text-[13px] space-y-2">
+          <li className="bg-background text-foreground px-4 py-3">{t("AGENT TERMINAL")}</li>
+          <li className="bg-primary text-foreground px-4 py-3">↓ {t("TOOL REGISTRY")}</li>
+          {TOOLS.map((t) => <li key={t} className="border border-background px-4 py-3">↳ {t}()</li>)}
+        </ol>
       </div>
     </section>
   );

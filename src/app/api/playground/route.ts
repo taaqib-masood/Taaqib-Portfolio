@@ -4,7 +4,7 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const maxDuration = 30; // max duration for edge
 
-// Server-side caps — never trust client-sent generation settings.
+// Server-side caps: never trust client-sent generation settings.
 const MAX_TOKENS = 1024;
 const MAX_SYSTEM_PROMPT_CHARS = 4_000;
 const MAX_MESSAGES = 20;

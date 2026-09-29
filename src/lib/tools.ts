@@ -11,23 +11,10 @@ import {
   contact,
 } from "@/data/resume";
 
-/** Cached fallback for when GitHub rate limits or for instantaneous response. */
+/** Returned when GitHub is unreachable. Names only: never report stats we did not just read. */
 const GITHUB_FALLBACK = {
-  note: "Cached profile statistics for Taaqib Masood (github.com/taaqib-masood) plus open-source contributions",
-  publicRepos: 10,
-  totalStars: 64,
-  followers: 5,
-  contributions: 569,
-  topRepos: [
-    { name: "smart-hospital-agent", title: "Reva AI — WhatsApp Receptionist", stars: 12, language: "TypeScript" },
-    { name: "stock-market-forecasting-risk-analytics", title: "Stock Market Forecasting & Risk Analytics", stars: 15, language: "Python" },
-    { name: "predictive-maintenance-industrial-machinery", title: "Predictive Maintenance of Industrial Machinery", stars: 10, language: "Python" },
-    { name: "salon-booking-saas", title: "Salon Booking SaaS (UAE)", stars: 18, language: "TypeScript" },
-    { name: "atlas-ai", title: "Atlas AI — Autonomous Multi-Agent System", stars: 7, language: "JavaScript" },
-    { name: "garageIQ-landing-page", title: "GarageIQ Workshop Platform", stars: 2, language: "CSS" },
-    { name: "majestic-constructions", title: "Majestic Constructions Portal", stars: 0, language: "TypeScript" },
-    { name: "Taaqib-Portfolio", title: "Swiss Brutalist Portfolio with Agent Terminal", stars: 0, language: "TypeScript" },
-  ],
+  note: "Live GitHub stats are unavailable right now. Repository names are listed; star, follower and contribution counts are omitted rather than guessed. See github.com/taaqib-masood.",
+  topRepos: githubRepos.map((r) => ({ name: r.name, title: r.title, language: r.language })),
 };
 
 let cachedGithubData: { payload: string; timestamp: number } | null = null;
@@ -212,7 +199,6 @@ export const tools = {
           publicRepos: user.public_repos,
           followers: user.followers,
           totalStars,
-          contributions: 569, // REST API does not expose contribution count; use known value
           topRepos: repos.map((r) => ({
             name: r.name,
             stars: r.stargazers_count,

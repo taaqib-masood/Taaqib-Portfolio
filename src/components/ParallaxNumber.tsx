@@ -15,8 +15,9 @@ export function ParallaxNumber({ number }: { number: string }) {
   return (
     <motion.div
       ref={ref}
-      style={{ y }}
-      className="absolute top-0 left-4 md:left-8 -z-10 pointer-events-none select-none text-[120px] md:text-[200px] leading-none font-bold text-[#e2e2e2] opacity-50"
+      style={{ y, WebkitTextStroke: "1px currentColor", WebkitTextFillColor: "transparent" }}
+      aria-hidden="true"
+      className="absolute top-0 left-4 md:left-8 z-0 pointer-events-none select-none text-[120px] md:text-[200px] leading-none font-black tracking-[-0.05em] opacity-25"
     >
       {number}
     </motion.div>

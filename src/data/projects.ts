@@ -9,7 +9,6 @@ export interface Project {
   repo: string;
   demo: string | null;
   role: string;
-  image?: string;
   highlights?: string[];
 }
 
@@ -26,8 +25,8 @@ export interface GithubRepoInfo {
 export const githubRepos: GithubRepoInfo[] = [
   {
     name: "smart-hospital-agent",
-    title: "Reva AI — WhatsApp Receptionist",
-    description: "AI WhatsApp receptionist and clinic management dashboard built with Next.js 14, Supabase (PostgreSQL with RLS), Meta Cloud API v19.0, and Razorpay.",
+    title: "Reva AI: WhatsApp Receptionist",
+    description: "AI WhatsApp receptionist and clinic management dashboard built with Next.js 16, Supabase (PostgreSQL with RLS), Meta Cloud API v19.0, and Razorpay.",
     language: "TypeScript",
     url: "https://github.com/taaqib-masood/smart-hospital-agent",
     category: "AI/LLM & Full-Stack",
@@ -40,7 +39,7 @@ export const githubRepos: GithubRepoInfo[] = [
   },
   {
     name: "stock-market-forecasting-risk-analytics",
-    title: "Stock Market Forecasting & Risk Analytics",
+    title: "Boro: Trading, Risk & Compliance Platform",
     description: "Systematic quant trading pipeline forecasting price movements (ARIMA + LightGBM ensemble, 52 features) with walk-forward validation and 10+ strict risk rules.",
     language: "Python",
     url: "https://github.com/taaqib-masood/stock-market-forecasting-risk-analytics",
@@ -60,10 +59,9 @@ export const githubRepos: GithubRepoInfo[] = [
     url: "https://github.com/taaqib-masood/predictive-maintenance-industrial-machinery",
     category: "ML & Edge AI",
     highlights: [
-      "MAE 15.31 and R² 0.85 outperforming standalone architectures",
+      "MAE 15.31 and RMSE 17.22, outperforming each model on its own",
       "Processes vibration and thermal sensor telemetry across time and frequency domains (FFT)",
-      "75% model footprint reduction via TensorFlow Lite INT8 quantization",
-      "Edge-deployed for real-time inference on Raspberry Pi 4 and NVIDIA Jetson Nano"
+      "Quantized and converted to TensorFlow Lite for low-latency inference on edge devices"
     ]
   },
   {
@@ -82,61 +80,88 @@ export const githubRepos: GithubRepoInfo[] = [
   },
   {
     name: "atlas-ai",
-    title: "Atlas AI — Autonomous Multi-Agent System",
-    description: "Modular agentic task orchestration platform coordinating specialized LLM agents for research, synthesis, and workflow automation.",
-    language: "JavaScript / TypeScript",
+    title: "Atlas AI: AI Tool Directory",
+    description: "Production AI tool directory: 91 curated tools across 13 categories, explainable recommendations, favorites, dashboard, and an admin workflow with a full change-history ledger. Zero runtime dependencies.",
+    language: "JavaScript",
     url: "https://github.com/taaqib-masood/atlas-ai",
-    category: "AI/LLM Agents",
+    category: "Full-Stack",
     highlights: [
-      "Multi-agent supervisor pattern delegating sub-tasks to specialized domain agents",
-      "Scoped tool registries with deterministic guardrails against hallucinated actions",
-      "Streaming execution graph visualization"
+      "Server-rendered Node.js (>= 22.5) with zero runtime dependencies and no build step",
+      "Built-in SQLite (node:sqlite) with an automatic JSON-file fallback behind one DAO interface",
+      "scrypt password hashing, sessions, CSRF protection and rate-limited auth, all hand-rolled",
+      "Explainable rule-based recommender that shows why each tool was suggested"
     ]
   },
   {
     name: "garageIQ-landing-page",
-    title: "GarageIQ — Auto Workshop Platform",
-    description: "Modern landing page and customer portal interface for automotive service centers and workshops.",
-    language: "HTML / CSS / JavaScript",
+    title: "GarageIQ: Marketing Site",
+    description: "Static marketing site for GarageIQ, the UAE garage-intelligence platform (the product itself lives in a private repo). No build step, no dependencies, deployed on Vercel.",
+    language: "HTML / CSS",
     url: "https://github.com/taaqib-masood/garageIQ-landing-page",
     category: "Frontend",
     highlights: [
-      "Responsive automotive service booking workflow",
-      "Interactive inspection checklist preview"
-    ]
-  },
-  {
-    name: "majestic-constructions",
-    title: "Majestic Constructions Portal",
-    description: "Commercial construction project tracking portal and corporate showcase website.",
-    language: "TypeScript",
-    url: "https://github.com/taaqib-masood/majestic-constructions",
-    category: "Full-Stack",
-    highlights: [
-      "Client milestone tracking and architectural portfolio showcases",
-      "Performance-optimized image delivery"
+      "Dependency-free static site served straight from public/",
+      "Public face of the private GarageIQ product"
     ]
   },
   {
     name: "Taaqib-Portfolio",
-    title: "Taaqib Masood — Swiss Brutalist Engineering Portfolio",
+    title: "Taaqib Masood: Swiss Brutalist Engineering Portfolio",
     description: "Production Next.js portfolio featuring a mechanical Swiss brutalist design system and interactive AI Agent Terminal.",
     language: "TypeScript",
     url: "https://github.com/taaqib-masood/Taaqib-Portfolio",
     category: "Full-Stack & AI",
     highlights: [
       "Interactive Groq-powered AI Agent Terminal operating as an interview proxy",
-      "Custom physics-based Framer Motion cubic-bezier transitions",
-      "Dynamic Google Translate RTL Arabic switcher with zero visual layout shift"
+      "WebGL point-cloud scenes (three.js + React Three Fiber): hero monolith and a scroll-driven project embedding space",
+      "Nonce-based strict CSP, lazy-loaded 3D, and a live request trace of every agent tool call"
     ]
   }
 ];
 
 export const projects: Project[] = [
   {
+    slug: "garageiq",
+    aliases: ["garage-iq", "garage iq", "garages", "garage marketplace"],
+    title: "GarageIQ: UAE Garage Intelligence",
+    blurb: "The trust layer for car repair in the UAE: turns tens of thousands of scattered Google Maps reviews into structured garage intelligence (trust, speed and price scores, brand specialisation, best-for tags) behind a natural-language search.",
+    stack: [
+      "Next.js 14",
+      "NestJS 11",
+      "Prisma",
+      "PostgreSQL (Supabase)",
+      "PostGIS",
+      "pgvector",
+      "Gemini 2.0 Flash",
+      "Groq",
+      "Python",
+      "Celery",
+      "Redis",
+      "Apify",
+      "Cloudinary",
+      "Better Auth",
+    ],
+    metrics: [
+      "5,809 garages tracked · 55,000+ reviews ingested · 4,900+ AI-scored profiles",
+      "Dual-LLM pipeline: Gemini for live search intent, a 6-model Groq fleet for batch enrichment",
+      "Batch enrichment routed across models by real daily token budget",
+      "PostGIS geo search + pgvector embeddings in one Postgres",
+    ],
+    highlights: [
+      "Natural-language search: \"brakes squeaking near Al Quoz\" is parsed into service, location, brand and price band by Gemini 2.0 Flash",
+      "Batch enrichment fleet (Llama 3.1/3.3, GPT-OSS 20B/120B, Qwen3-32B, Llama-4-Scout) scheduled against each model's daily token cap",
+      "Admin overrides pin AI-generated tags so nightly re-enrichment can never silently overwrite a human decision",
+      "HttpOnly cookie sessions (Better Auth), bcrypt + short-lived JWT admin auth, and edge caching on public read paths",
+    ],
+    categories: ["AI/LLM", "Full-Stack"],
+    repo: "https://github.com/taaqib-masood/garageIQ-landing-page",
+    demo: "https://app.garageiq.ae/en",
+    role: "Founder & sole engineer, 2026 – present (product repo private)",
+  },
+  {
     slug: "ltts-proctoring-portal",
     title: "LTTS Test Management & Live Interview Proctoring Portal",
-    blurb: "Production proctored assessment + recruitment platform — live video interviewing, real-time transcription, AI Whisper Coach, and auto-generated hiring reports.",
+    blurb: "Production proctored assessment + recruitment platform: live video interviewing, real-time transcription, AI Whisper Coach, and auto-generated hiring reports.",
     stack: [
       "Angular 19",
       "Node.js",
@@ -156,14 +181,13 @@ export const projects: Project[] = [
     ],
     categories: ["AI/LLM", "Full-Stack"],
     repo: "https://github.com/taaqib-masood",
-    demo: null,
+    demo: "https://www.loom.com/share/4320e5b3e47940069c2d4f3f0a473708",
     role: "Sole-built end-to-end at L&T Technology Services, Feb–Jun 2026",
-    image: "/projects/ltts-proctoring.jpg",
   },
   {
     slug: "mcp-code-review-pipeline",
     title: "MCP AI Code-Review Pipeline",
-    blurb: "Multi-source AI code reviewer on Model Context Protocol — Python connectors for GitHub, GitLab, Jira, Confluence, and Jama feed Claude for cross-referenced reviews that cite exact ticket clauses and spec violations.",
+    blurb: "Multi-source AI code reviewer on Model Context Protocol: Python connectors for GitHub, GitLab, Jira, Confluence, and Jama feed Claude for cross-referenced reviews that cite exact ticket clauses and spec violations.",
     stack: [
       "Python",
       "Model Context Protocol",
@@ -182,13 +206,13 @@ export const projects: Project[] = [
     categories: ["AI/LLM"],
     repo: "https://github.com/taaqib-masood",
     demo: null,
-    role: "Built at L&T Technology Services",
-    image: "/projects/mcp-code-review.jpg",
+    role: "Built at L&T Technology Services, Apr–Jun 2026",
   },
   {
     slug: "stock-forecasting-risk",
-    title: "Stock Market Forecasting & Risk Analytics",
-    blurb: "Systematic pipeline forecasting prices (ARIMA + LightGBM ensemble, 52 features) and enforcing 10+ walk-forward-validated risk rules — fully automated via GitHub Actions, with FinBERT news sentiment and SHAP-explained Telegram signals.",
+    aliases: ["boro", "stock", "stocks", "trading", "stock-market-forecasting-risk-analytics"],
+    title: "Boro: Trading, Risk & Compliance Platform",
+    blurb: "Automated trading, risk and compliance platform: forecasts prices (ARIMA + LightGBM ensemble, 52 features) and enforcing 10+ walk-forward-validated risk rules, fully automated via GitHub Actions, with FinBERT news sentiment and SHAP-explained Telegram signals.",
     stack: [
       "Python",
       "ARIMA",
@@ -204,20 +228,23 @@ export const projects: Project[] = [
     ],
     metrics: [
       "10+ enforced risk rules (2% max-risk sizing, ATR stops, regime gates, earnings blackout)",
+      "ARIMA + LightGBM ensemble on 52 features, gated by walk-forward validation",
+      "Backtest (RELIANCE, 2019–2024): Sharpe 0.67 with realistic costs",
+      "Automatic JSON audit trail for every trade decision",
       "Paper-trade simulator with mark-to-market P&L",
       "End-to-end MLflow experiment tracking",
-      "Zero manual daily monitoring",
+      "Telegram signals in plain English with SHAP + Groq reasoning per signal",
+      "Zerodha GTT order generation, zero manual daily monitoring",
     ],
     categories: ["ML", "AI/LLM"],
     repo: "https://github.com/taaqib-masood/stock-market-forecasting-risk-analytics",
     demo: "https://stocks-proj.netlify.app",
     role: "Personal project, Dec 2025 – present",
-    image: "/projects/stock-forecasting.jpg",
   },
   {
     slug: "salon-booking-saas",
     title: "Salon Booking SaaS (UAE)",
-    blurb: "Production-grade multi-tenant SaaS for UAE salons — bilingual EN/AR catalogs, real-time slot scheduling, staff commission tracking, loyalty points, and WhatsApp/email notifications, containerized and Kubernetes-orchestrated.",
+    blurb: "Production-grade multi-tenant SaaS for UAE salons: bilingual EN/AR catalogs, real-time slot scheduling, staff commission tracking, loyalty points, and WhatsApp/email notifications, containerized and Kubernetes-orchestrated.",
     stack: [
       "React",
       "Vite",
@@ -245,12 +272,11 @@ export const projects: Project[] = [
     repo: "https://github.com/taaqib-masood/salon-booking-saas",
     demo: null,
     role: "Personal project, Feb–May 2026",
-    image: "/projects/salon-booking.jpg",
   },
   {
     slug: "predictive-maintenance",
     title: "Predictive Maintenance of Industrial Machinery",
-    blurb: "Dynamic AI-based hybrid model integrating GBM, LSTM, and CNN under a smart meta-controller — processes vibration & thermal data in time and frequency domains and dynamically weights predictions by model confidence, optimized for edge deployment.",
+    blurb: "Dynamic AI-based hybrid model integrating GBM, LSTM, and CNN under a smart meta-controller that processes vibration & thermal data in time and frequency domains and dynamically weights predictions by model confidence, optimized for edge deployment.",
     stack: [
       "Python",
       "TensorFlow",
@@ -263,16 +289,14 @@ export const projects: Project[] = [
     ],
     metrics: [
       "MAE 15.31 (outperforms individual models)",
-      "R² 0.85",
-      "75% model-size reduction via TensorFlow Lite",
-      "Real-time on Raspberry Pi 4 & NVIDIA Jetson Nano",
+      "RMSE 17.22",
+      "Quantized to TensorFlow Lite for edge devices",
       "Handles both gradual degradation & sudden failures",
     ],
     categories: ["ML", "Edge"],
     repo: "https://github.com/taaqib-masood/predictive-maintenance-industrial-machinery",
     demo: null,
-    role: "Research project, VIT — dataset: NASA CMAPSS Turbofan Engine Dataset",
-    image: "/projects/predictive-maintenance.jpg",
+    role: "Research project, VIT. Dataset: NASA CMAPSS Turbofan Engine Dataset",
   },
   {
     slug: "smart-hospital-agent",
@@ -284,10 +308,10 @@ export const projects: Project[] = [
       "reva-whatsapp",
       "hospital-agent"
     ],
-    title: "Reva AI — WhatsApp Receptionist",
-    blurb: "AI-powered WhatsApp bot replacing clinic front desks — autonomously books appointments, sends reminders, collects deposits via Razorpay, and manages patient records 24/7 with a real-time dashboard.",
+    title: "Reva AI: WhatsApp Receptionist",
+    blurb: "AI-powered WhatsApp bot replacing clinic front desks. It autonomously books appointments, sends reminders, collects deposits via Razorpay, and manages patient records 24/7 with a real-time dashboard.",
     stack: [
-      "Next.js 14 (App Router)",
+      "Next.js 16 (App Router)",
       "TypeScript",
       "Tailwind CSS",
       "Framer Motion",
@@ -313,6 +337,22 @@ export const projects: Project[] = [
     repo: "https://github.com/taaqib-masood/smart-hospital-agent",
     demo: null,
     role: "Personal project / SaaS",
-    image: "/projects/smart-hospital.jpg",
+  },
+  {
+    slug: "atlas-ai",
+    aliases: ["atlas", "ai tool directory", "atlas ai"],
+    title: "Atlas AI: AI Tool Directory",
+    blurb: "Production AI tool directory with categorised browsing, search and filters, explainable recommendations, favourites, a personal dashboard, and an admin publishing workflow with a full change-history ledger.",
+    stack: ["Node.js 22", "SQLite (node:sqlite)", "Server-side rendering", "scrypt", "Zero dependencies"],
+    metrics: [
+      "Zero runtime dependencies, no build step",
+      "91 curated tools across 13 categories",
+      "SQLite with automatic JSON-file fallback behind one DAO",
+      "Hand-rolled sessions, CSRF and rate-limited auth",
+    ],
+    categories: ["Full-Stack"],
+    repo: "https://github.com/taaqib-masood/atlas-ai",
+    demo: null,
+    role: "Personal project, 2026",
   },
 ];

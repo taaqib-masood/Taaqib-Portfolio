@@ -1,9 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { skills } from "@/data/resume";
 import { ParallaxNumber } from "@/components/ParallaxNumber";
 import { VerticalLine } from "@/components/VerticalLine";
+import { TokenText } from "@/components/TokenText";
+import { useT } from "@/components/LocaleProvider";
+
+const SHOWN = 6;
 
 export function Skills({ 
   activeSkill, 
@@ -12,12 +17,14 @@ export function Skills({
   activeSkill?: string | null; 
   onSkillSelect?: (skill: string | null) => void; 
 }) {
+  const t = useT();
+  const [open, setOpen] = useState<Set<string>>(new Set());
   return (
     <section id="skills" className="max-w-[1440px] mx-auto border-b border-border">
       <div className="relative grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
-        <ParallaxNumber number="02" />
+        <ParallaxNumber number="05" />
         <div className="lg:col-span-4 p-6 md:p-8 border-b lg:border-b-0 relative flex items-start">
-          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] relative z-10">Skills</h2>
+          <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] relative z-10"><TokenText text="Skills" /></h2>
           <VerticalLine />
         </div>
         <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2">
@@ -38,7 +45,7 @@ export function Skills({
                 }}
                 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-6 border-b border-border pb-4"
               >
-                {category}
+                {t(category)}
               </motion.h3>
               <motion.div 
                 variants={{
@@ -47,13 +54,15 @@ export function Skills({
                 }}
                 className="flex flex-wrap gap-2"
               >
-                {items.map((skill) => {
+                {items.map((skill, i) => {
                   const isActive = activeSkill === skill;
+                  // Phones: first SHOWN chips, then "+N more" (an active skill always stays visible).
+                  const folded = i >= SHOWN && !open.has(category) && !isActive;
                   return (
                     <button
                       key={skill}
                       onClick={() => onSkillSelect?.(isActive ? null : skill)}
-                      className={`px-3 py-1.5 border border-border text-[12px] font-semibold uppercase tracking-widest transition-colors duration-300 ${
+                      className={`px-3 py-1.5 max-sm:min-h-10 border border-border text-[12px] font-semibold uppercase tracking-widest transition-colors duration-300 ${folded ? "max-md:hidden" : ""} ${
                         isActive 
                           ? "bg-[#2e5bff] text-white border-[#2e5bff]" 
                           : "bg-surface text-foreground hover:bg-foreground hover:text-surface"
@@ -63,6 +72,14 @@ export function Skills({
                     </button>
                   );
                 })}
+                {items.length > SHOWN && !open.has(category) && (
+                  <button
+                    onClick={() => setOpen(new Set(open).add(category))}
+                    className="md:hidden px-3 min-h-10 border border-dashed border-border text-[12px] font-semibold uppercase tracking-widest text-outline"
+                  >
+                    +{items.length - SHOWN} {t("more")}
+                  </button>
+                )}
               </motion.div>
             </motion.div>
           ))}
