@@ -209,26 +209,47 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
   };
   const hasAnswer = messages.some((m) => m.role === "assistant" && m.parts.some((p) => p.type === "text" && p.text));
 
+  // Capture first-token TTFT timestamp when first text part arrives (updates ref only, no re-render)
+  useEffect(() => {
+    const timing = requestTiming.current;
+    if (!timing.start || timing.firstText !== null) return;
+    const latest = messages.at(-1);
+    const response = latest?.role === "assistant" && latest.id !== timing.previousId ? latest : undefined;
+    if (response?.parts.some((p) => p.type === "text" && p.text.length > 0)) {
+      timing.firstText = performance.now();
+    }
+  }, [messages]);
+
+  // Periodic timer and final metrics reporting (throttled to 100ms, decoupled from token stream)
   useEffect(() => {
     const timing = requestTiming.current;
     if (!timing.start) return;
-    const latest = messages.at(-1);
-    const response = latest?.role === "assistant" && latest.id !== timing.previousId ? latest : undefined;
-    if (timing.firstText === null && response?.parts.some(p => p.type === "text" && p.text.length > 0)) {
-      timing.firstText = performance.now();
-    }
+
     const update = () => {
       const now = performance.now();
+      const latest = live.current.messages.at(-1);
+      const response = latest?.role === "assistant" && latest.id !== timing.previousId ? latest : undefined;
       if (!isLoading && timing.end === null) timing.end = now;
-      const measurement = measureRequest(timing.start, timing.firstText, timing.end ?? now, !isLoading ? response?.metadata?.outputTokens : undefined);
+      const measurement = measureRequest(
+        timing.start,
+        timing.firstText,
+        timing.end ?? now,
+        !isLoading ? response?.metadata?.outputTokens : undefined
+      );
       setElapsedMs(measurement.elapsedMs);
-      onMetrics?.({ ...measurement, state: status === "error" ? "error" : isLoading ? (timing.firstText === null ? "waiting" : "streaming") : response?.metadata ? "complete" : "stopped" });
+      onMetrics?.({
+        ...measurement,
+        state: status === "error" ? "error" : isLoading ? (timing.firstText === null ? "waiting" : "streaming") : response?.metadata ? "complete" : "stopped",
+      });
     };
-    update();
-    if (!isLoading) return;
-    const interval = setInterval(update, 100);
-    return () => clearInterval(interval);
-  }, [messages, status, isLoading, onMetrics]);
+
+    if (isLoading) {
+      const interval = setInterval(update, 100);
+      return () => clearInterval(interval);
+    } else {
+      update();
+    }
+  }, [isLoading, status, onMetrics]);
 
   useEffect(() => {
     if (messages && messages.length > 0) {
