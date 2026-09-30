@@ -224,8 +224,12 @@ export async function POST(req: Request) {
   }
 
   // --- Stream with Groq model + automatic fallback ---
-  const PRIMARY_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
-  const FALLBACK_MODEL = process.env.GROQ_FALLBACK_MODEL || "llama-3.1-8b-instant";
+  // Defaults must be models a free Groq key can actually reach. The llama-3.x ids are
+  // gated ("does not exist or you do not have access to it" -> 404), which failed the
+  // whole request ~0.2s in; the fallback didn't save it because that model was gated too.
+  // Override with GROQ_MODEL / GROQ_FALLBACK_MODEL if your key has different access.
+  const PRIMARY_MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
+  const FALLBACK_MODEL = process.env.GROQ_FALLBACK_MODEL || "openai/gpt-oss-20b";
   const groq = createGroq({
     apiKey: process.env.GROQ_API_KEY,
     fetch: async (url: string | URL | Request, opts?: RequestInit) => {
