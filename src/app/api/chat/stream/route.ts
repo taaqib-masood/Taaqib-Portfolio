@@ -261,9 +261,15 @@ export async function POST(req: Request) {
     headers: {
       "X-RateLimit-Remaining": String(remaining),
     },
+    // The visitor sees this text, so keep it short, but say what actually went wrong.
+    // A blanket "an error occurred" is what let a provider-side failure (bad key, no
+    // model access, rate limit) masquerade as a client-side React crash for days.
     onError: (error) => {
-      console.error("[Chat Agent Error]", error);
-      return "An error occurred while generating the response.";
+      const status = (error as { statusCode?: number }).statusCode;
+      console.error(`[Chat Agent Error] status=${status ?? "none"}`, error);
+      if (status === 401 || status === 403) return "The agent's model access is misconfigured on the server (check GROQ_API_KEY and model access).";
+      if (status === 429) return "The agent is rate limited by the model provider. Try again in a minute.";
+      return "The agent's model provider returned an error. Try again in a moment.";
     },
   });
 }
