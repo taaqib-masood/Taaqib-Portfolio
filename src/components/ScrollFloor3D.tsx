@@ -11,7 +11,7 @@ export function ScrollFloor3D() {
       `}</style>
       <div
         aria-hidden="true"
-        className="fixed bottom-0 left-0 w-full pointer-events-none"
+        className="fixed bottom-0 left-0 w-full pointer-events-none hidden md:block"
         style={{
           height: 200,
           zIndex: 1,
