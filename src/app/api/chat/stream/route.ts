@@ -224,12 +224,17 @@ export async function POST(req: Request) {
   }
 
   // --- Stream with Groq model + automatic fallback ---
-  // Defaults must be models a free Groq key can actually reach. The llama-3.x ids are
-  // gated ("does not exist or you do not have access to it" -> 404), which failed the
-  // whole request ~0.2s in; the fallback didn't save it because that model was gated too.
-  // Override with GROQ_MODEL / GROQ_FALLBACK_MODEL if your key has different access.
-  const PRIMARY_MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
-  const FALLBACK_MODEL = process.env.GROQ_FALLBACK_MODEL || "openai/gpt-oss-20b";
+  // Defaults must be models this key can actually reach: the llama-3.x ids are gated
+  // ("does not exist or you do not have access to it" -> 404), which killed the request
+  // ~0.2s in. Override with GROQ_MODEL / GROQ_FALLBACK_MODEL.
+  // 20b is primary on measured latency: 120b burns ~2s on reasoning tokens before any
+  // visible output (1958ms vs 456ms to first visible token), and this is a chat UI.
+  // Set GROQ_MODEL=openai/gpt-oss-120b if you want the deeper answers.
+  // Fallback is 120b, not qwen: the free tier caps input tokens per minute at ~7-8k and
+  // this system prompt alone is ~7.1k tokens, so qwen (ITPM 7000) can never accept a
+  // request from this app and would fail on every fallback.
+  const PRIMARY_MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-20b";
+  const FALLBACK_MODEL = process.env.GROQ_FALLBACK_MODEL || "openai/gpt-oss-120b";
   const groq = createGroq({
     apiKey: process.env.GROQ_API_KEY,
     fetch: async (url: string | URL | Request, opts?: RequestInit) => {
