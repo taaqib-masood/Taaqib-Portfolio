@@ -172,8 +172,10 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
   const { messages, sendMessage, status, stop } = useChat<UIMessage<{ outputTokens?: number }>>({
     transport,
     onError: (err: Error) => {
+      // The server already explains provider failures (bad key, rate limit) in the
+      // streamed error text, so don't relabel every failure as "the agent is offline".
       console.error("Agent error details:", err);
-      setApiError(`${t("The agent is offline for a moment. Try again, or email me at")} ${contact.email}`);
+      setApiError(err?.message?.trim() || `${t("The agent is offline for a moment. Try again, or email me at")} ${contact.email}`);
     },
   });
 
