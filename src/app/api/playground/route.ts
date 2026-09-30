@@ -102,13 +102,28 @@ export async function POST(req: Request) {
       ? Math.min(Math.floor(body.maxTokens), MAX_TOKENS)
       : MAX_TOKENS;
 
+  const PRIMARY_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+  const FALLBACK_MODEL = process.env.GROQ_FALLBACK_MODEL || "llama-3.1-8b-instant";
   const groq = createGroq({
     apiKey: process.env.GROQ_API_KEY,
+    fetch: async (url: string | URL | Request, opts?: RequestInit) => {
+      const res = await globalThis.fetch(url, opts);
+      if (res.ok) return res;
+      if ([429, 400, 404, 500, 503].includes(res.status) && opts?.body) {
+        const body = JSON.parse(opts.body as string);
+        if (body.model !== FALLBACK_MODEL) {
+          console.warn(`[Groq] ${body.model} returned ${res.status}, falling back to ${FALLBACK_MODEL}`);
+          body.model = FALLBACK_MODEL;
+          return globalThis.fetch(url, { ...opts, body: JSON.stringify(body) });
+        }
+      }
+      return res;
+    },
   });
 
   try {
     const result = streamText({
-      model: groq(process.env.GROQ_MODEL || "openai/gpt-oss-20b"),
+      model: groq(PRIMARY_MODEL),
       system: systemPrompt,
       messages,
       temperature,

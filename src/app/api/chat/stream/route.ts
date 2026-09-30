@@ -223,13 +223,28 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ error: "Invalid messages" }), { status: 400, headers: { "Content-Type": "application/json" } });
   }
 
-  // --- Stream with ultra-low latency Groq model ---
-  // Preferred fast active model: openai/gpt-oss-20b (instant TTFT, no OTPM limits on Groq free tier)
-  const selectedModel = process.env.GROQ_MODEL || "openai/gpt-oss-20b";
-  const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
+  // --- Stream with Groq model + automatic fallback ---
+  const PRIMARY_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+  const FALLBACK_MODEL = process.env.GROQ_FALLBACK_MODEL || "llama-3.1-8b-instant";
+  const groq = createGroq({
+    apiKey: process.env.GROQ_API_KEY,
+    fetch: async (url: string | URL | Request, opts?: RequestInit) => {
+      const res = await globalThis.fetch(url, opts);
+      if (res.ok) return res;
+      if ([429, 400, 404, 500, 503].includes(res.status) && opts?.body) {
+        const body = JSON.parse(opts.body as string);
+        if (body.model !== FALLBACK_MODEL) {
+          console.warn(`[Groq] ${body.model} returned ${res.status}, falling back to ${FALLBACK_MODEL}`);
+          body.model = FALLBACK_MODEL;
+          return globalThis.fetch(url, { ...opts, body: JSON.stringify(body) });
+        }
+      }
+      return res;
+    },
+  });
 
   const result = streamText({
-    model: groq(selectedModel),
+    model: groq(PRIMARY_MODEL),
     // Arabic version of the site: answer in Arabic, keep technical terms as they are.
     system: getSystemPrompt(interviewMode) + (req.headers.get("x-locale") === "ar"
       ? "\n\nLANGUAGE: The visitor is using the Arabic version of the site. Answer in clear Modern Standard Arabic. Keep technical terms, product names and code identifiers in English."

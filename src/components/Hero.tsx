@@ -67,7 +67,7 @@ export function Hero() {
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
+          viewport={{ once: true, margin: "0px" }}
           transition={{ duration: 0.5, delay: 0.2, ease: [0.83, 0, 0.17, 1] }}
           className="p-6 md:p-8 border-b md:border-b-0 md:border-r border-border"
         >
@@ -82,7 +82,7 @@ export function Hero() {
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
+          viewport={{ once: true, margin: "0px" }}
           transition={{ duration: 0.5, delay: 0.3, ease: [0.83, 0, 0.17, 1] }}
           className="p-6 md:p-8 border-b md:border-b-0 lg:border-r border-border"
         >
@@ -97,7 +97,7 @@ export function Hero() {
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
+          viewport={{ once: true, margin: "0px" }}
           transition={{ duration: 0.5, delay: 0.4, ease: [0.83, 0, 0.17, 1] }}
           className="p-6 md:p-8 border-b md:border-b-0 md:border-r border-border"
         >
@@ -112,7 +112,7 @@ export function Hero() {
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
+          viewport={{ once: true, margin: "0px" }}
           transition={{ duration: 0.5, delay: 0.5, ease: [0.83, 0, 0.17, 1] }}
           className="p-6 md:p-8 flex flex-col justify-between"
         >

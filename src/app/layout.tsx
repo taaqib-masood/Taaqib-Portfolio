@@ -76,13 +76,15 @@ export default async function RootLayout({
       <head></head>
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased text-foreground overflow-x-hidden pb-[88px] sm:pb-[56px]",
+          "min-h-screen bg-background font-sans antialiased text-foreground pb-[88px] sm:pb-[56px]",
           inter.variable,
           plexArabic.variable
         )}
       >
         <LocaleProvider locale={locale} dict={locale === "ar" ? ar : null}>
-          {children}
+          <div className="overflow-x-hidden">
+            {children}
+          </div>
           <CommandMenu />
           <ScrollToTop />
         </LocaleProvider>
