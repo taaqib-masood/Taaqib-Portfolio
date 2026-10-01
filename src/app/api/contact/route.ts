@@ -57,7 +57,9 @@ export async function POST(req: Request) {
     });
 
     if (error) {
-      console.error("Resend error:", error.name);
+      // Full error, not just .name: the message is what distinguishes an invalid key (401)
+      // from the onboarding@resend.dev sender being restricted to the account owner (403).
+      console.error("[Contact] Resend rejected the send:", error);
       return NextResponse.json({ error: "Could not send your message. Please email directly." }, { status: 502 });
     }
 

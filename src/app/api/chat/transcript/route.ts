@@ -34,7 +34,10 @@ export async function POST(req: Request) {
     text: mail.text,
   });
   if (error) {
-    console.error("Resend error:", error.name);
+    // Log the whole error: Resend returns { message, name, statusCode } and the message
+    // is the only part that says which of the real causes it is (invalid key 401, the
+    // onboarding@resend.dev sender being restricted to the account owner 403, etc).
+    console.error("[Transcript] Resend rejected the send:", error);
     return NextResponse.json({ error: "Could not send. Please email directly." }, { status: 502 });
   }
   return NextResponse.json({ success: true });
