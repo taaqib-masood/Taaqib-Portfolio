@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { Resend } from "resend";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { sendMail } from "@/lib/mail";
 
 export const runtime = "edge";
 
@@ -33,37 +33,26 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!process.env.RESEND_API_KEY) {
-      // In production a missing key must fail loudly: a fake "sent" would silently drop a recruiter's message.
-      if (process.env.NODE_ENV === "production") {
-        console.error("[Contact] RESEND_API_KEY is not set; message not delivered");
-        return NextResponse.json({ error: "Could not send your message. Please email directly." }, { status: 503 });
-      }
+    // No key in development: log and pretend, so the form is testable without Resend.
+    if (!process.env.RESEND_API_KEY && process.env.NODE_ENV !== "production") {
       // Never log the sender's PII; lengths are enough to confirm the mock path works.
       console.log(`[Contact Form Mock] received message (${message.length} chars)`);
-      return NextResponse.json(
-        { success: true, message: "message queued (mock)" },
-        { status: 200 }
-      );
+      return NextResponse.json({ success: true, message: "message queued (mock)" }, { status: 200 });
     }
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    const { data, error } = await resend.emails.send({
-      from: "Contact Form <onboarding@resend.dev>",
+    const result = await sendMail({
       to: "taaqib.masood@icloud.com",
       replyTo: email,
       subject: `New portfolio message from ${name}`,
       text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
     });
-
-    if (error) {
-      // Full error, not just .name: the message is what distinguishes an invalid key (401)
-      // from the onboarding@resend.dev sender being restricted to the account owner (403).
-      console.error("[Contact] Resend rejected the send:", error);
-      return NextResponse.json({ error: "Could not send your message. Please email directly." }, { status: 502 });
+    if (!result.ok) {
+      // In production a failed send must fail loudly: a fake "sent" would drop a recruiter's message.
+      console.error(`[Contact] not delivered (${result.status}): ${result.reason}`);
+      return NextResponse.json({ error: "Could not send your message. Please email directly." }, { status: result.status });
     }
 
-    return NextResponse.json({ success: true, id: data?.id }, { status: 200 });
+    return NextResponse.json({ success: true, id: result.id }, { status: 200 });
   } catch (error) {
     console.error("Contact API error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

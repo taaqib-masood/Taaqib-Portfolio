@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { sendMail } from "@/lib/mail";
 import { transcriptSchema, formatTranscript } from "@/lib/transcript";
 import { contact } from "@/data/resume";
 
@@ -17,28 +17,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Too many transcripts. Please try again later." }, { status: 429 });
   }
 
-  if (!process.env.RESEND_API_KEY) {
-    if (process.env.NODE_ENV === "production") {
-      console.error("[Transcript] RESEND_API_KEY is not set; transcript not delivered");
-      return NextResponse.json({ error: "Could not send. Please email directly." }, { status: 503 });
-    }
+  // No key in development: log and pretend, so the form is testable without Resend.
+  if (!process.env.RESEND_API_KEY && process.env.NODE_ENV !== "production") {
     console.log(`[Transcript Mock] ${parsed.data.messages.length} messages, follow-up: ${Boolean(parsed.data.email)}`);
     return NextResponse.json({ success: true, message: "transcript queued (mock)" });
   }
 
-  const { error } = await new Resend(process.env.RESEND_API_KEY).emails.send({
-    from: "Portfolio AI Agent <onboarding@resend.dev>",
+  const result = await sendMail({
     to: contact.email,
     ...(parsed.data.email ? { replyTo: parsed.data.email } : {}),
     subject: mail.subject,
     text: mail.text,
   });
-  if (error) {
-    // Log the whole error: Resend returns { message, name, statusCode } and the message
-    // is the only part that says which of the real causes it is (invalid key 401, the
-    // onboarding@resend.dev sender being restricted to the account owner 403, etc).
-    console.error("[Transcript] Resend rejected the send:", error);
-    return NextResponse.json({ error: "Could not send. Please email directly." }, { status: 502 });
+  if (!result.ok) {
+    // Never a fake "sent" in production: a dropped transcript is a lost recruiter.
+    console.error(`[Transcript] not delivered (${result.status}): ${result.reason}`);
+    return NextResponse.json({ error: "Could not send. Please email directly." }, { status: result.status });
   }
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, id: result.id });
 }
