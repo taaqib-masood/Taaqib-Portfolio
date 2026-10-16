@@ -74,7 +74,7 @@ export function EmbeddingSection({ projects, activeSkill, onAskAgent }: {
             <div className="p-6">
               <h3 className="text-[28px] font-bold uppercase tracking-[-0.03em] leading-[1.05]">{t(p.title)}</h3>
               <p className="mt-4 text-[14px] leading-[1.5] text-on-surface-variant line-clamp-3">{t((plain && caseStudies[p.slug]?.plain) || p.blurb)}</p>
-              <p className="mt-4 font-mono text-[12px] uppercase tracking-[0.08em] text-primary">{t(p.metrics[0])}</p>
+              <p className="mt-4 font-mono text-[12px] uppercase tracking-[0.08em] text-foreground">{t(p.metrics[0])}</p>
             </div>
             <div className="grid grid-cols-2 border-t border-border text-[12px] font-bold uppercase tracking-widest">
               <Link href={`/projects/${p.slug}`} className="min-h-12 flex items-center justify-center uppercase border-r border-border hover:bg-foreground hover:text-background transition-colors">{t("Case study")}</Link>
@@ -95,7 +95,7 @@ export function EmbeddingSection({ projects, activeSkill, onAskAgent }: {
               <button
                 key={x.slug}
                 onClick={() => jumpTo(i)}
-                aria-label={`Fly to ${x.title}`}
+                aria-label={`${String(i + 1).padStart(2, "0")} ${x.title}`}
                 aria-current={i === focus}
                 className={`font-mono text-[11px] min-w-8 min-h-8 transition-colors ${i === focus ? "text-foreground" : "text-outline hover:text-foreground"}`}
               >

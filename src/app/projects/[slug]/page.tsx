@@ -165,13 +165,16 @@ export default async function CaseStudyPage({ params }: Params) {
         </TechDetails>
 
         {/* Next steps for the reader */}
-        <footer className="grid grid-cols-1 md:grid-cols-2">
+        <footer className="grid grid-cols-1 md:grid-cols-3">
           <Link href="/#projects" className="p-6 md:p-8 md:border-r border-b md:border-b-0 border-border text-[14px] font-bold uppercase tracking-widest hover:bg-foreground hover:text-background transition-colors">
             {tr("← All projects")}
           </Link>
-          <Link href="/#contact" className="p-6 md:p-8 text-[14px] font-bold uppercase tracking-widest bg-primary hover:bg-foreground hover:text-background transition-colors flex justify-between">
+          <Link href="/#contact" className="p-6 md:p-8 md:border-r border-b md:border-b-0 border-border text-[14px] font-bold uppercase tracking-widest bg-primary hover:bg-foreground hover:text-background transition-colors flex justify-between">
             {tr("Talk to Taaqib")} <ArrowUpRight className="h-5 w-5" />
           </Link>
+          <a href="/taaqib-masood-cv.pdf" download className="p-6 md:p-8 text-[14px] font-bold uppercase tracking-widest hover:bg-foreground hover:text-background transition-colors flex items-center justify-between">
+            {tr("Download CV")} <ArrowUpRight className="h-5 w-5" />
+          </a>
         </footer>
       </article>
     </main>

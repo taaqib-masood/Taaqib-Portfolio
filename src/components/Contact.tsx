@@ -76,8 +76,8 @@ export function Contact() {
           <h2 className="relative z-10 text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1]"><TokenText text="Contact" /></h2>
         </div>
         <div className="lg:col-span-8 p-6 md:p-8 bg-surface-container-low flex flex-col justify-center">
-          <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-outline">
-            {t("Open to AI Engineering and AI-integrated full-stack roles. Based in Dubai, available immediately.")}
+          <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-on-surface-variant">
+            {t("Open to engineering roles and freelance builds. Based in Dubai.")}
           </p>
         </div>
       </div>
@@ -98,7 +98,7 @@ export function Contact() {
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-outline mb-1">{t("Email")}</p>
-                  <a href={`mailto:${contact.email}`} className="inline-block py-2 text-[16px] font-medium hover:text-outline transition-colors">{contact.email}</a>
+                  <a href={`mailto:${contact.email}`} dir="ltr" className="inline-block py-2 text-[16px] font-medium hover:text-on-surface-variant transition-colors">{contact.email}</a>
                 </div>
               </li>
               <li className="flex items-start gap-4">
@@ -107,7 +107,7 @@ export function Contact() {
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-outline mb-1">{t("Phone")}</p>
-                  <a href={`tel:${contact.phone}`} className="inline-block py-2 text-[16px] font-medium hover:text-outline transition-colors">{contact.phone}</a>
+                  <a href={`tel:${contact.phone}`} dir="ltr" className="inline-block py-2 text-[16px] font-medium hover:text-on-surface-variant transition-colors">{contact.phone}</a>
                 </div>
               </li>
               <li className="flex items-start gap-4">
@@ -173,18 +173,18 @@ export function Contact() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex-1 flex flex-col">
               <div className="space-y-2">
                 <label htmlFor="name" className="text-[10px] font-bold uppercase tracking-widest text-outline">{t("Name")}</label>
-                <input id="name" placeholder="John Doe" className="w-full border border-border bg-surface px-4 py-3 text-[16px] focus:outline-none focus:border-primary transition-colors" {...register("name")} />
-                {errors.name && <p className="text-[10px] font-bold uppercase tracking-widest text-destructive mt-1">{t(errors.name.message ?? "")}</p>}
+                <input id="name" autoComplete="name" aria-invalid={!!errors.name} aria-describedby={errors.name ? "name-error" : undefined} placeholder="John Doe" className="w-full border border-border bg-surface px-4 py-3 text-[16px] focus:outline-none focus:border-primary transition-colors" {...register("name")} />
+                {errors.name && <p id="name-error" role="alert" className="text-[10px] font-bold uppercase tracking-widest text-[#ff8080] mt-1">{t(errors.name.message ?? "")}</p>}
               </div>
               <div className="space-y-2">
                 <label htmlFor="email" className="text-[10px] font-bold uppercase tracking-widest text-outline">{t("Email")}</label>
-                <input id="email" type="email" placeholder="john@example.com" className="w-full border border-border bg-surface px-4 py-3 text-[16px] focus:outline-none focus:border-primary transition-colors" {...register("email")} />
-                {errors.email && <p className="text-[10px] font-bold uppercase tracking-widest text-destructive mt-1">{t(errors.email.message ?? "")}</p>}
+                <input id="email" type="email" dir="ltr" autoComplete="email" aria-invalid={!!errors.email} aria-describedby={errors.email ? "email-error" : undefined} placeholder="john@example.com" className="w-full border border-border bg-surface px-4 py-3 text-[16px] focus:outline-none focus:border-primary transition-colors" {...register("email")} />
+                {errors.email && <p id="email-error" role="alert" className="text-[10px] font-bold uppercase tracking-widest text-[#ff8080] mt-1">{t(errors.email.message ?? "")}</p>}
               </div>
               <div className="space-y-2 flex-1 flex flex-col">
                 <label htmlFor="message" className="text-[10px] font-bold uppercase tracking-widest text-outline">{t("Message")}</label>
-                <textarea id="message" placeholder={t("How can I help you?")} className="w-full flex-1 min-h-[160px] border border-border bg-surface px-4 py-3 text-[16px] focus:outline-none focus:border-primary transition-colors resize-none" {...register("message")} />
-                {errors.message && <p className="text-[10px] font-bold uppercase tracking-widest text-destructive mt-1">{t(errors.message.message ?? "")}</p>}
+                <textarea id="message" autoComplete="off" aria-invalid={!!errors.message} aria-describedby={errors.message ? "message-error" : undefined} placeholder={t("How can I help you?")} className="w-full flex-1 min-h-[160px] border border-border bg-surface px-4 py-3 text-[16px] focus:outline-none focus:border-primary transition-colors resize-none" {...register("message")} />
+                {errors.message && <p id="message-error" role="alert" className="text-[10px] font-bold uppercase tracking-widest text-[#ff8080] mt-1">{t(errors.message.message ?? "")}</p>}
               </div>
               <button type="submit" className="w-full bg-primary hover:bg-foreground text-on-primary hover:text-surface transition-colors py-4 text-[14px] font-bold uppercase tracking-widest flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" disabled={isSubmitting}>
                 {isSubmitting ? (
