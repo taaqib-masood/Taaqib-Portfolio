@@ -2,13 +2,22 @@ import { NextResponse } from "next/server";
 
 // Live GitHub feed for the portfolio. Fetched server-side so the browser never talks to
 // third-party APIs (tighter CSP), cached at the edge so visitors share one upstream call.
-export const revalidate = 3600;
+// GitHub activity changes daily; six hours avoids hourly regeneration while keeping the feed fresh.
+export const revalidate = 21600;
 
 const USER = "taaqib-masood";
-const CACHE = "public, s-maxage=3600, stale-while-revalidate=86400";
+const CACHE = "public, s-maxage=21600, stale-while-revalidate=3600";
+const TRACKED_REPOS = new Set([
+  "smart-hospital-agent",
+  "atlas-ai",
+  "stock-market-forecasting-risk-analytics",
+  "predictive-maintenance-industrial-machinery",
+  "salon-booking-saas",
+  "taaqib-portfolio",
+]);
 
 export type GithubFeed = {
-  repos: { name: string; stars: number; forks: number; language: string | null; pushedAt: string }[] | null;
+  repos: { name: string; stars: number; forks: number; language: string | null }[] | null;
   contributions: { total: number; days: { date: string; count: number; level: 0 | 1 | 2 | 3 | 4 }[] } | null;
 };
 
@@ -28,8 +37,8 @@ async function repos(): Promise<GithubFeed["repos"]> {
   if (!Array.isArray(data)) return null;
   // Public, non-fork repos only: never leak private repo names even if the token could see them.
   return data
-    .filter((r) => r && !r.private && !r.fork)
-    .map((r) => ({ name: str(r.name), stars: num(r.stargazers_count), forks: num(r.forks_count), language: r.language ? str(r.language) : null, pushedAt: str(r.pushed_at) }));
+    .filter((r) => r && !r.private && !r.fork && TRACKED_REPOS.has(str(r.name).toLowerCase()))
+    .map((r) => ({ name: str(r.name), stars: num(r.stargazers_count), forks: num(r.forks_count), language: r.language ? str(r.language) : null }));
 }
 
 const LEVELS: Record<string, 0 | 1 | 2 | 3 | 4> = { NONE: 0, FIRST_QUARTILE: 1, SECOND_QUARTILE: 2, THIRD_QUARTILE: 3, FOURTH_QUARTILE: 4 };
