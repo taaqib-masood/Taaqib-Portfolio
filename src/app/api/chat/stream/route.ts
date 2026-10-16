@@ -254,6 +254,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: groq(PRIMARY_MODEL),
+    maxOutputTokens: 1024,
     // Arabic version of the site: answer in Arabic, keep technical terms as they are.
     system: getSystemPrompt(interviewMode) + (req.headers.get("x-locale") === "ar"
       ? "\n\nLANGUAGE: The visitor is using the Arabic version of the site. Answer in clear Modern Standard Arabic. Keep technical terms, product names and code identifiers in English."

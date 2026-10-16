@@ -43,6 +43,8 @@ export function rateLimit(
 }
 
 export function getClientIp(req: Request): string {
+  // Forwarded headers need trusted ingress; direct Next.js requests share a bucket.
+  if (process.env.VERCEL !== "1") return "anonymous";
   return (
     req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
     req.headers.get("x-real-ip") ||
