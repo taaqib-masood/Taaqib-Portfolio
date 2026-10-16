@@ -3,13 +3,17 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
-import { writeFile } from 'node:fs/promises';
+import { mkdtemp, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const port = 3101;
 const url = `http://localhost:${port}`;
+const artifactDir = await mkdtemp(join(tmpdir(), 'portfolio-chat-e2e-'));
+console.log(`Artifacts: ${artifactDir}`);
 const server = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'dev', '-p', String(port)], {
   cwd: process.cwd(), env: process.env, detached: true, stdio: ['ignore', 'pipe', 'pipe'],
 });
@@ -59,7 +63,7 @@ try {
   await delay(500);
   const reply = (await page.locator('#agent .prose').allTextContents()).join('\n').trim();
   const systemError = await page.locator('#agent [role=alert]').allTextContents();
-  await page.locator('#agent').screenshot({ path: '/tmp/portfolio-chat-e2e.png' });
+  await page.locator('#agent').screenshot({ path: join(artifactDir, 'chat.png') });
   console.log(JSON.stringify({ responses, reply, systemError, errors }, null, 2));
   assert.ok(reply, 'No assistant reply rendered');
   assert.ok(responses.some(response => response.status === 200), 'No successful real chat response');
@@ -70,7 +74,7 @@ try {
   console.error(`FAIL: ${error.message}`);
   process.exitCode = 1;
 } finally {
-  await writeFile('/tmp/portfolio-chat-e2e-server.log', serverLog);
+  await writeFile(join(artifactDir, 'server.log'), serverLog);
   await browser?.close();
   try { process.kill(-server.pid, 'SIGTERM'); } catch { /* Server already exited. */ }
 }

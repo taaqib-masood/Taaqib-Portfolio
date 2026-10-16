@@ -62,6 +62,7 @@ export async function POST(req: Request) {
 
     const result = streamText({
       model: groq(PRIMARY_MODEL),
+      maxOutputTokens: 1024,
       system: SYSTEM_PROMPT,
       messages: [
         {
