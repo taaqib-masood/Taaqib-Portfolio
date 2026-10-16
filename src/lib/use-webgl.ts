@@ -25,5 +25,5 @@ export function useWebGLGate(ref: RefObject<Element | null>, media = "(min-width
     return () => mq.removeEventListener("change", check);
   }, [media]);
 
-  return { supported, reduced: !!reduced, animate: supported && inView && !reduced };
+return { supported, inView, reduced: !!reduced, animate: supported && inView && !reduced };
 }

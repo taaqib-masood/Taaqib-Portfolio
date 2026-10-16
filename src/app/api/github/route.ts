@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 
-// Live GitHub feed for the portfolio. Fetched server-side so the browser never talks to
-// third-party APIs (tighter CSP), cached at the edge so visitors share one upstream call.
-// GitHub activity changes daily; six hours avoids hourly regeneration while keeping the feed fresh.
-export const revalidate = 21600;
+// Live GitHub feed for the portfolio. Cache the response at Vercel's CDN so visitors share
+// one upstream call; a partial outage gets a short TTL rather than inheriting the success TTL.
+export const dynamic = "force-dynamic";
 
 const USER = "taaqib-masood";
-const CACHE = "public, s-maxage=21600, stale-while-revalidate=3600";
+const SUCCESS_CACHE = "public, s-maxage=21600, stale-while-revalidate=3600";
+const DEGRADED_CACHE = "public, s-maxage=60, stale-while-revalidate=300";
 const TRACKED_REPOS = new Set([
   "smart-hospital-agent",
   "atlas-ai",
@@ -25,7 +25,7 @@ const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) && v >=
 const str = (v: unknown) => (typeof v === "string" ? v.slice(0, 200) : "");
 
 async function getJson(url: string, headers: Record<string, string> = {}) {
-  const res = await fetch(url, { headers, next: { revalidate }, signal: AbortSignal.timeout(4000) });
+  const res = await fetch(url, { headers, cache: "no-store", signal: AbortSignal.timeout(4000) });
   if (!res.ok) throw new Error(`${url} → ${res.status}`);
   return res.json() as Promise<unknown>;
 }
@@ -54,7 +54,7 @@ async function contributionsFromGraphql(token: string): Promise<GithubFeed["cont
         totalContributions weeks { contributionDays { date contributionCount contributionLevel } } } } } }`,
       variables: { login: USER },
     }),
-    next: { revalidate },
+    cache: "no-store",
     signal: AbortSignal.timeout(4000),
   });
   if (!res.ok) throw new Error(`graphql → ${res.status}`);
@@ -91,5 +91,11 @@ export async function GET() {
     repos: r.status === "fulfilled" ? r.value : null,
     contributions: c.status === "fulfilled" ? c.value : null,
   };
-  return NextResponse.json(body, { headers: { "Cache-Control": CACHE } });
+  const complete = r.status === "fulfilled" && r.value !== null && c.status === "fulfilled" && c.value !== null;
+  return NextResponse.json(body, {
+    headers: {
+      "Cache-Control": "public, max-age=0, must-revalidate",
+      "Vercel-CDN-Cache-Control": complete ? SUCCESS_CACHE : DEGRADED_CACHE,
+    },
+  });
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { projects, Project } from "@/data/projects";
 import { ParallaxNumber } from "@/components/ParallaxNumber";
@@ -40,8 +40,15 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
   const t = useT();
   const [activeFilter, setActiveFilter] = useState("All");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const dialogTitleRef = useRef<HTMLHeadingElement>(null);
   const plain = useAudience() === "plain";
   const describe = (p: Project) => t((plain && caseStudies[p.slug]?.plain) || p.blurb);
+
+  useEffect(() => {
+    if (!selectedProject) return;
+    const frame = requestAnimationFrame(() => dialogTitleRef.current?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [selectedProject]);
 
   const filteredProjects = projects.filter((project) =>
     activeFilter === "All"
@@ -69,12 +76,13 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
           <h2 className="text-[24px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] relative z-10"><TokenText text="Projects" /></h2>
           <VerticalLine />
         </div>
-        <div className="lg:col-span-8 p-6 md:p-8 flex flex-wrap gap-4 items-center bg-surface">
+        <div role="group" aria-label={t("Project filters")} className="lg:col-span-8 p-6 md:p-8 flex flex-wrap gap-4 items-center bg-surface">
           {categories.map((category) => (
             <button
               key={category}
               onClick={() => setActiveFilter(category)}
-              className={`px-4 py-2 border border-border text-[12px] font-semibold uppercase tracking-widest transition-colors ${
+              aria-pressed={activeFilter === category}
+              className={`min-h-11 px-4 py-2 border border-border text-[12px] font-semibold uppercase tracking-widest transition-colors ${
                 activeFilter === category
                   ? "bg-foreground text-surface"
                   : "bg-surface text-foreground hover:bg-surface-container"
@@ -117,6 +125,8 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
                   isFaded ? "opacity-20 pointer-events-none" : ""
                 } ${activeSkill && matchesSkill ? "border border-[#2e5bff]" : ""}`}
                 tabIndex={0}
+                role="button"
+                aria-haspopup="dialog"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                      e.preventDefault();
@@ -137,9 +147,9 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
                 <div className="relative z-20 flex flex-col h-full justify-between pointer-events-none">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h4 className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-4 text-outline group-hover:text-surface/80 transition-colors duration-400">
+                      <p className="text-[12px] font-semibold uppercase tracking-[0.02em] mb-4 text-outline group-hover:text-surface/80 transition-colors duration-400">
                         {t(project.categories[0])}{projectYear(project) ? ` / ${projectYear(project)}` : ""}
-                      </h4>
+                      </p>
                       <h3 className="text-[24px] md:text-[32px] font-bold tracking-[-0.03em] leading-[1.1] mb-6 uppercase text-foreground group-hover:text-surface group-hover:drop-shadow-md transition-colors duration-400">
                         {t(project.title)}
                       </h3>
@@ -174,6 +184,14 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
               const agentEl = document.getElementById("agent");
               agentEl?.scrollIntoView({ behavior: "smooth", block: "start" });
             }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                document.getElementById("agent")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
+            }}
             className="group cursor-pointer relative border-b md:border-r border-border p-6 md:p-8 flex flex-col justify-between transition-all duration-500 hover:z-10 min-h-[300px] overflow-hidden bg-foreground text-surface col-span-1 md:col-span-2 lg:col-span-3"
           >
             <div className="relative z-10 flex flex-col h-full justify-between">
@@ -201,12 +219,12 @@ export function Projects({ onAskAgent, activeSkill }: { onAskAgent?: (title: str
       </div>
 
       <Dialog open={!!selectedProject} onOpenChange={(open) => !open && setSelectedProject(null)}>
-        <DialogContent className="max-w-5xl w-[95vw] bg-surface border border-border p-0 rounded-none gap-0 max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl w-[95vw] bg-surface border border-border p-0 rounded-none gap-0 max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain">
           {selectedProject && (
             <>
               <div className="p-8 border-b border-border bg-surface">
                 <DialogHeader>
-                  <DialogTitle className="text-[32px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] mb-4 text-foreground">
+                  <DialogTitle ref={dialogTitleRef} tabIndex={-1} className="text-[32px] md:text-[48px] font-bold uppercase tracking-[-0.03em] leading-[1] mb-4 text-foreground">
                     {t(selectedProject.title)}
                   </DialogTitle>
                   <DialogDescription className="text-[16px] md:text-[18px] leading-[1.5] text-foreground/80 max-w-2xl">

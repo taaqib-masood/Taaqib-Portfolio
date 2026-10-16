@@ -146,17 +146,17 @@ export function GithubGraph() {
         </div>
         <div className="lg:col-span-8 p-6 md:p-8 bg-surface-container-low flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-outline">
+            <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-on-surface-variant">
               {t("Consistent contributions and open-source projects tracking logic layer developments.")}
             </p>
-            <p className="text-[12px] font-mono text-outline/80 mt-1">
+            <p className="text-[12px] font-mono text-on-surface-variant mt-1">
               {t("Hover any calendar block to inspect real-time daily commit telemetry.")}
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={handleAskAgentAboutGithub}
-              className="inline-flex items-center gap-2 px-3 py-1.5 max-sm:min-h-10 border border-primary/50 bg-primary/10 hover:bg-primary hover:text-on-primary text-primary transition-all text-[11px] font-mono font-bold tracking-wider uppercase cursor-pointer"
+              className="inline-flex items-center gap-2 px-3 py-1.5 max-sm:min-h-10 border border-primary/50 bg-primary/10 hover:bg-primary hover:text-on-primary text-foreground transition-all text-[11px] font-mono font-bold tracking-wider uppercase cursor-pointer"
             >
               <Terminal className="h-3 w-3" />
               {t("Ask AI Agent")}
@@ -204,7 +204,7 @@ export function GithubGraph() {
           <Calendar className="h-3.5 w-3.5 text-primary" />
           {hoveredDay ? (
             <span className="text-foreground font-semibold flex items-center gap-2">
-              <span className="text-outline">{t("DATE:")}</span> {hoveredDay.date}
+              <span className="text-on-surface-variant">{t("DATE:")}</span> {hoveredDay.date}
               <span className="text-outline mx-1">|</span>
               <span className="text-emerald-500 font-bold">{hoveredDay.count} {hoveredDay.count === 1 ? t("contribution") : t("contributions")}</span>
               <span className="text-outline mx-1">|</span>
@@ -213,7 +213,7 @@ export function GithubGraph() {
               </span>
             </span>
           ) : (
-            <span className="text-outline">
+            <span className="text-on-surface-variant">
               <strong className="text-foreground">{t("ANNUAL TELEMETRY:")}</strong>{" "}
               {contributions
                 ? `${contributions.total.toLocaleString("en-US")} ${t("contributions across")} ${activeDays} ${t("active days. Hover any block to inspect.")}`
@@ -221,7 +221,7 @@ export function GithubGraph() {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2 text-outline">
+        <div className="flex items-center gap-2 text-on-surface-variant">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
           <span>{t("LIVE FROM GITHUB · REFRESHED HOURLY")}</span>
         </div>

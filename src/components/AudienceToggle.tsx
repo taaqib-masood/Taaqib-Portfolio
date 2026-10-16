@@ -11,7 +11,7 @@ export function AudienceToggle() {
     <div
       role="group"
       aria-label={t("Reading mode")}
-      className="fixed top-4 end-[92px] sm:top-6 sm:end-[116px] z-50 flex border border-[#ffffff] bg-[#000000] text-[10px] font-bold uppercase tracking-widest"
+  className="fixed top-[80px] end-4 sm:top-6 sm:end-[116px] z-50 flex border border-[#ffffff] bg-[#000000] text-[10px] font-bold uppercase tracking-widest"
     >
       {(["tech", "plain"] as const).map((mode) => (
         <button

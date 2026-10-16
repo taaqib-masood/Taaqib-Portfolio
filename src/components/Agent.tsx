@@ -181,28 +181,19 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
 
   const isLoading = status === "streaming" || status === "submitted";
 
-  // Transcript to Taaqib: sent when the visitor leaves (keepalive survives the unload) or asks
-  // for a follow-up. Only new messages trigger a send, so one visit usually makes one email.
+  // A transcript is sent only after the visitor explicitly requests a follow-up.
   const live = useRef({ messages, activeMode, locale });
   live.current = { messages, activeMode, locale };
-  const sentUpTo = useRef(0);
   const [followUp, setFollowUp] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [followUpEmail, setFollowUpEmail] = useState("");
-  const sendTranscript = useCallback((email?: string) => {
+  const sendTranscript = useCallback((email: string) => {
     const { messages, activeMode, locale } = live.current;
     let items = toTranscriptMessages(messages);
-    if (!items.some((m) => m.role === "user") || (!email && messages.length <= sentUpTo.current)) return null;
-    sentUpTo.current = messages.length;
-    const body = () => JSON.stringify({ messages: items, mode: activeMode, locale, ...(email ? { email } : {}) });
+    if (!items.some((m) => m.role === "user")) return null;
+    const body = () => JSON.stringify({ messages: items, mode: activeMode, locale, email });
     while (items.length > 2 && body().length > 60_000) items = items.slice(2); // keepalive bodies are capped at 64 KB
     return fetch("/api/chat/transcript", { method: "POST", keepalive: true, headers: { "Content-Type": "application/json" }, body: body() });
   }, []);
-  useEffect(() => {
-    const onHide = () => { if (document.visibilityState === "hidden") sendTranscript()?.catch(() => {}); };
-    document.addEventListener("visibilitychange", onHide);
-    window.addEventListener("pagehide", onHide);
-    return () => { document.removeEventListener("visibilitychange", onHide); window.removeEventListener("pagehide", onHide); };
-  }, [sendTranscript]);
   const requestFollowUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setFollowUp("sending");
@@ -380,7 +371,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
                   <span>{t(mode.label)}</span>
                   <span
                     className={`text-[9px] px-1 py-0.2 border ${
-                      isActive ? "border-foreground/30 text-foreground" : "border-surface/20 text-surface/50"
+                      isActive ? "border-foreground/30 text-foreground" : "border-surface/40 text-surface/80"
                     }`}
                   >
                     {mode.badge}
@@ -398,7 +389,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
           <VerticalLine className="bg-surface/20" />
           <div className="p-6 md:p-8 border-b border-surface/20 bg-foreground flex-1">
             <div className="mb-6">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-surface/50 block mb-1">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-surface/80 block mb-1">
                 Current Lens
               </span>
               <h3 className="text-[13px] font-bold uppercase tracking-[0.05em] text-surface">
@@ -445,7 +436,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
                     key={t}
                     className="flex items-center gap-2 border border-surface/15 bg-surface/5 px-2.5 py-1.5 text-[11px] font-mono uppercase tracking-wider text-surface/70"
                   >
-                    <Wrench className="h-3 w-3 text-surface/50 shrink-0" />
+                    <Wrench className="h-3 w-3 text-surface/80 shrink-0" />
                     <span>{t}()</span>
                   </div>
                 ))}
@@ -462,6 +453,9 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
 
         {/* Chat Window */}
         <div className="lg:col-span-8 order-1 lg:order-2 flex flex-col bg-foreground min-h-[550px] border-b border-surface/20 lg:border-b-0">
+          <p role="note" className="border-b border-surface/20 px-6 py-3 text-[11px] leading-[1.5] text-surface/80">
+            {t("Messages are processed by an AI service. Your conversation is emailed to Taaqib only if you enter your email and select Send conversation.")}
+          </p>
           {/* Message list */}
           <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6" style={{ minHeight: 450, maxHeight: 650 }}>
             {messages.length === 0 && !apiError && (
@@ -600,7 +594,7 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
                 animate={{ opacity: 1, y: 0 }}
                 className="pt-2"
               >
-                <span className="text-[10px] font-mono uppercase tracking-widest text-surface/50 block mb-2">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-surface/80 block mb-2">
                   Contextual Technical Follow-ups:
                 </span>
                 <div className="flex flex-wrap gap-2">
@@ -660,10 +654,10 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
           <form onSubmit={handleFormSubmit} className="border-t border-surface/20 bg-foreground p-6 flex items-end gap-4">
             <div className="flex-1 border border-surface/20 relative focus-within:border-surface transition-colors">
               <div className="absolute left-4 top-3 flex items-center gap-2">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-surface/50">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-surface/80">
                   {t("Command Prompt")}
                 </span>
-                <span className="text-[9px] font-mono px-1.5 py-0.5 border border-surface/20 text-surface/50">
+                <span className="text-[9px] font-mono px-1.5 py-0.5 border border-surface/40 text-surface/80">
                   {activeMode.toUpperCase()}
                 </span>
               </div>
@@ -700,9 +694,6 @@ export function Agent({ prefillMessage, onMetrics }: { prefillMessage?: string |
               </button>
             )}
           </form>
-          <p className="border-t border-surface/20 px-6 py-2 text-[11px] text-surface/50">
-            {t("Conversations are shared with Taaqib so he can follow up.")}
-          </p>
         </div>
       </div>
     </section>

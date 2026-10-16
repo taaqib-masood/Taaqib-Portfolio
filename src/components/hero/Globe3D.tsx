@@ -436,6 +436,7 @@ export default function Globe3D({ progress, animate }: { progress: MotionValue<n
           ref={(el) => { shared.current.labels[i] = el; }}
           onClick={() => setSelected(selected === p.id ? null : p.id)}
           aria-expanded={selected === p.id}
+          style={{ minWidth: 32, minHeight: 32 }}
           className={`absolute left-0 top-0 opacity-0 font-mono text-[10px] tracking-[0.14em] whitespace-nowrap px-1 py-0.5 bg-background/80 hover:bg-foreground hover:text-background ${p.id === "dxb" ? "text-foreground font-bold text-[11px]" : "text-[#a3a6b6]"} ${selected === p.id ? "!bg-foreground !text-background" : ""}`}
         >
           {p.id === "dxb" ? `${t("DUBAI")}${time ? ` · ${time}` : ""}` : t(p.name.split(",")[0].toUpperCase())}
@@ -444,6 +445,7 @@ export default function Globe3D({ progress, animate }: { progress: MotionValue<n
       <button
         ref={(el) => { shared.current.satLabel = el; }}
         onClick={wakeAgent}
+        style={{ minWidth: 32, minHeight: 32 }}
         className="absolute left-0 top-0 opacity-0 font-mono text-[10px] tracking-[0.14em] whitespace-nowrap px-1 py-0.5 border border-primary bg-background/80 text-foreground hover:bg-primary"
       >
         {t("AI AGENT · ONLINE")}
