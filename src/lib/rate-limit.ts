@@ -43,7 +43,7 @@ export function rateLimit(
 }
 
 export function getClientIp(req: Request): string {
-  // Forwarded headers need trusted ingress; direct Next.js requests share a bucket.
+  // ponytail: Outside Vercel all visitors share one quota; configure trusted ingress before enabling per-client IP limits.
   if (process.env.VERCEL !== "1") return "anonymous";
   return (
     req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
