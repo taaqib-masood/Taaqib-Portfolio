@@ -8,13 +8,17 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
-import { appendFileSync } from 'node:fs';
+import { appendFileSync, mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const port = Number(process.env.PORT || 3140);
 const url = process.env.LIVE_URL || `http://localhost:${port}`;
+const artifactDir = mkdtempSync(join(tmpdir(), 'portfolio-repro-'));
+console.log(`Artifacts: ${artifactDir}`);
 
 const LIVE = !!process.env.LIVE_URL;
 const REAL = !!process.env.REAL;
@@ -25,7 +29,7 @@ const server = LIVE ? { pid: 0, exitCode: null, stdout: { on() {} }, stderr: { o
       cwd: process.cwd(), env: process.env, detached: true, stdio: ['ignore', 'pipe', 'pipe'],
     });
 let serverLog = '';
-const log = m => { serverLog += m; appendFileSync('/tmp/repro-server.log', m); };
+const log = m => { serverLog += m; appendFileSync(join(artifactDir, 'server.log'), m); };
 server.stdout.on('data', log);
 server.stderr.on('data', log);
 
