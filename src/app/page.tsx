@@ -14,6 +14,7 @@ import { StatusBar } from "@/components/StatusBar";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { AudienceToggle } from "@/components/AudienceToggle";
 import { QuickFacts } from "@/components/QuickFacts";
+import { BusinessServices } from "@/components/BusinessServices";
 import { projects } from "@/data/projects";
 import { ScrollHairline } from "@/components/ScrollHairline";
 import type { AgentMetrics } from "@/lib/agent-telemetry";
@@ -107,6 +108,7 @@ export default function Home() {
       <AudienceToggle />
       <Hero />
       <QuickFacts />
+      <BusinessServices />
       <About />
       <Near id="agent" minH={H.agent} force={agentPrefill !== null}>
         <Agent prefillMessage={agentPrefill} onMetrics={setAgentMetrics} />

@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { motion, useScroll } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useWebGLGate } from "@/lib/use-webgl";
 import { useAudience } from "@/lib/audience";
 import { useT } from "@/components/LocaleProvider";
@@ -13,9 +14,10 @@ import { useT } from "@/components/LocaleProvider";
 const Globe3D = dynamic(() => import("@/components/hero/Globe3D"), { ssr: false });
 
 export function Hero() {
-  const t = useT();
-  const containerRef = useRef<HTMLElement>(null);
-  const { supported, animate } = useWebGLGate(containerRef, "(min-width: 768px)");
+const t = useT();
+const containerRef = useRef<HTMLElement>(null);
+const globeRef = useRef<HTMLDivElement>(null);
+const { supported, inView, animate } = useWebGLGate(globeRef, "(min-width: 768px)");
   const plain = useAudience() === "plain";
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end start"] });
 
@@ -30,12 +32,17 @@ export function Hero() {
       {/* Massive Typography & Photo Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-0 mt-6 sm:mt-12 lg:mt-24">
         {/* CSS entrance, not framer: the name and photo are the LCP, so they must not wait for hydration. */}
-        <div className="lg:col-span-7 flex flex-col justify-center relative z-10 pointer-events-none animate-in fade-in slide-in-from-bottom-5 duration-500 motion-reduce:animate-none">
+        <div className="lg:col-span-7 flex flex-col justify-center relative z-10 animate-in fade-in slide-in-from-bottom-5 duration-500 motion-reduce:animate-none">
           <h1 lang="en" className="text-[clamp(36px,10.5vw,180px)] font-black leading-[0.9] tracking-[-0.05em] text-foreground uppercase whitespace-nowrap">
             TAAQIB
             <br />
             MASOOD
           </h1>
+          <div className="mt-6 flex flex-wrap gap-2.5">
+            <Link href="#services" className="inline-flex min-h-12 items-center justify-center bg-foreground px-4 text-[11px] font-bold uppercase tracking-widest text-background hover:bg-primary hover:text-foreground transition-colors">{t("For businesses")}</Link>
+            <Link href="#projects" className="inline-flex min-h-12 items-center justify-center border border-border bg-surface px-4 text-[11px] font-bold uppercase tracking-widest hover:bg-foreground hover:text-background transition-colors">{t("Explore projects")}</Link>
+            <Link href="/taaqib-masood-cv.pdf" download className="inline-flex min-h-12 items-center justify-center border border-border bg-surface px-4 text-[11px] font-bold uppercase tracking-widest hover:bg-foreground hover:text-background transition-colors">{t("Download CV")}</Link>
+          </div>
         </div>
 
         <div className="lg:col-span-5 flex justify-start lg:justify-end items-end w-full">
@@ -46,7 +53,8 @@ export function Hero() {
                 alt="Taaqib Masood"
                 fill
                 priority
-                sizes="(max-width: 768px) 100vw, 45vw"
+                fetchPriority="high"
+                sizes="(max-width: 768px) calc(100vw - 3rem), (max-width: 1200px) 42vw, 560px"
                 className="object-cover object-top"
               />
             </div>
@@ -57,12 +65,13 @@ export function Hero() {
       {/* Structural Data Blocks */}
       <div className="relative mt-10 md:mt-24">
       {/* Globe rises from the data row's top rule (the horizon), left of the photo column. */}
-      {supported && (
-        <div className="absolute bottom-full start-0 w-full lg:w-[56%] h-[380px]">
-          <Globe3D progress={scrollYProgress} animate={animate} />
-        </div>
-      )}
+          <div ref={globeRef} className="absolute bottom-full start-0 w-full lg:w-[56%] h-[380px]">
+            {supported && inView && (
+              <Globe3D progress={scrollYProgress} animate={animate} />
+            )}
+          </div>
       <div className="relative z-10 bg-background grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-t border-border">
+        <h2 className="sr-only">{t("Portfolio snapshot")}</h2>
         
         <motion.div
           initial={{ opacity: 0, y: 40 }}

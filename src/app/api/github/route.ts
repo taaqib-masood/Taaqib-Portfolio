@@ -1,14 +1,23 @@
 import { NextResponse } from "next/server";
 
-// Live GitHub feed for the portfolio. Fetched server-side so the browser never talks to
-// third-party APIs (tighter CSP), cached at the edge so visitors share one upstream call.
-export const revalidate = 3600;
+// Live GitHub feed for the portfolio. Cache the response at Vercel's CDN so visitors share
+// one upstream call; a partial outage gets a short TTL rather than inheriting the success TTL.
+export const dynamic = "force-dynamic";
 
 const USER = "taaqib-masood";
-const CACHE = "public, s-maxage=3600, stale-while-revalidate=86400";
+const SUCCESS_CACHE = "public, s-maxage=21600, stale-while-revalidate=3600";
+const DEGRADED_CACHE = "public, s-maxage=60, stale-while-revalidate=300";
+const TRACKED_REPOS = new Set([
+  "smart-hospital-agent",
+  "atlas-ai",
+  "stock-market-forecasting-risk-analytics",
+  "predictive-maintenance-industrial-machinery",
+  "salon-booking-saas",
+  "taaqib-portfolio",
+]);
 
 export type GithubFeed = {
-  repos: { name: string; stars: number; forks: number; language: string | null; pushedAt: string }[] | null;
+  repos: { name: string; stars: number; forks: number; language: string | null }[] | null;
   contributions: { total: number; days: { date: string; count: number; level: 0 | 1 | 2 | 3 | 4 }[] } | null;
 };
 
@@ -16,7 +25,7 @@ const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) && v >=
 const str = (v: unknown) => (typeof v === "string" ? v.slice(0, 200) : "");
 
 async function getJson(url: string, headers: Record<string, string> = {}) {
-  const res = await fetch(url, { headers, next: { revalidate }, signal: AbortSignal.timeout(4000) });
+  const res = await fetch(url, { headers, cache: "no-store", signal: AbortSignal.timeout(4000) });
   if (!res.ok) throw new Error(`${url} → ${res.status}`);
   return res.json() as Promise<unknown>;
 }
@@ -28,8 +37,8 @@ async function repos(): Promise<GithubFeed["repos"]> {
   if (!Array.isArray(data)) return null;
   // Public, non-fork repos only: never leak private repo names even if the token could see them.
   return data
-    .filter((r) => r && !r.private && !r.fork)
-    .map((r) => ({ name: str(r.name), stars: num(r.stargazers_count), forks: num(r.forks_count), language: r.language ? str(r.language) : null, pushedAt: str(r.pushed_at) }));
+    .filter((r) => r && !r.private && !r.fork && TRACKED_REPOS.has(str(r.name).toLowerCase()))
+    .map((r) => ({ name: str(r.name), stars: num(r.stargazers_count), forks: num(r.forks_count), language: r.language ? str(r.language) : null }));
 }
 
 const LEVELS: Record<string, 0 | 1 | 2 | 3 | 4> = { NONE: 0, FIRST_QUARTILE: 1, SECOND_QUARTILE: 2, THIRD_QUARTILE: 3, FOURTH_QUARTILE: 4 };
@@ -45,7 +54,7 @@ async function contributionsFromGraphql(token: string): Promise<GithubFeed["cont
         totalContributions weeks { contributionDays { date contributionCount contributionLevel } } } } } }`,
       variables: { login: USER },
     }),
-    next: { revalidate },
+    cache: "no-store",
     signal: AbortSignal.timeout(4000),
   });
   if (!res.ok) throw new Error(`graphql → ${res.status}`);
@@ -82,5 +91,11 @@ export async function GET() {
     repos: r.status === "fulfilled" ? r.value : null,
     contributions: c.status === "fulfilled" ? c.value : null,
   };
-  return NextResponse.json(body, { headers: { "Cache-Control": CACHE } });
+  const complete = r.status === "fulfilled" && r.value !== null && c.status === "fulfilled" && c.value !== null;
+  return NextResponse.json(body, {
+    headers: {
+      "Cache-Control": "public, max-age=0, must-revalidate",
+      "Vercel-CDN-Cache-Control": complete ? SUCCESS_CACHE : DEGRADED_CACHE,
+    },
+  });
 }

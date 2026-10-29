@@ -37,7 +37,7 @@ export function About() {
           <VerticalLine />
         </div>
         <div className="lg:col-span-8 p-6 md:p-8 bg-surface-container-low flex flex-col justify-center">
-          <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-outline">
+  <p className="text-[16px] leading-[1.5] uppercase font-semibold tracking-widest text-on-surface-variant">
             {t("AI Engineer · Dubai, UAE")}
           </p>
         </div>
