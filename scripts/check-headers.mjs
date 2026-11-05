@@ -1,12 +1,23 @@
 // Self-check for security headers (no server needed):
 // 1. Executes src/middleware.ts against real next/server — asserts CSP + per-request nonce.
 // 2. Asserts static headers (HSTS, XFO, nosniff) registered in .next/routes-manifest.json.
-// Run: node --experimental-strip-types scripts/check-headers.mjs  (or via bun)
+// Run: node scripts/check-headers.mjs
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { NextRequest, NextResponse } from "next/server";
+import { createRequire } from "node:module";
+import vm from "node:vm";
 
-const { middleware } = await import("../src/middleware.ts");
+const require = createRequire(import.meta.url);
+const { NextRequest, NextResponse } = require("next/server");
+const ts = require("typescript");
+const module = { exports: {} };
+const code = ts.transpileModule(readFileSync(new URL("../src/middleware.ts", import.meta.url), "utf8"), {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+}).outputText;
+vm.runInNewContext(code, {
+  module, exports: module.exports, require, process, Buffer, Headers, crypto: globalThis.crypto,
+}, { filename: "src/middleware.ts" });
+const { middleware } = module.exports;
 
 // Spy on NextResponse.next to capture the derived request headers the
 // middleware hands to Next (where the x-nonce forwarding matters).
