@@ -15,7 +15,7 @@ const code = ts.transpileModule(readFileSync(new URL("../src/middleware.ts", imp
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 }).outputText;
 vm.runInNewContext(code, {
-  module, exports: module.exports, require, process, Buffer, Headers, crypto: globalThis.crypto,
+  module, exports: module.exports, require, process, Buffer, Headers, URL, crypto: globalThis.crypto,
 }, { filename: "src/middleware.ts" });
 const { middleware } = module.exports;
 
