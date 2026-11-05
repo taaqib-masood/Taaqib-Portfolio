@@ -22,7 +22,10 @@
 
 # session scratch
 /.tmp/
-/graphify-out/
+/graphify-out/*
+!/graphify-out/GRAPH_REPORT.md
+!/graphify-out/graph.json
+!/graphify-out/graph.html
 
 # debug
 npm-debug.log*
