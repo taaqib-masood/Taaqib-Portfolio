@@ -56,9 +56,11 @@ function load(file) {
 const cases = [
   ["chat/stream", { messages: [{ role: "user", content: "Synthetic request" }], maxTokens: 1000000 }],
   ["mcp-review", { prDiff: "Synthetic diff", jiraAc: "Synthetic criteria", maxTokens: 1000000 }],
-  ["playground", { messages: [{ role: "user", content: "Synthetic request" }], maxTokens: 1000000 }],
+  ["playground", { messages: [{ role: "user", content: "Synthetic request" }], maxTokens: 1000000,
+    systemPrompt: "Synthetic custom system prompt", presetId: "constructor" }],
 ];
 let failures = 0;
+const playgroundRequests = [];
 const limiter = load(path.join(root, "src/lib/rate-limit.ts"));
 const allowances = ["192.0.2.1", "192.0.2.2", "192.0.2.3"].map(ip => {
   const identity = limiter.getClientIp(new Request("http://fixture.invalid", {
@@ -87,6 +89,7 @@ for (const [route, body] of cases) {
   assert.equal(response.status, 200, route + " remains usable");
   await response.text();
   const sent = requests.slice(before);
+  if (route === "playground") playgroundRequests.push(...sent);
   assert.ok(sent.length, route + " reached the mocked provider");
   if (scenario !== "normal") assert.ok(sent.length >= 2, scenario + " triggered a second provider request");
   if (scenario === "fallback") {
@@ -104,4 +107,10 @@ for (const [route, body] of cases) {
   }
  }
 }
+const { PLAYGROUND_PRESETS, DEFAULT_PRESET } = load(path.join(root, "src/lib/playground-presets.ts"));
+const playgroundSystems = playgroundRequests.map(r => r.messages.find(m => m.role === "system")?.content);
+if (!playgroundSystems.length || playgroundSystems.some(s => s !== PLAYGROUND_PRESETS[DEFAULT_PRESET].prompt)) {
+  failures++;
+  console.error("FAIL playground: client-supplied systemPrompt/presetId reached Groq as the system message");
+} else console.log("PASS playground: Groq system message is always a server preset");
 assert.equal(failures, 0, "Every public AI route must bound output even when the client asks for more");

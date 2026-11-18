@@ -1,12 +1,12 @@
 import { streamText } from "ai";
 import { createGroq } from "@ai-sdk/groq";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { PLAYGROUND_PRESETS, DEFAULT_PRESET } from "@/lib/playground-presets";
 
 export const maxDuration = 30; // max duration for edge
 
 // Server-side caps: never trust client-sent generation settings.
 const MAX_TOKENS = 1024;
-const MAX_SYSTEM_PROMPT_CHARS = 4_000;
 const MAX_MESSAGES = 20;
 const MAX_MESSAGE_CHARS = 8_000;
 
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
 
   let body: {
     messages?: unknown;
-    systemPrompt?: unknown;
+    presetId?: unknown;
     temperature?: unknown;
     maxTokens?: unknown;
   };
@@ -87,10 +87,11 @@ export async function POST(req: Request) {
     );
   }
 
-  const systemPrompt =
-    typeof body.systemPrompt === "string" && body.systemPrompt.trim().length > 0
-      ? body.systemPrompt.slice(0, MAX_SYSTEM_PROMPT_CHARS)
-      : "You are a helpful AI assistant. Respond concisely.";
+  const presetId =
+    typeof body.presetId === "string" && Object.hasOwn(PLAYGROUND_PRESETS, body.presetId)
+      ? (body.presetId as keyof typeof PLAYGROUND_PRESETS)
+      : DEFAULT_PRESET;
+  const systemPrompt = PLAYGROUND_PRESETS[presetId].prompt;
 
   const temperature =
     typeof body.temperature === "number" && body.temperature >= 0 && body.temperature <= 1
@@ -102,8 +103,9 @@ export async function POST(req: Request) {
       ? Math.min(Math.floor(body.maxTokens), MAX_TOKENS)
       : MAX_TOKENS;
 
-  const PRIMARY_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
-  const FALLBACK_MODEL = process.env.GROQ_FALLBACK_MODEL || "llama-3.1-8b-instant";
+  // Fixed, not GROQ_MODEL: keeps playground traffic off the chat agent's primary model quota.
+  const PRIMARY_MODEL = "openai/gpt-oss-120b";
+  const FALLBACK_MODEL = "openai/gpt-oss-20b";
   const groq = createGroq({
     apiKey: process.env.GROQ_API_KEY,
     fetch: async (url: string | URL | Request, opts?: RequestInit) => {
