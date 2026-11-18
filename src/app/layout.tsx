@@ -82,7 +82,7 @@ export default async function RootLayout({
         )}
       >
         <LocaleProvider locale={locale} dict={locale === "ar" ? ar : null}>
-          <div className="overflow-x-hidden">
+          <div className="overflow-x-clip">
             {children}
           </div>
           <CommandMenu />
