@@ -14,13 +14,13 @@ function evict(now: number) {
   for (const [key, entry] of buckets) {
     if (entry.resetAt < now) buckets.delete(key);
   }
-  // Still over cap? Drop oldest-inserted (Map preserves insertion order).
+  // Still over cap? Drop oldest-inserted (Map preserves insertion order), never a daily budget.
   let excess = buckets.size - MAX_BUCKETS;
-  if (excess > 0) {
-    for (const key of buckets.keys()) {
-      if (excess-- <= 0) break;
-      buckets.delete(key);
-    }
+  for (const key of buckets.keys()) {
+    if (excess <= 0) break;
+    if (key.startsWith("daily:")) continue;
+    buckets.delete(key);
+    excess--;
   }
 }
 
@@ -36,7 +36,12 @@ function memoryCount(key: string, windowMs: number, now: number): Entry {
   return entry;
 }
 
-// Fixed-window counter shared by all instances. Null when unconfigured or unreachable.
+// Atomic: increments and (re)sets the expiry in one step, so a counter can never be left without a TTL.
+const INCR_SCRIPT = `local c = redis.call('INCR', KEYS[1])
+if c == 1 or redis.call('PTTL', KEYS[1]) < 0 then redis.call('PEXPIRE', KEYS[1], ARGV[1]) end
+return {c, redis.call('PTTL', KEYS[1])}`;
+
+// Fixed-window counter shared by all instances. Null when unconfigured, unreachable or slow.
 async function sharedCount(key: string, windowMs: number, now: number): Promise<Entry | null> {
   const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
@@ -44,18 +49,15 @@ async function sharedCount(key: string, windowMs: number, now: number): Promise<
   try {
     const res = await fetch(`${url.replace(/\/$/, "")}/pipeline`, {
       method: "POST",
+      signal: AbortSignal.timeout(2000),
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify([
-        ["SET", `rl:${key}`, "0", "PX", String(windowMs), "NX"],
-        ["INCR", `rl:${key}`],
-        ["PTTL", `rl:${key}`],
-      ]),
+      body: JSON.stringify([["EVAL", INCR_SCRIPT, "1", `rl:${key}`, String(windowMs)]]),
     });
     if (!res.ok) return null;
-    const [, incr, ttl] = (await res.json()) as { result?: unknown }[];
-    if (typeof incr?.result !== "number") return null;
-    const ms = typeof ttl?.result === "number" && ttl.result > 0 ? ttl.result : windowMs;
-    return { count: incr.result, resetAt: now + ms };
+    const [reply] = (await res.json()) as { result?: unknown }[];
+    const [count, ttl] = Array.isArray(reply?.result) ? reply.result : [];
+    if (typeof count !== "number") return null;
+    return { count, resetAt: now + (typeof ttl === "number" && ttl > 0 ? ttl : windowMs) };
   } catch {
     return null;
   }

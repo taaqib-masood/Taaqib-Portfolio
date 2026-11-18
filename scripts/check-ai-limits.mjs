@@ -17,13 +17,19 @@ let failStatus = 503;
 let replyWithTool = false;
 const redis = new Map();
 let redisCalls = 0;
+let redisStall = false;
 const fakeFetch = async (url, options) => {
   if (new URL(String(url)).hostname === "redis.fixture.invalid") {
     redisCalls++;
-    return Response.json(JSON.parse(options.body).map(([cmd, key]) => {
-      if (cmd === "SET") return { result: redis.has(key) ? null : (redis.set(key, 0), "OK") };
-      if (cmd === "INCR") { redis.set(key, redis.get(key) + 1); return { result: redis.get(key) }; }
-      return { result: 1000 };
+    if (redisStall) return new Promise((_, reject) => options.signal.addEventListener("abort", () => reject(options.signal.reason)));
+    // Mirrors the Lua script: one atomic command that increments and repairs a missing TTL.
+    return Response.json(JSON.parse(options.body).map(([cmd, , , key, ttl]) => {
+      assert.equal(cmd, "EVAL");
+      const entry = redis.get(key) ?? { count: 0, ttl: -1 };
+      entry.count++;
+      if (entry.count === 1 || entry.ttl < 0) entry.ttl = Number(ttl);
+      redis.set(key, entry);
+      return { result: [entry.count, entry.ttl] };
     }));
   }
   assert.equal(new URL(String(url)).hostname, "api.groq.com");
@@ -98,10 +104,23 @@ const shared = [];
 for (let i = 0; i < 3; i++) shared.push((await limiter.rateLimit("shared-check", 2, 3600000)).allowed);
 assert.deepEqual(shared, [true, true, false]);
 assert.equal(redisCalls, 3, "configured shared store holds the counters");
-assert.equal(redis.get("rl:shared-check"), 3);
+assert.equal(redis.get("rl:shared-check").count, 3);
+redis.set("rl:no-ttl", { count: 5, ttl: -1 });
+await limiter.rateLimit("no-ttl", 10, 3600000);
+assert.equal(redis.get("rl:no-ttl").ttl, 3600000, "a counter missing its TTL gets one back");
+redisStall = true;
+const stalledAt = Date.now();
+const keepAlive = setTimeout(() => {}, 5000); // AbortSignal.timeout's timer is unref'd in Node
+assert.equal((await limiter.rateLimit("stalled", 2, 3600000)).allowed, true);
+clearTimeout(keepAlive);
+assert.ok(Date.now() - stalledAt < 5000, "a stalled shared store falls back to memory quickly");
+redisStall = false;
 delete runtimeEnv.UPSTASH_REDIS_REST_URL;
 delete runtimeEnv.UPSTASH_REDIS_REST_TOKEN;
-console.log("PASS counters live in the shared store when configured");
+console.log("PASS counters live in the shared store when configured, keep a TTL, and survive a stalled store");
+for (let i = 0; i < 10005; i++) await limiter.rateLimit("daily:evict-check", 1, 3600000).then(() => limiter.rateLimit("evict-filler:" + i, 1, 3600000));
+assert.equal((await limiter.rateLimit("daily:evict-check", 1, 3600000)).allowed, false, "eviction keeps daily budgets");
+console.log("PASS memory eviction never resets a daily budget");
 for (const [route, body] of cases) {
  for (const scenario of route === "chat/stream" ? ["normal", "fallback", "quota", "tool"] : ["normal", "fallback", "quota"]) {
   failOnce = scenario === "fallback" || scenario === "quota";
