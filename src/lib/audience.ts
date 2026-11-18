@@ -3,15 +3,19 @@
 import { useSyncExternalStore } from "react";
 
 export type Audience = "tech" | "plain";
+const DEFAULT_AUDIENCE: Audience = "plain";
 const KEY = "audience";
 const EVENT = "audience-change";
 
-// Precedence: ?view=plain|tech in the URL (so a recruiter link can open in plain mode),
-// then the viewer's last choice, then technical.
+// Precedence: explicit ?view=plain|tech, saved choice, then Plain English.
 function read(): Audience {
   const param = new URLSearchParams(window.location.search).get("view");
   if (param === "plain" || param === "tech") return param;
-  try { return localStorage.getItem(KEY) === "plain" ? "plain" : "tech"; } catch { return "tech"; }
+  try {
+    const saved = localStorage.getItem(KEY);
+    if (saved === "plain" || saved === "tech") return saved;
+  } catch { /* Storage can be unavailable. */ }
+  return DEFAULT_AUDIENCE;
 }
 
 function subscribe(onChange: () => void) {
@@ -28,7 +32,6 @@ export function setAudience(next: Audience) {
   window.dispatchEvent(new Event(EVENT));
 }
 
-/** Server and first client render are always "tech", so hydration matches. */
 export function useAudience(): Audience {
-  return useSyncExternalStore(subscribe, read, () => "tech");
+  return useSyncExternalStore(subscribe, read, () => DEFAULT_AUDIENCE);
 }
