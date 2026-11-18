@@ -21,10 +21,13 @@ let redisStall = false;
 const fakeFetch = async (url, options) => {
   if (new URL(String(url)).hostname === "redis.fixture.invalid") {
     redisCalls++;
+    if (redisStall) assert.ok(options.signal, "shared-store fetch carries a timeout signal");
     if (redisStall) return new Promise((_, reject) => options.signal.addEventListener("abort", () => reject(options.signal.reason)));
     // Mirrors the Lua script: one atomic command that increments and repairs a missing TTL.
-    return Response.json(JSON.parse(options.body).map(([cmd, , , key, ttl]) => {
+    return Response.json(JSON.parse(options.body).map(([cmd, script, , key, ttl]) => {
       assert.equal(cmd, "EVAL");
+      // ponytail: no Lua runtime here, so check the script's TTL repair branch textually and mirror it below.
+      assert.match(script, /if c == 1 or redis\.call\('PTTL', KEYS\[1\]\) < 0 then redis\.call\('PEXPIRE', KEYS\[1\], ARGV\[1\]\)/);
       const entry = redis.get(key) ?? { count: 0, ttl: -1 };
       entry.count++;
       if (entry.count === 1 || entry.ttl < 0) entry.ttl = Number(ttl);
@@ -113,12 +116,14 @@ const stalledAt = Date.now();
 const keepAlive = setTimeout(() => {}, 5000); // AbortSignal.timeout's timer is unref'd in Node
 assert.equal((await limiter.rateLimit("stalled", 2, 3600000)).allowed, true);
 clearTimeout(keepAlive);
-assert.ok(Date.now() - stalledAt < 5000, "a stalled shared store falls back to memory quickly");
+const stalledFor = Date.now() - stalledAt;
+assert.ok(stalledFor >= 1500 && stalledFor < 5000, "a stalled shared store times out, then falls back to memory");
 redisStall = false;
 delete runtimeEnv.UPSTASH_REDIS_REST_URL;
 delete runtimeEnv.UPSTASH_REDIS_REST_TOKEN;
 console.log("PASS counters live in the shared store when configured, keep a TTL, and survive a stalled store");
-for (let i = 0; i < 10005; i++) await limiter.rateLimit("daily:evict-check", 1, 3600000).then(() => limiter.rateLimit("evict-filler:" + i, 1, 3600000));
+await limiter.rateLimit("daily:evict-check", 1, 3600000);
+for (let i = 0; i < 10005; i++) await limiter.rateLimit("evict-filler:" + i, 1, 3600000);
 assert.equal((await limiter.rateLimit("daily:evict-check", 1, 3600000)).allowed, false, "eviction keeps daily budgets");
 console.log("PASS memory eviction never resets a daily budget");
 for (const [route, body] of cases) {
