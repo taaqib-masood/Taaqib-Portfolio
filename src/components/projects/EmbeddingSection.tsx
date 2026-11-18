@@ -51,7 +51,8 @@ export function EmbeddingSection({ projects, activeSkill, onAskAgent }: {
       <div className="sticky top-0 h-screen overflow-hidden bg-background">
         {supported && !reduced && <EmbeddingSpace projects={projects} activeSkill={activeSkill} progress={scrollYProgress} animate={animate} />}
 
-        <div className="absolute top-0 left-0 right-0 flex items-center justify-between pl-8 pr-40 py-4 border-b border-border bg-background/80 font-mono text-[11px] uppercase tracking-[0.16em] text-on-surface-variant">
+        {/* The home page reserves room above its fixed controls for two lines here. */}
+        <div className="absolute inset-x-0 top-0 flex flex-wrap items-center justify-between gap-x-6 gap-y-0.5 px-8 py-1 border-b border-border bg-background/80 font-mono text-[11px] leading-4 uppercase tracking-[0.16em] text-on-surface-variant">
           <span>{t("Latent space")} · {projects.length} {t("nodes")} · {t("edges = shared stack")}</span>
           <span className={activeSkill ? "text-primary" : ""}>
             {activeSkill ? `${t("Query")} “${activeSkill}” · ${matchCount}/${projects.length} ${t("match")}` : t("Select a skill below to query")}
