@@ -51,10 +51,10 @@ export function EmbeddingSection({ projects, activeSkill, onAskAgent }: {
       <div className="sticky top-0 h-screen overflow-hidden bg-background">
         {supported && !reduced && <EmbeddingSpace projects={projects} activeSkill={activeSkill} progress={scrollYProgress} animate={animate} />}
 
-        {/* Keep this strip below the fixed reading-mode and language controls. */}
-        <div className="absolute inset-x-0 top-16 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-8 py-4 border-b border-border bg-background/80 font-mono text-[11px] uppercase tracking-[0.16em] text-on-surface-variant">
-          <span>{t("Latent space")} · {projects.length} {t("nodes")} · {t("edges = shared stack")}</span>
-          <span className={activeSkill ? "text-primary" : ""}>
+        {/* Keep the strip on one line above the fixed controls at top-6. */}
+        <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-x-6 px-8 py-0.5 border-b border-border bg-background/80 font-mono text-[11px] leading-4 uppercase tracking-[0.16em] text-on-surface-variant">
+          <span className="truncate">{t("Latent space")} · {projects.length} {t("nodes")} · {t("edges = shared stack")}</span>
+          <span className={`truncate ${activeSkill ? "text-primary" : ""}`}>
             {activeSkill ? `${t("Query")} “${activeSkill}” · ${matchCount}/${projects.length} ${t("match")}` : t("Select a skill below to query")}
           </span>
         </div>
