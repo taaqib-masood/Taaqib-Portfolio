@@ -100,7 +100,7 @@ export default function Home() {
 
   return (
     <MotionConfig reducedMotion="user">
-    <main className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-on-primary pb-[48px]">
+    <main className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-on-primary pb-[48px] motion-safe:md:[--portfolio-controls-top:3rem]">
       <ScrollHairline />
       {/* Phones: a solid bar behind the fixed toggles so they never sit on top of headings or white sections. */}
       <div aria-hidden="true" className="sm:hidden fixed top-0 inset-x-0 h-[72px] bg-background border-b border-border z-40" />
