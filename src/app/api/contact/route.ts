@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { limitRoute } from "@/lib/rate-limit";
 import { sendMail } from "@/lib/mail";
 
 export const runtime = "edge";
@@ -24,8 +24,8 @@ export async function POST(req: Request) {
     }
     const { name, email, message } = parsed.data;
 
-    // --- Rate limit: 5 submissions / hour / IP (prevents email bombing via Resend) ---
-    const { allowed } = rateLimit(`contact:${getClientIp(req)}`, 5, 60 * 60 * 1000);
+    // --- Rate limit: 5 submissions / hour / IP, 40 / day in total (stays under the Resend daily quota) ---
+    const { allowed } = await limitRoute("contact", req, 5, 40);
     if (!allowed) {
       return NextResponse.json(
         { error: "Too many messages. Please try again later." },
