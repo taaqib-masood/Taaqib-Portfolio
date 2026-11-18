@@ -89,6 +89,12 @@ for (const [route, body] of cases) {
   const sent = requests.slice(before);
   assert.ok(sent.length, route + " reached the mocked provider");
   if (scenario !== "normal") assert.ok(sent.length >= 2, scenario + " triggered a second provider request");
+  if (scenario === "fallback") {
+    if (sent.at(-1).model === sent[0].model) {
+      failures++;
+      console.error("FAIL " + route + "/fallback: retry kept model " + String(sent[0].model));
+    } else console.log("PASS " + route + "/fallback: retry switched model to " + String(sent.at(-1).model));
+  }
   for (const request of sent) {
     const limit = request.max_completion_tokens ?? request.max_tokens;
     if (limit !== 1024) {
