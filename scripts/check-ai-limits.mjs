@@ -112,11 +112,11 @@ redis.set("rl:no-ttl", { count: 5, ttl: -1 });
 await limiter.rateLimit("no-ttl", 10, 3600000);
 assert.equal(redis.get("rl:no-ttl").ttl, 3600000, "a counter missing its TTL gets one back");
 redisStall = true;
-const stalledAt = Date.now();
+const stalledAt = performance.now();
 const keepAlive = setTimeout(() => {}, 5000); // AbortSignal.timeout's timer is unref'd in Node
 assert.equal((await limiter.rateLimit("stalled", 2, 3600000)).allowed, true);
 clearTimeout(keepAlive);
-const stalledFor = Date.now() - stalledAt;
+const stalledFor = performance.now() - stalledAt;
 assert.ok(stalledFor >= 1500 && stalledFor < 5000, "a stalled shared store times out, then falls back to memory");
 redisStall = false;
 delete runtimeEnv.UPSTASH_REDIS_REST_URL;
