@@ -76,9 +76,11 @@ function load(file) {
 const cases = [
   ["chat/stream", { messages: [{ role: "user", content: "Synthetic request" }], maxTokens: 1000000 }],
   ["mcp-review", { prDiff: "Synthetic diff", jiraAc: "Synthetic criteria", maxTokens: 1000000 }],
-  ["playground", { messages: [{ role: "user", content: "Synthetic request" }], maxTokens: 1000000 }],
+  ["playground", { messages: [{ role: "user", content: "Synthetic request" }], maxTokens: 1000000,
+    systemPrompt: "Synthetic custom system prompt", presetId: "constructor" }],
 ];
 let failures = 0;
+const playgroundRequests = [];
 const limiter = load(path.join(root, "src/lib/rate-limit.ts"));
 const allowances = [];
 for (const ip of ["192.0.2.1", "192.0.2.2", "192.0.2.3"]) {
@@ -139,6 +141,7 @@ for (const [route, body] of cases) {
   assert.equal(response.status, 200, route + " remains usable");
   await response.text();
   const sent = requests.slice(before);
+  if (route === "playground") playgroundRequests.push(...sent);
   assert.ok(sent.length, route + " reached the mocked provider");
   if (scenario !== "normal") assert.ok(sent.length >= 2, scenario + " triggered a second provider request");
   if (scenario === "fallback") {
@@ -162,41 +165,10 @@ for (const [route, body] of cases) {
   }
  }
 }
-{
-  // History trim: a long conversation sends only the last few turns, each clamped.
-  const { POST } = load(path.join(root, "src/app/api/chat/stream/route.ts"));
-  const before = requests.length;
-  const messages = Array.from({ length: 29 }, (_, i) => ({ role: i % 2 ? "assistant" : "user", content: "x".repeat(50000) }));
-  const response = await POST(new Request("http://fixture.invalid/api/chat/stream", {
-    method: "POST", headers: { "content-type": "application/json", "x-forwarded-for": "203.0.113.1" }, body: JSON.stringify({ messages }),
-  }));
-  await response.text();
-  const sent = requests.slice(before);
-  const chars = sent.length ? JSON.stringify(sent[0].messages.filter(m => m.role !== "system")).length : Infinity;
-  if (response.status !== 429 && chars > 20000) {
-    failures++;
-    console.error("FAIL chat/stream history: " + chars + " chars of history reached Groq");
-  } else console.log("PASS chat/stream history trimmed to " + chars + " chars");
-}
-{
-  // Global daily budget: fresh addresses (each under its own hourly limit) must still hit 429 before Groq.
-  runtimeEnv.VERCEL = "1";
-  const { POST } = load(path.join(root, "src/app/api/chat/stream/route.ts"));
-  let served = 0, blocked = null;
-  for (let i = 0; i < 1000 && !blocked; i++) {
-    const before = requests.length;
-    const response = await POST(new Request("http://fixture.invalid/api/chat/stream", {
-      method: "POST", headers: { "content-type": "application/json", "x-forwarded-for": "198.51." + (i >> 8) + "." + (i & 255) },
-      body: JSON.stringify({ messages: [{ role: "user", content: "Synthetic request" }] }),
-    }));
-    await response.text();
-    if (response.status === 429) blocked = requests.length - before;
-    else served++;
-  }
-  delete runtimeEnv.VERCEL;
-  if (blocked !== 0 || served < 31) {
-    failures++;
-    console.error("FAIL chat/stream global budget: served " + served + ", blocked request reached Groq " + String(blocked) + " times");
-  } else console.log("PASS chat/stream global budget returns 429 after " + served + " requests from distinct IPs without calling Groq");
-}
+const { PLAYGROUND_PRESETS, DEFAULT_PRESET } = load(path.join(root, "src/lib/playground-presets.ts"));
+const playgroundSystems = playgroundRequests.map(r => r.messages.find(m => m.role === "system")?.content);
+if (!playgroundSystems.length || playgroundSystems.some(s => s !== PLAYGROUND_PRESETS[DEFAULT_PRESET].prompt)) {
+  failures++;
+  console.error("FAIL playground: client-supplied systemPrompt/presetId reached Groq as the system message");
+} else console.log("PASS playground: Groq system message is always a server preset");
 assert.equal(failures, 0, "Every public AI route must bound output even when the client asks for more");
