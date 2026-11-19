@@ -9,7 +9,8 @@ import { NextResponse, type NextRequest } from "next/server";
 // still parses. Without this, any third-party page could make its visitors fire contact
 // emails and paid LLM calls from their own IPs, dodging the per-IP rate limits.
 function rejectCrossSiteApiWrite(request: NextRequest) {
-  if (!request.nextUrl.pathname.startsWith("/api/") || request.method === "GET" || request.method === "HEAD") return null;
+  // Every write, not just "/api/": the raw pathname is still percent-encoded ("/%61pi/contact").
+  if (request.method === "GET" || request.method === "HEAD") return null;
   const site = request.headers.get("sec-fetch-site");
   const origin = request.headers.get("origin");
   let originHost: string | null = null;

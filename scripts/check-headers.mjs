@@ -63,6 +63,7 @@ assert.equal(api({ "content-type": "application/json", origin: "https://evil.exa
 assert.equal(api({ "content-type": "text/plain", "sec-fetch-site": "same-origin" }).status, 415, "non-JSON body rejected");
 assert.equal(api({ "content-type": "application/json", origin: "http://localhost:3000", "sec-fetch-site": "same-origin" }).status, 200, "same-origin JSON passes");
 assert.equal(api({}, "GET").status, 200, "GET is never blocked");
+assert.equal(middleware(new NextRequest("http://localhost:3000/%61pi/contact", { method: "POST", headers: { host: "localhost:3000", "content-type": "text/plain", "sec-fetch-site": "cross-site" } })).status, 403, "percent-encoded API path still guarded");
 assert.ok(!cspA.includes("script-src 'self' 'unsafe-inline'"), "no unsafe-inline in prod script-src");
 assert.ok(!cspA.includes("'unsafe-eval'"), "no unsafe-eval in prod");
 
