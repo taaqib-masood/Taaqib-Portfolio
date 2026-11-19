@@ -1,12 +1,17 @@
+import { unstable_cache } from "next/cache";
 import { NextResponse } from "next/server";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 // Live GitHub feed for the portfolio. Cache the response at Vercel's CDN so visitors share
 // one upstream call; a partial outage gets a short TTL rather than inheriting the success TTL.
+// The CDN keys on the query string, so upstream results also live in Next's data cache (keyed by
+// name, not URL): `?n=1`, `?n=2`, ... share one GitHub call per TTL instead of spending GITHUB_TOKEN.
 export const dynamic = "force-dynamic";
 
 const USER = "taaqib-masood";
 const SUCCESS_CACHE = "public, s-maxage=21600, stale-while-revalidate=3600";
 const DEGRADED_CACHE = "public, s-maxage=60, stale-while-revalidate=300";
+const FEED_TTL = 21600;
 const TRACKED_REPOS = new Set([
   "smart-hospital-agent",
   "atlas-ai",
@@ -34,7 +39,7 @@ async function repos(): Promise<GithubFeed["repos"]> {
   const headers: Record<string, string> = { Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" };
   if (process.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
   const data = await getJson(`https://api.github.com/users/${USER}/repos?per_page=100&type=owner`, headers);
-  if (!Array.isArray(data)) return null;
+  if (!Array.isArray(data)) throw new Error("repos: not an array");
   // Public, non-fork repos only: never leak private repo names even if the token could see them.
   return data
     .filter((r) => r && !r.private && !r.fork && TRACKED_REPOS.has(str(r.name).toLowerCase()))
@@ -77,16 +82,24 @@ async function contributions(): Promise<GithubFeed["contributions"]> {
     total?: { lastYear?: unknown };
     contributions?: { date?: unknown; count?: unknown; level?: unknown }[];
   };
-  if (!Array.isArray(data.contributions)) return null;
+  if (!Array.isArray(data.contributions)) throw new Error("contributions: not an array");
   const days = data.contributions
     .filter((d) => typeof d.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d.date))
     .map((d) => ({ date: d.date as string, count: num(d.count), level: Math.min(4, Math.floor(num(d.level))) as 0 | 1 | 2 | 3 | 4 }));
   return { total: num(data.total?.lastYear) || days.reduce((s, d) => s + d.count, 0), days };
 }
 
-export async function GET() {
+// Throws are never cached, so only healthy halves get the six-hour data-cache entry.
+const cachedRepos = unstable_cache(repos, ["github-feed-repos"], { revalidate: FEED_TTL });
+const cachedContributions = unstable_cache(contributions, ["github-feed-contributions"], { revalidate: FEED_TTL });
+
+export async function GET(req: Request) {
+  // Second layer for when the data cache is cold or upstream is failing (failures are not cached).
+  if (!rateLimit(`github:${getClientIp(req)}`, 60, 60 * 60 * 1000).allowed) {
+    return NextResponse.json({ error: "Too many requests." }, { status: 429, headers: { "Cache-Control": "no-store" } });
+  }
   // Each half fails independently: a contributions outage must not hide repo stats, and vice versa.
-  const [r, c] = await Promise.allSettled([repos(), contributions()]);
+  const [r, c] = await Promise.allSettled([cachedRepos(), cachedContributions()]);
   const body: GithubFeed = {
     repos: r.status === "fulfilled" ? r.value : null,
     contributions: c.status === "fulfilled" ? c.value : null,
