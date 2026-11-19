@@ -13,13 +13,33 @@ const cache = new Map();
 const runtimeEnv = { GROQ_API_KEY: "synthetic-unused", NODE_ENV: "test" };
 const requests = [];
 let failOnce = false;
+let failStatus = 503;
 let replyWithTool = false;
+const redis = new Map();
+let redisCalls = 0;
+let redisStall = false;
 const fakeFetch = async (url, options) => {
+  if (new URL(String(url)).hostname === "redis.fixture.invalid") {
+    redisCalls++;
+    if (redisStall) assert.ok(options.signal, "shared-store fetch carries a timeout signal");
+    if (redisStall) return new Promise((_, reject) => options.signal.addEventListener("abort", () => reject(options.signal.reason)));
+    // Mirrors the Lua script: one atomic command that increments and repairs a missing TTL.
+    return Response.json(JSON.parse(options.body).map(([cmd, script, , key, ttl]) => {
+      assert.equal(cmd, "EVAL");
+      // ponytail: no Lua runtime here, so check the script's TTL repair branch textually and mirror it below.
+      assert.match(script, /if c == 1 or redis\.call\('PTTL', KEYS\[1\]\) < 0 then redis\.call\('PEXPIRE', KEYS\[1\], ARGV\[1\]\)/);
+      const entry = redis.get(key) ?? { count: 0, ttl: -1 };
+      entry.count++;
+      if (entry.count === 1 || entry.ttl < 0) entry.ttl = Number(ttl);
+      redis.set(key, entry);
+      return { result: [entry.count, entry.ttl] };
+    }));
+  }
   assert.equal(new URL(String(url)).hostname, "api.groq.com");
   requests.push(JSON.parse(options.body));
   if (failOnce) {
     failOnce = false;
-    return new Response(JSON.stringify({ error: { message: "Synthetic retry" } }), { status: 503 });
+    return new Response(JSON.stringify({ error: { message: "Synthetic retry" } }), { status: failStatus });
   }
   const chunk = { id: "synthetic", object: "chat.completion.chunk", created: 0,
     model: "synthetic-model", choices: [{ index: 0, delta: { content: "Synthetic answer" }, finish_reason: "stop" }],
@@ -56,16 +76,19 @@ function load(file) {
 const cases = [
   ["chat/stream", { messages: [{ role: "user", content: "Synthetic request" }], maxTokens: 1000000 }],
   ["mcp-review", { prDiff: "Synthetic diff", jiraAc: "Synthetic criteria", maxTokens: 1000000 }],
-  ["playground", { messages: [{ role: "user", content: "Synthetic request" }], maxTokens: 1000000 }],
+  ["playground", { messages: [{ role: "user", content: "Synthetic request" }], maxTokens: 1000000,
+    systemPrompt: "Synthetic custom system prompt", presetId: "constructor" }],
 ];
 let failures = 0;
+const playgroundRequests = [];
 const limiter = load(path.join(root, "src/lib/rate-limit.ts"));
-const allowances = ["192.0.2.1", "192.0.2.2", "192.0.2.3"].map(ip => {
+const allowances = [];
+for (const ip of ["192.0.2.1", "192.0.2.2", "192.0.2.3"]) {
   const identity = limiter.getClientIp(new Request("http://fixture.invalid", {
     headers: { "x-forwarded-for": ip, "x-real-ip": ip },
   }));
-  return limiter.rateLimit("identity-check:" + identity, 2, 3600000).allowed;
-});
+  allowances.push((await limiter.rateLimit("identity-check:" + identity, 2, 3600000)).allowed);
+}
 if (JSON.stringify(allowances) !== "[true,true,false]") {
   failures++;
   console.error("FAIL untrusted forwarded headers reset the rate-limit bucket");
@@ -73,11 +96,42 @@ if (JSON.stringify(allowances) !== "[true,true,false]") {
 runtimeEnv.VERCEL = "1";
 assert.equal(limiter.getClientIp(new Request("http://fixture.invalid", { headers: { "x-forwarded-for": "192.0.2.10, 192.0.2.30" } })), "192.0.2.10");
 assert.equal(limiter.getClientIp(new Request("http://fixture.invalid", { headers: { "x-real-ip": "192.0.2.20" } })), "192.0.2.20");
+const ipOf = (ip) => limiter.getClientIp(new Request("http://fixture.invalid", { headers: { "x-forwarded-for": ip } }));
+assert.equal(ipOf("2001:db8:1:2:aaaa::1"), "2001:db8:1:2::/64");
+assert.equal(ipOf("2001:0db8:0001:0002:bbbb:cccc:dddd:eeee"), "2001:db8:1:2::/64");
+assert.notEqual(ipOf("2001:db8:1:3::1"), ipOf("2001:db8:1:2::1"));
+assert.equal(ipOf("::ffff:192.0.2.5"), "192.0.2.5");
+console.log("PASS IPv6 clients share one bucket per /64");
 delete runtimeEnv.VERCEL;
 console.log("PASS configured Vercel header parsing remains compatible");
+Object.assign(runtimeEnv, { UPSTASH_REDIS_REST_URL: "https://redis.fixture.invalid", UPSTASH_REDIS_REST_TOKEN: "synthetic" });
+const shared = [];
+for (let i = 0; i < 3; i++) shared.push((await limiter.rateLimit("shared-check", 2, 3600000)).allowed);
+assert.deepEqual(shared, [true, true, false]);
+assert.equal(redisCalls, 3, "configured shared store holds the counters");
+assert.equal(redis.get("rl:shared-check").count, 3);
+redis.set("rl:no-ttl", { count: 5, ttl: -1 });
+await limiter.rateLimit("no-ttl", 10, 3600000);
+assert.equal(redis.get("rl:no-ttl").ttl, 3600000, "a counter missing its TTL gets one back");
+redisStall = true;
+const stalledAt = performance.now();
+const keepAlive = setTimeout(() => {}, 5000); // AbortSignal.timeout's timer is unref'd in Node
+assert.equal((await limiter.rateLimit("stalled", 2, 3600000)).allowed, true);
+clearTimeout(keepAlive);
+const stalledFor = performance.now() - stalledAt;
+assert.ok(stalledFor >= 1500 && stalledFor < 5000, "a stalled shared store times out, then falls back to memory");
+redisStall = false;
+delete runtimeEnv.UPSTASH_REDIS_REST_URL;
+delete runtimeEnv.UPSTASH_REDIS_REST_TOKEN;
+console.log("PASS counters live in the shared store when configured, keep a TTL, and survive a stalled store");
+await limiter.rateLimit("daily:evict-check", 1, 3600000);
+for (let i = 0; i < 10005; i++) await limiter.rateLimit("evict-filler:" + i, 1, 3600000);
+assert.equal((await limiter.rateLimit("daily:evict-check", 1, 3600000)).allowed, false, "eviction keeps daily budgets");
+console.log("PASS memory eviction never resets a daily budget");
 for (const [route, body] of cases) {
- for (const scenario of route === "chat/stream" ? ["normal", "fallback", "tool"] : ["normal", "fallback"]) {
-  failOnce = scenario === "fallback";
+ for (const scenario of route === "chat/stream" ? ["normal", "fallback", "quota", "tool"] : ["normal", "fallback", "quota"]) {
+  failOnce = scenario === "fallback" || scenario === "quota";
+  failStatus = scenario === "quota" ? 429 : 503;
   replyWithTool = scenario === "tool";
   const before = requests.length;
   const { POST } = load(path.join(root, "src/app/api", route, "route.ts"));
@@ -87,6 +141,7 @@ for (const [route, body] of cases) {
   assert.equal(response.status, 200, route + " remains usable");
   await response.text();
   const sent = requests.slice(before);
+  if (route === "playground") playgroundRequests.push(...sent);
   assert.ok(sent.length, route + " reached the mocked provider");
   if (scenario !== "normal") assert.ok(sent.length >= 2, scenario + " triggered a second provider request");
   if (scenario === "fallback") {
@@ -94,6 +149,12 @@ for (const [route, body] of cases) {
       failures++;
       console.error("FAIL " + route + "/fallback: retry kept model " + String(sent[0].model));
     } else console.log("PASS " + route + "/fallback: retry switched model to " + String(sent.at(-1).model));
+  }
+  if (scenario === "quota") {
+    if (sent.some(r => r.model !== sent[0].model)) {
+      failures++;
+      console.error("FAIL " + route + "/quota: a 429 spent the fallback model's quota");
+    } else console.log("PASS " + route + "/quota: a 429 stays on " + String(sent[0].model));
   }
   for (const request of sent) {
     const limit = request.max_completion_tokens ?? request.max_tokens;
@@ -104,4 +165,10 @@ for (const [route, body] of cases) {
   }
  }
 }
+const { PLAYGROUND_PRESETS, DEFAULT_PRESET } = load(path.join(root, "src/lib/playground-presets.ts"));
+const playgroundSystems = playgroundRequests.map(r => r.messages.find(m => m.role === "system")?.content);
+if (!playgroundSystems.length || playgroundSystems.some(s => s !== PLAYGROUND_PRESETS[DEFAULT_PRESET].prompt)) {
+  failures++;
+  console.error("FAIL playground: client-supplied systemPrompt/presetId reached Groq as the system message");
+} else console.log("PASS playground: Groq system message is always a server preset");
 assert.equal(failures, 0, "Every public AI route must bound output even when the client asks for more");

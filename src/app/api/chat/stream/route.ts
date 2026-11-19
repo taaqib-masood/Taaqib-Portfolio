@@ -1,7 +1,7 @@
 import { createGroq } from "@ai-sdk/groq";
 import { stepCountIs, streamText, convertToModelMessages } from "ai";
 import { tools } from "@/lib/tools";
-import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { limitRoute } from "@/lib/rate-limit";
 import { projects, githubRepos } from "@/data/projects";
 import {
   aboutParagraphs,
@@ -153,12 +153,13 @@ ACTIVE INTERVIEW MODE: [RECRUITER / SCREENING]
   }
 }
 
-// --- Rate limiting: shared bounded limiter (30 msgs / hour / IP) ---
+// --- Rate limiting: 30 msgs / hour / IP, 200 / day in total (well under the Groq free-tier daily quota) ---
 const MAX_REQUESTS = 30;
-const WINDOW_MS = 60 * 60 * 1000;
+const DAILY_BUDGET = 200;
 // History caps: giant pasted histories would burn tokens per request.
 const MAX_CHAT_MESSAGES = 30;
-const MAX_MESSAGE_CHARS = 8_000;
+const MAX_HISTORY_MESSAGES = 8; // only the last few turns reach the model
+const MAX_MESSAGE_CHARS = 2_000;
 
 export async function POST(req: Request) {
   // --- API key guard ---
@@ -173,12 +174,10 @@ export async function POST(req: Request) {
   }
 
   // --- Rate limiter ---
-  const ip = getClientIp(req);
-
-  const { allowed, remaining } = rateLimit(`chat:${ip}`, MAX_REQUESTS, WINDOW_MS);
+  const { allowed, remaining } = await limitRoute("chat", req, MAX_REQUESTS, DAILY_BUDGET);
   if (!allowed) {
     return new Response(
-      JSON.stringify({ error: "Rate limit exceeded. Max 30 messages per hour." }),
+      JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
       {
         status: 429,
         headers: {
@@ -219,7 +218,8 @@ export async function POST(req: Request) {
         : typeof m.content === "string" ? m.content : "";
       return { id: crypto.randomUUID(), role: m.role as "user" | "assistant", parts: [{ type: "text" as const, text: text.slice(0, MAX_MESSAGE_CHARS) }] };
     })
-    .filter((m) => m.parts[0].text.trim().length > 0);
+    .filter((m) => m.parts[0].text.trim().length > 0)
+    .slice(-MAX_HISTORY_MESSAGES);
   if (normalizedMessages.length === 0 || normalizedMessages.at(-1)!.role !== "user") {
     return new Response(JSON.stringify({ error: "Invalid messages" }), { status: 400, headers: { "Content-Type": "application/json" } });
   }
@@ -241,7 +241,8 @@ export async function POST(req: Request) {
     fetch: async (url: string | URL | Request, opts?: RequestInit) => {
       const res = await globalThis.fetch(url, opts);
       if (res.ok) return res;
-      if ([429, 400, 404, 500, 503].includes(res.status) && opts?.body) {
+      // Only a missing model or a provider outage justifies a second model; 400/429 would just spend its quota too.
+      if ((res.status === 404 || res.status >= 500) && opts?.body) {
         const body = JSON.parse(opts.body as string);
         if (body.model !== FALLBACK_MODEL) {
           console.warn(`[Groq] ${body.model} returned ${res.status}, falling back to ${FALLBACK_MODEL}`);

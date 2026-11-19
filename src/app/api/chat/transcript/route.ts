@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { limitRoute } from "@/lib/rate-limit";
 import { sendMail } from "@/lib/mail";
 import { transcriptSchema, formatTranscript } from "@/lib/transcript";
 import { contact } from "@/data/resume";
@@ -13,7 +13,8 @@ export async function POST(req: Request) {
   if (!parsed.success || !mail) return NextResponse.json({ error: "Invalid transcript." }, { status: 400 });
 
   // A page-leave send plus a follow-up send per visit is normal; more than 6/hour from one IP is abuse.
-  if (!rateLimit(`transcript:${getClientIp(req)}`, 6, 60 * 60 * 1000).allowed) {
+  // 40/day in total keeps contact + transcript under the Resend daily quota.
+  if (!(await limitRoute("transcript", req, 6, 40)).allowed) {
     return NextResponse.json({ error: "Too many transcripts. Please try again later." }, { status: 429 });
   }
 

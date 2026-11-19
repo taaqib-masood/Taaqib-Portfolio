@@ -12,7 +12,7 @@ Last reviewed: Sep 2026 (Next 15.5.25, React 19.3)
 | Headers | `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` (camera/mic/geo/interest-cohort denied) | `next.config.mjs` |
 | CSP | Strict nonce-based CSP generated per request in middleware: `script-src 'self' 'nonce-…' 'strict-dynamic'`; `object-src 'none'`; `base-uri 'self'`; `form-action 'self'`. `'unsafe-eval'`/`'unsafe-inline'` only added in dev (HMR). `style-src 'unsafe-inline'` required by framer-motion/Next inline styles. | `src/middleware.ts` |
 | Cookies | All `document.cookie` writes (Google Translate `googtrans`) carry `Secure; SameSite=Lax` | `src/components/LanguageToggle.tsx` |
-| Rate limiting | All LLM/email endpoints rate-limited per-IP with bounded memory: chat 30/h, playground 20/h, mcp-review 10/h, contact 5/h | `src/lib/rate-limit.ts` + API routes |
+| Rate limiting | All LLM/email endpoints: per-visitor hourly limit (IPv6 keyed by /64) plus a global daily budget per route that returns 429 before Groq/Resend is called: chat 30/h + 200/day, playground 20/h + 100/day, mcp-review 10/h + 50/day, contact 5/h + 40/day, transcript 6/h + 40/day. Counters are shared across instances via Upstash Redis when `UPSTASH_REDIS_REST_URL`/`_TOKEN` (or Vercel KV `KV_REST_API_URL`/`_TOKEN`) are set | `src/lib/rate-limit.ts` + API routes |
 | Input validation | Zod schema on contact; server-side caps on tokens/prompt/history sizes across all AI routes | API routes |
 
 ## Verified — no action needed
@@ -28,6 +28,6 @@ Last reviewed: Sep 2026 (Next 15.5.25, React 19.3)
 ## Known limits
 
 - Pages are `force-dynamic` by design (set in `src/app/layout.tsx`): the nonce-CSP requires per-request rendering so Next can stamp inline hydration scripts with the request nonce. **Do not remove it** — prerendered/cached HTML has no nonces, every inline script gets blocked, and the site never hydrates (framer-motion `initial={{opacity:0}}` elements stay invisible; observed in prod Sep 2026).
-- Rate limiting is in-memory → per-instance on Vercel (best-effort, not a global quota). Outside Vercel, requests share a bucket because forwarded headers are untrusted. Self-hosted deployments need trusted ingress before enabling per-client quotas. Upgrade path: Upstash Redis or Vercel WAF if abuse ever appears.
+- Without the Upstash env vars (or if Redis is unreachable), rate-limit counters fall back to per-instance memory, so limits and daily budgets apply per instance only. Set the Upstash env vars in production. Outside Vercel, requests share a bucket because forwarded headers are untrusted. Self-hosted deployments need trusted ingress before enabling per-client quotas.
 - CSP allows `style-src 'unsafe-inline'` (framer-motion + Next inject inline styles) and `data:/blob:` in `img-src` (Next image internals). No `unsafe-inline` in `script-src` in production.
 - Post-deploy check recommended: open DevTools console on `/` and `/playground` and confirm zero CSP violation reports (middleware + static headers verified by `bun scripts/check-headers.mjs`, but a real-browser pass catches anything the allowlist missed, e.g. Google Translate internals).

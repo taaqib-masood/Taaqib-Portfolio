@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, Loader2, Settings2, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { PLAYGROUND_PRESETS, DEFAULT_PRESET, type PlaygroundPresetId } from "@/lib/playground-presets";
 
 // Helper for AI SDK v6 message parts
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,9 +21,7 @@ function getTextFromParts(parts: any[] | undefined, content: string | undefined)
 }
 
 export default function PlaygroundPage() {
-  const [systemPrompt, setSystemPrompt] = useState(
-    "You are a helpful AI assistant. Respond concisely."
-  );
+  const [presetId, setPresetId] = useState<PlaygroundPresetId>(DEFAULT_PRESET);
   const [temperature, setTemperature] = useState(0.7);
   const [maxTokens, setMaxTokens] = useState(512);
 
@@ -31,8 +30,8 @@ export default function PlaygroundPage() {
   const [inputValue, setInputValue] = useState("");
 
   const transport = useMemo(
-    () => new DefaultChatTransport({ api: "/api/playground", body: { systemPrompt, temperature, maxTokens } }),
-    [systemPrompt, temperature, maxTokens]
+    () => new DefaultChatTransport({ api: "/api/playground", body: { presetId, temperature, maxTokens } }),
+    [presetId, temperature, maxTokens]
   );
 
   const { messages, sendMessage, status, stop } = useChat({
@@ -110,15 +109,20 @@ export default function PlaygroundPage() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-slate-300">
+              <label htmlFor="playground-preset" className="text-sm font-medium text-slate-300">
                 System Prompt
               </label>
-              <textarea
-                value={systemPrompt}
-                onChange={(e) => setSystemPrompt(e.target.value)}
-                className="w-full h-32 bg-slate-950/50 border border-slate-800 rounded-lg p-3 text-sm text-slate-300 focus:outline-none focus:ring-1 focus:ring-violet-500 focus:border-violet-500 resize-none"
-                placeholder="You are a helpful AI assistant..."
-              />
+              <select
+                id="playground-preset"
+                value={presetId}
+                onChange={(e) => setPresetId(e.target.value as PlaygroundPresetId)}
+                className="w-full bg-slate-950/50 border border-slate-800 rounded-lg p-2 text-sm text-slate-300 focus:outline-none focus:ring-1 focus:ring-violet-500 focus:border-violet-500"
+              >
+                {Object.entries(PLAYGROUND_PRESETS).map(([id, { label }]) => (
+                  <option key={id} value={id}>{label}</option>
+                ))}
+              </select>
+              <p className="text-xs text-slate-500">{PLAYGROUND_PRESETS[presetId].prompt}</p>
             </div>
 
             <div className="flex flex-col gap-2">
@@ -154,7 +158,7 @@ export default function PlaygroundPage() {
             </div>
 
             <div className="mt-auto pt-4 text-xs text-slate-500 border-t border-slate-800">
-              Model: <span className="text-violet-400">llama-3.3-70b via Groq</span>
+              Model: <span className="text-violet-400">gpt-oss-120b via Groq</span>
             </div>
           </div>
         </aside>
