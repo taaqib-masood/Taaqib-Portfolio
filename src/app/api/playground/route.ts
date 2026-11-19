@@ -53,11 +53,11 @@ export async function POST(req: Request) {
     );
   }
 
-  // --- Rate limit: 20 requests / hour / IP (playground is a demo, keep spend tight) ---
-  const { allowed, remaining } = rateLimit(`playground:${getClientIp(req)}`, 20, 60 * 60 * 1000);
+  // --- Rate limit: 20 requests / hour / IP, 100 / day in total (playground is a demo, keep spend tight) ---
+  const { allowed, remaining } = await limitRoute("playground", req, 20, 100);
   if (!allowed) {
     return new Response(
-      JSON.stringify({ error: "Rate limit exceeded. Max 20 playground requests per hour." }),
+      JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
       { status: 429, headers: { "Content-Type": "application/json", "X-RateLimit-Remaining": "0" } }
     );
   }
@@ -111,7 +111,8 @@ export async function POST(req: Request) {
     fetch: async (url: string | URL | Request, opts?: RequestInit) => {
       const res = await globalThis.fetch(url, opts);
       if (res.ok) return res;
-      if ([429, 400, 404, 500, 503].includes(res.status) && opts?.body) {
+      // Only a missing model or a provider outage justifies a second model; 400/429 would just spend its quota too.
+      if ((res.status === 404 || res.status >= 500) && opts?.body) {
         const body = JSON.parse(opts.body as string);
         if (body.model !== FALLBACK_MODEL) {
           console.warn(`[Groq] ${body.model} returned ${res.status}, falling back to ${FALLBACK_MODEL}`);

@@ -1,12 +1,12 @@
 import { streamText } from "ai";
 import { createGroq } from "@ai-sdk/groq";
-import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { limitRoute } from "@/lib/rate-limit";
 
 export const maxDuration = 30; // max duration for edge
 
 // Input caps: huge diffs would burn the Groq quota in a single request.
-const MAX_DIFF_CHARS = 40_000;
-const MAX_AC_CHARS = 10_000;
+const MAX_DIFF_CHARS = 16_000;
+const MAX_AC_CHARS = 4_000;
 
 const SYSTEM_PROMPT = `You are an automated MCP code reviewer. 
 You cross-reference the provided PR diff with the provided Jira Acceptance Criteria (AC).
@@ -21,11 +21,11 @@ export async function POST(req: Request) {
     );
   }
 
-  // --- Rate limit: 10 reviews / hour / IP ---
-  const { allowed, remaining } = rateLimit(`mcp-review:${getClientIp(req)}`, 10, 60 * 60 * 1000);
+  // --- Rate limit: 10 reviews / hour / IP, 50 / day in total ---
+  const { allowed, remaining } = await limitRoute("mcp-review", req, 10, 50);
   if (!allowed) {
     return new Response(
-      JSON.stringify({ error: "Rate limit exceeded. Max 10 reviews per hour." }),
+      JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
       { status: 429, headers: { "Content-Type": "application/json", "X-RateLimit-Remaining": "0" } }
     );
   }
@@ -48,7 +48,8 @@ export async function POST(req: Request) {
       fetch: async (url: string | URL | Request, opts?: RequestInit) => {
         const res = await globalThis.fetch(url, opts);
         if (res.ok) return res;
-        if ([429, 400, 404, 500, 503].includes(res.status) && opts?.body) {
+        // Only a missing model or a provider outage justifies a second model; 400/429 would just spend its quota too.
+        if ((res.status === 404 || res.status >= 500) && opts?.body) {
           const body = JSON.parse(opts.body as string);
           if (body.model !== FALLBACK_MODEL) {
             console.warn(`[Groq] ${body.model} returned ${res.status}, falling back to ${FALLBACK_MODEL}`);
