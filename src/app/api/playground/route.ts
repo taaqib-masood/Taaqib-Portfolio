@@ -1,6 +1,6 @@
 import { streamText } from "ai";
 import { createGroq } from "@ai-sdk/groq";
-import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { limitRoute } from "@/lib/rate-limit";
 import { PLAYGROUND_PRESETS, DEFAULT_PRESET } from "@/lib/playground-presets";
 
 export const maxDuration = 30; // max duration for edge
