@@ -95,7 +95,7 @@ const cachedContributions = unstable_cache(contributions, ["github-feed-contribu
 
 export async function GET(req: Request) {
   // Second layer for when the data cache is cold or upstream is failing (failures are not cached).
-  if (!rateLimit(`github:${getClientIp(req)}`, 60, 60 * 60 * 1000).allowed) {
+  if (!(await rateLimit(`github:${getClientIp(req)}`, 60, 60 * 60 * 1000)).allowed) {
     return NextResponse.json({ error: "Too many requests." }, { status: 429, headers: { "Cache-Control": "no-store" } });
   }
   // Each half fails independently: a contributions outage must not hide repo stats, and vice versa.
